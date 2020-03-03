@@ -88,8 +88,8 @@ done
 
 printf "Copying scripts to TopSpin directory... "
 tspy=$tspath/py/user
-if cp $dir/pypopt.py $tspy && \
+if cp $dir/pypopt.py $dir/pypopt-makecf.py $tspy && \
         mkdir -p $tspy/pypopt $tspy/pypopt/routines $tspy/pypopt/cost_functions && \
-        cp $dir/pypopt-be.py $dir/pypopt-makecf.py $tspy/pypopt; then
+        cp $dir/pypopt-be.py $tspy/pypopt; then
     printf "done\n"
 fi

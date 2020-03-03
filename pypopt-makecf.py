@@ -1,18 +1,9 @@
-# Check if this is being called from TopSpin
-try:
-    ERRMSG("pypopt-makecf.py: Please run this script outside TopSpin!")
-    EXIT()
-except NameError:
-    pass
-# TODO: Can we get TopSpin to run this from system Python 3 anyway?
-
 import os
-import dill
 
-p_tshome = "/opt/topspin4.0.7/exp/stan/nmr"
+p_tshome = "/mnt/c/Bruker/TopSpin4.0.7/exp/stan/nmr"
 p_pypopt = os.path.join(p_tshome, "py/user/pypopt")
 p_costfunctions = os.path.join(p_pypopt, "cost_functions")
-p_python3 = "/usr/local/bin/python3"
+p_python3 = "/usr/bin/python3"
 
 
 def main():
@@ -23,7 +14,7 @@ def main():
     # 1. Define cf_name (this will be the name you choose for the cost function
     #    when creating a new routine in TopSpin).
     # 2. Edit f() to return the value you want it to.
-    # 3. Run this script in Python 3.
+    # 3. Run this script, either in TopSpin or using the external Python 3.
 
     # STEP 1: Change this to whatever name you want.
     cf_name = "total_int"
@@ -58,14 +49,15 @@ def main():
         return np.sum(get_real_spectrum())
 
     # STEP 3
-    # Close this and run it in Python 3!
+    # Run the script!
 
     # The code below doesn't need to be modified.
     cf = Cost_Function(cf_name, f)
     p_cf_file = os.path.join(p_costfunctions, cf_name)
     with open(p_cf_file, "wb") as file:
         dill.dump(cf, file)
-    print("Cost function {} saved to {}.".format(cf_name, p_costfunctions))
+    print("Cost function {} successfully"
+          "saved to {}.".format(cf_name, p_costfunctions))
 
 
 class Cost_Function:
@@ -75,4 +67,15 @@ class Cost_Function:
 
 
 if __name__ == "__main__":
-    main()
+    # Check if this is being called from TopSpin
+    try:
+        SHOW_STATUS("pypopt-makecf.py: Running script with Python 3...")
+        from subprocess import *
+        import sys
+        py3run = Popen([p_python3, sys.argv[0]], stdout=PIPE)
+        out, _ = py3run.communicate()
+        MSG(out)
+        EXIT()
+    except NameError:  # Python 3
+        import dill
+        main()
