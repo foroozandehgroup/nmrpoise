@@ -4,24 +4,33 @@
 dir=$(dirname $0)
 
 printf "Locating python3 executable... "
-pyex=$(which python3)
-if [[ -z $pyex ]]; then
-    printf "not found\n"
-    printf "Locating python executable... "
-    pyex=$(which python)
+if [[ $PY3PATH ]]; then # if the user set the environment variable already
+    pyex=$PY3PATH
+    printf "provided as \$PY3PATH: $PY3PATH\n"
+else
+    pyex=$(which python3)
     if [[ -z $pyex ]]; then
         printf "not found\n"
-        printf "\nPath to Python 3 not found.\nPlease install it first and make sure that it is in \$PATH."
-        exit 1
+        printf "Locating python executable... "
+        pyex=$(which python)
+        if [[ -z $pyex ]]; then
+            printf "not found\n"
+            printf "\nPath to Python 3 not found.\nPlease install it first and make sure that it is in \$PATH."
+            exit 1
+        fi
     fi
+    printf "$pyex\n"
 fi
-printf "$pyex\n"
 
 printf "Checking Python version... "
 pyv=$($pyex --version 2>&1) && printf "$pyv\n"
 if [[ $pyv != "Python 3"* ]]; then
-    printf "\nA Python executable was found at $pyex, but it was not Python 3.\n"
-    printf "Please install Python 3 and make sure that it is in \$PATH.\n"
+    if [[ $PY3PATH ]]; then
+        printf "\n\n\$PY3PATH was given as $pyex, but it was not a Python 3 executable.\n"
+    else
+        printf "\n\nA Python executable was found at $pyex, but it was not Python 3.\n"
+        printf "Please install Python 3 and make sure that it is in \$PATH.\n"
+    fi
     exit 1
 fi
 
