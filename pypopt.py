@@ -59,19 +59,6 @@ def main():
     # Create the AU programme for acquisition
     create_au_prog()
 
-    # Check if they're within bounds
-    for i in range(len(routine.pars)):
-        s = ""
-        if ((routine.init[i] < routine.lb[i]) or
-                (routine.init[i] > routine.ub[i])):
-            s = s + ("Please set {} to a value between {} and {}."
-                     "[Current value: {}]\n").format(routine.pars[i],
-                                                     routine.lb[i],
-                                                     routine.ub[i],
-                                                     routine.init[i])
-    if s:
-        err_exit(s)
-
     # Construct the path to the folder of the current spectrum.
     x = CURDATA()
     p_spectrum = os.path.join(x[3], x[0], x[1], "pdata", x[2])
@@ -317,6 +304,30 @@ def get_new_routine_parameters():
             ub.append(process_values(i, settings[1]))
             init.append(process_values(i, settings[2]))
             tol.append(process_values(i, settings[3]))
+
+    # Check if the values are sensible
+    s = ""
+    for i in range(len(opt_pars)):
+        if (lb[i] >= ub[i]):
+            s = s + ("Please set the maximum value of {} to be larger "
+                     "than the minimum value. "
+                     "[Current values: min={}, max={}]\n").format(opt_pars[i],
+                                                                  lb[i],
+                                                                  ub[i])
+        else:
+            if ((init[i] < lb[i]) or (init[i] > ub[i])):
+                s = s + ("Please set the initial value of {} to a value "
+                         "to be between {} and {}. "
+                         "[Current value: {}]\n").format(opt_pars[i], lb[i],
+                                                         ub[i], init[i])
+            if ((tol[i] > ub[i] - lb[i]) or (tol[i] <= 0)):
+                s = s + ("Please set the tolerance of {} to a positive value "
+                         "smaller than {}. "
+                         "[Current value: {}]\n").format(opt_pars[i],
+                                                         ub[i] - lb[i],
+                                                         tol[i])
+    if s:
+        err_exit(s)
 
     # Prompt for cost function.
     # Search for existing cost functions
