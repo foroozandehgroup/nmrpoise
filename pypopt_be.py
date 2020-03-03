@@ -1,6 +1,6 @@
 # Check if this is being called from TopSpin
 try:
-    ERRMSG("pypopt-makecf.py: Please run this script outside TopSpin!")
+    ERRMSG("pypopt_be.py: Please run this script outside TopSpin!")
     EXIT()
 except NameError:
     pass

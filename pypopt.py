@@ -6,11 +6,11 @@ from subprocess import *
 
 tshome = up.getTopspinHome()  # use tshome to avoid installer overwriting
 p_pypopt = os.path.join(tshome, "exp/stan/nmr/py/user/pypopt")
-p_backend = os.path.join(p_pypopt, "pypopt-be.py")
+p_backend = os.path.join(p_pypopt, "pypopt_be.py")
 p_routines = os.path.join(p_pypopt, "routines")
 p_costfunctions = os.path.join(p_pypopt, "cost_functions")
 p_optlog = os.path.join(p_pypopt, "pypopt.log")
-p_opterr = os.path.join(p_pypopt, "pypopt-err.log")
+p_opterr = os.path.join(p_pypopt, "pypopt_err.log")
 p_python3 = "/usr/local/bin/python3"
 
 

@@ -16,9 +16,9 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 ## Installation (manual)
 
 1. Clone this repository: `git clone https://github.com/yongrenjie/pypopt`
-2. Specify the path to the Python 3 executable by modifying the `p_python3` variable in the Python scripts. This occurs near the top of both `pypopt.py` and `pypopt-makecf.py`.
-3. Specify the path to the TopSpin directory (this is the `p_tshome` variable). This occurs near the top of both `pypopt-be.py` and `pypopt-makecf.py`.
-4. Copy `pypopt.py` and `pypopt-makecf.py` to TopSpin's `/exp/stan/nmr/py/user` directory, and copy `pypopt-be.py` to `/exp/stan/nmr/py/user/pypopt` (you will need to make the folder first).
+2. Specify the path to the Python 3 executable by modifying the `p_python3` variable in the Python scripts. This occurs near the top of both `pypopt.py` and `pypopt_makecf.py`.
+3. Specify the path to the TopSpin directory (this is the `p_tshome` variable). This occurs near the top of both `pypopt_be.py` and `pypopt_makecf.py`.
+4. Copy `pypopt.py` and `pypopt_makecf.py` to TopSpin's `/exp/stan/nmr/py/user` directory, and copy `pypopt_be.py` to `/exp/stan/nmr/py/user/pypopt` (you will need to make the folder first).
 
 ## Running
 
