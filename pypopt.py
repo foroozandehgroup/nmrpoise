@@ -35,6 +35,11 @@ def main():
                  "Currently pypopt does not work with "
                  "multidimensional experiments.")
 
+    # Make folders if they don't exist
+    for folder in [p_pypopt, p_routines, p_costfunctions]:
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+
     # Select optimisation routine
     routine_id = get_routine_id()
 
@@ -64,6 +69,8 @@ def main():
     p_spectrum = os.path.join(x[3], x[0], x[1], "pdata", x[2])
 
     # Run the backend script
+    if not os.path.isfile(p_backend):
+        err_exit("Backend script not found. Please reinstall pypopt.")
     echo("Loading backend script...", cst.INFO)
     ferr = open(p_opterr, "a")
     backend = Popen([p_python3, '-u', p_backend],

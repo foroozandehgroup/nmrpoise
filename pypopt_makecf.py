@@ -53,6 +53,8 @@ def main():
 
     # The code below doesn't need to be modified.
     cf = Cost_Function(cf_name, f)
+    if not os.path.isdir(p_costfunctions):
+        os.makedirs(p_costfunctions)
     p_cf_file = os.path.join(p_costfunctions, cf_name)
     with open(p_cf_file, "wb") as file:
         dill.dump(cf, file)
