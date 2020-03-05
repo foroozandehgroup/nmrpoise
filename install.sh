@@ -89,9 +89,12 @@ for i in ${packages[@]}; do
         printf "found\n"
     else
         printf "not found\n"
-        printf "\nPlease install the Python package $i, e.g. with\n"
-        printf "    pip install $i\n"
-        printf "then run this script again.\n"
+        if [[ $pyex == *"conda"* ]]; then
+            conda install $i || (printf "Please install the package $i with your Python package manager.\n" && exit 1)
+        else
+            pip3 install $i || pip install $i || (printf "Please install the package $i with your Python package manager.\n" && exit 1)
+        fi
+        printf "\n"
     fi
 done
 
