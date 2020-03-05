@@ -44,6 +44,10 @@ printf "Locating TopSpin installation directory... "
 if [[ $TOPSPINDIR ]]; then # if the user set the environment variable already
     tspath=$TOPSPINDIR
     printf "provided as \$TOPSPINDIR: $TOPSPINDIR\n"
+    if ! [[ -d "$TOPSPINDIR/py/user" ]]; then
+        printf "\nThe directory provided ($TOPSPINDIR) was not a valid TopSpin directory.\n"
+        exit 1
+    fi
 else
     # find all possible TopSpin directories
     unset tsdirs i # from http://mywiki.wooledge.org/BashFAQ/020
@@ -72,6 +76,12 @@ else
     else
         tspath=${tsdirs[0]}
         printf "$tspath\n"
+    fi
+    # check that it's valid
+    if ! [[ -d "$tspath/py/user" ]]; then
+        printf "\nThe directory found ($tspath) was not a valid TopSpin directory.\n"
+        printf "Please specify the TopSpin directory with \$TOPSPINDIR.\n"
+        exit 1
     fi
 fi
 
@@ -104,4 +114,7 @@ if cp $dir/pypopt.py $dir/pypopt_makecf.py $tspy && \
         mkdir -p $tspy/pypopt $tspy/pypopt/routines $tspy/pypopt/cost_functions && \
         cp $dir/pypopt_be.py $tspy/pypopt; then
     printf "done\n"
+else
+    printf "failed\n"
+    printf "\nError copying files to $tspath/py/user: please ensure you have the correct permissions to do so.\n"
 fi
