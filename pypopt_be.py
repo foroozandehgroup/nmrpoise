@@ -214,7 +214,7 @@ def ppm_to_point(shift):
                spectral window.
     """
     si = get_proc_par("SI")
-    o1p = get_acqu_par("O1P")
+    o1p = get_acqu_par("O1") / get_acqu_par("SFO1")
     sw = get_acqu_par("SW")
 
     # Make sure it's within range
@@ -226,7 +226,7 @@ def ppm_to_point(shift):
     # Calculate the value
     spacing = (highest_shift - lowest_shift)/si
     x = round((shift - lowest_shift)/spacing)
-    return x
+    return int(si - x)
 
 
 def get_fid():
@@ -277,7 +277,7 @@ def get_real_spectrum(left=None, right=None):
         left = temp
 
     # Get default bounds
-    si = get_proc_par("SI")
+    si = int(get_proc_par("SI"))
     leftn = 0
     rightn = si - 1
     # Then replace them if necessary
@@ -320,7 +320,7 @@ def get_imag_spectrum(left=None, right=None):
         left = temp
 
     # Get default bounds
-    si = get_proc_par("SI")
+    si = int(get_proc_par("SI"))
     leftn = 0
     rightn = si - 1
     # Then replace them if necessary
