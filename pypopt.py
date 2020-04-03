@@ -2,7 +2,7 @@ from __future__ import division, with_statement, print_function
 import os
 import pickle
 import de.bruker.nmr.mfw.root.UtilPath as up
-from subprocess import *
+import subprocess
 
 tshome = up.getTopspinHome()  # use tshome to avoid installer overwriting
 p_pypopt = os.path.join(tshome, "exp/stan/nmr/py/user/pypopt")
@@ -73,8 +73,10 @@ def main():
         err_exit("Backend script not found. Please reinstall pypopt.")
     echo("Loading backend script...", cst.INFO)
     ferr = open(p_opterr, "a")
-    backend = Popen([p_python3, '-u', p_backend],
-                    stdin=PIPE, stdout=PIPE, stderr=ferr)
+    backend = subprocess.Popen([p_python3, '-u', p_backend],
+                               stdin=subprocess.PIPE,
+                               stdout=subprocess.PIPE,
+                               stderr=ferr)
     # Pass key information to the backend script
     print(routine_id, file=backend.stdin)
     print(p_spectrum, file=backend.stdin)
