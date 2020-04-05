@@ -110,9 +110,9 @@ done
 
 printf "Copying scripts to TopSpin directory... "
 tspy=$tspath/py/user
-if cp $dir/pypopt.py $dir/pypopt_makecf.py $tspy && \
-        mkdir -p $tspy/pypopt $tspy/pypopt/routines $tspy/pypopt/cost_functions && \
-        cp $dir/pypopt_be.py $tspy/pypopt; then
+if cp $dir/poptpy.py $dir/poptpy_makecf.py $tspy && \
+        mkdir -p $tspy/poptpy $tspy/poptpy/routines $tspy/poptpy/cost_functions && \
+        cp $dir/poptpy_be.py $tspy/poptpy; then
     printf "done\n"
 else
     printf "failed\n"

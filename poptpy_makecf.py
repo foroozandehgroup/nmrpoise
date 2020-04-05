@@ -1,8 +1,8 @@
 import os
 
 p_tshome = "/opt/topspin4.0.7/exp/stan/nmr"
-p_pypopt = os.path.join(p_tshome, "py/user/pypopt")
-p_costfunctions = os.path.join(p_pypopt, "cost_functions")
+p_poptpy = os.path.join(p_tshome, "py/user/poptpy")
+p_costfunctions = os.path.join(p_poptpy, "cost_functions")
 p_python3 = "/usr/local/bin/python3"
 
 
@@ -71,7 +71,7 @@ class Cost_Function:
 if __name__ == "__main__":
     # Check if this is being called from TopSpin
     try:
-        SHOW_STATUS("pypopt_makecf.py: Running script with Python 3...")
+        SHOW_STATUS("poptpy_makecf.py: Running script with Python 3...")
         from subprocess import *
         import sys
         py3run = Popen([p_python3, sys.argv[0]], stdout=PIPE)

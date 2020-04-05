@@ -1,4 +1,4 @@
-# pypopt
+# poptpy
 
 A series of Python scripts for the numerical optimisation of NMR parameters, running in Bruker's TopSpin software.
 
@@ -9,16 +9,16 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 
 ## Installation (MacOS / Linux)
 
-1. Clone this repository: `git clone https://github.com/yongrenjie/pypopt`
+1. Clone this repository: `git clone https://github.com/yongrenjie/poptpy`
 2. `cd` inside and run `./install.sh`
 3. The script will try to automatically detect the path to your Python 3 executable (using `which`), as well as the TopSpin installation directory (it searches inside `/opt`). If either of these are not in the typical location, you can set the environment variables `$PY3PATH` and `$TOPSPINDIR` before running the installer. Note that `$TOPSPINDIR` should point to the `.../exp/stan/nmr` folder in TopSpin.
 
 ## Installation (manual)
 
-1. Clone this repository: `git clone https://github.com/yongrenjie/pypopt`
-2. Specify the path to the Python 3 executable by modifying the `p_python3` variable in the Python scripts. This occurs near the top of both `pypopt.py` and `pypopt_makecf.py`.
-3. Specify the path to the TopSpin directory (this is the `p_tshome` variable). This occurs near the top of both `pypopt_be.py` and `pypopt_makecf.py`.
-4. Copy `pypopt.py` and `pypopt_makecf.py` to TopSpin's `/exp/stan/nmr/py/user` directory, and copy `pypopt_be.py` to `/exp/stan/nmr/py/user/pypopt` (you will need to make the folder first).
+1. Clone this repository: `git clone https://github.com/yongrenjie/poptpy`
+2. Specify the path to the Python 3 executable by modifying the `p_python3` variable in the Python scripts. This occurs near the top of both `poptpy.py` and `poptpy_makecf.py`.
+3. Specify the path to the TopSpin directory (this is the `p_tshome` variable). This occurs near the top of both `poptpy_be.py` and `poptpy_makecf.py`.
+4. Copy `poptpy.py` and `poptpy_makecf.py` to TopSpin's `/exp/stan/nmr/py/user` directory, and copy `poptpy_be.py` to `/exp/stan/nmr/py/user/poptpy` (you will need to make the folder first).
 
 ------------------------------------------------------
 
@@ -28,7 +28,7 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 
 A number of pre-built cost functions have already been created, which can cover many simple use cases. These will be fully documented in due course. If all you need is one of these, then you can skip this section entirely.
 
-However, one of the strengths of `pypopt` is its inherent flexibility: one can construct any cost function using the tools offered by the `numpy` package (as well as some custom functions). To create a new cost function, edit the file `.../py/user/pypopt_makecf.py`, either in TopSpin (`edpy pypopt_makecf`) or with a text editor of choice. There are further instructions in the script itself, as well as brief documentation of the custom functions available. Essentially:
+However, one of the strengths of `poptpy` is its inherent flexibility: one can construct any cost function using the tools offered by the `numpy` package (as well as some custom functions). To create a new cost function, edit the file `.../py/user/poptpy_makecf.py`, either in TopSpin (`edpy poptpy_makecf`) or with a text editor of choice. There are further instructions in the script itself, as well as brief documentation of the custom functions available. Essentially:
 
 - the name of the cost function must be specified (the `cf_name` variable);
 - the function returning the cost (`f()`) must be written.
@@ -49,7 +49,7 @@ In order to carry out an optimisation, you must specify several pieces of inform
 
 In this programme, a collection of these five items is referred to as a **routine**. Routines can be stored and ran multiple times (e.g. on different samples). On top of the five items listed, each routine is also associated with a name.
 
-`pypopt` should be run from within TopSpin (simply type `pypopt` into the TopSpin command line). The first time you run `pypopt`, it will prompt you to create a new routine. Once a routine has been created, however, it is stored (technically `pickle`'d) in the directory `.../py/user/pypopt/routines`, and can be selected for reuse in future runs (`pypopt` will recognise the presence of a stored routine).
+`poptpy` should be run from within TopSpin (simply type `poptpy` into the TopSpin command line). The first time you run `poptpy`, it will prompt you to create a new routine. Once a routine has been created, however, it is stored (technically `pickle`'d) in the directory `.../py/user/poptpy/routines`, and can be selected for reuse in future runs (`poptpy` will recognise the presence of a stored routine).
 
 *[Tip: when entering minimum and maximum values for parameters you can use (e.g.) 2m to denote 2 milliseconds, just like in TopSpin. You cannot, however, perform any arithmetic, because that would necessitate `eval` and we would prefer to avoid that!]*
 
@@ -57,4 +57,4 @@ Once a routine has been specified or created, the optimisation will take place, 
 
 When the optimisation is complete, the best values found will be displayed and also stored in TopSpin's parameter lists (usually `ased`, for most acquisition parameters) for future retrieval.
 
-There is an optimisation log that is kept at `.../py/user/pypopt/pypopt.log`. This documents how the cost function varies with the parameters and can be useful in troubleshooting optimisations, or for plotting graphs to show the optimisation trajectory.
+There is an optimisation log that is kept at `.../py/user/poptpy/poptpy.log`. This documents how the cost function varies with the parameters and can be useful in troubleshooting optimisations, or for plotting graphs to show the optimisation trajectory.

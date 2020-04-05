@@ -1,6 +1,6 @@
 # Check if this is being called from TopSpin
 try:
-    ERRMSG("pypopt_be.py: Please run this script outside TopSpin!")
+    ERRMSG("poptpy_be.py: Please run this script outside TopSpin!")
     EXIT()
 except NameError:
     pass
@@ -23,9 +23,9 @@ p_spectrum = input()
 p_optlog = input()
 
 p_tshome = "/opt/topspin4.0.7/exp/stan/nmr"
-p_pypopt = os.path.join(p_tshome, "py/user/pypopt")
-p_routines = os.path.join(p_pypopt, "routines")
-p_costfunctions = os.path.join(p_pypopt, "cost_functions")
+p_poptpy = os.path.join(p_tshome, "py/user/poptpy")
+p_routines = os.path.join(p_poptpy, "routines")
+p_costfunctions = os.path.join(p_poptpy, "cost_functions")
 
 
 def main():

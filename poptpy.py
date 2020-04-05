@@ -5,12 +5,12 @@ import de.bruker.nmr.mfw.root.UtilPath as up
 import subprocess
 
 tshome = up.getTopspinHome()  # use tshome to avoid installer overwriting
-p_pypopt = os.path.join(tshome, "exp/stan/nmr/py/user/pypopt")
-p_backend = os.path.join(p_pypopt, "pypopt_be.py")
-p_routines = os.path.join(p_pypopt, "routines")
-p_costfunctions = os.path.join(p_pypopt, "cost_functions")
-p_optlog = os.path.join(p_pypopt, "pypopt.log")
-p_opterr = os.path.join(p_pypopt, "pypopt_err.log")
+p_poptpy = os.path.join(tshome, "exp/stan/nmr/py/user/poptpy")
+p_backend = os.path.join(p_poptpy, "poptpy_be.py")
+p_routines = os.path.join(p_poptpy, "routines")
+p_costfunctions = os.path.join(p_poptpy, "cost_functions")
+p_optlog = os.path.join(p_poptpy, "poptpy.log")
+p_opterr = os.path.join(p_poptpy, "poptpy_err.log")
 p_python3 = "/usr/local/bin/python3"
 
 
@@ -32,11 +32,11 @@ def main():
         echo("{}D dataset found -- only works for 1D".format(GETACQUDIM()),
              cst.CRITICAL)
         err_exit("Please select a 1D dataset!\n"
-                 "Currently pypopt does not work with "
+                 "Currently poptpy does not work with "
                  "multidimensional experiments.")
 
     # Make folders if they don't exist
-    for folder in [p_pypopt, p_routines, p_costfunctions]:
+    for folder in [p_poptpy, p_routines, p_costfunctions]:
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
@@ -70,7 +70,7 @@ def main():
 
     # Run the backend script
     if not os.path.isfile(p_backend):
-        err_exit("Backend script not found. Please reinstall pypopt.")
+        err_exit("Backend script not found. Please reinstall poptpy.")
     echo("Loading backend script...", cst.INFO)
     ferr = open(p_opterr, "a")
     backend = subprocess.Popen([p_python3, '-u', p_backend],
@@ -109,7 +109,7 @@ def main():
                              "{} found.".format(values[i]))
                 convert_name_and_putpar(routine.pars[i], values[i])
             # Run acquisition and processing
-            XCMD("xau pypopt_au")
+            XCMD("xau poptpy_au")
             # Tell backend script it's done
             print("done", file=backend.stdin)
             backend.stdin.flush()
@@ -167,7 +167,7 @@ def err_exit(error):
 
     Returns: None.
     """
-    ERRMSG(title="pypopt", message=error)
+    ERRMSG(title="poptpy", message=error)
     EXIT()
 
 
@@ -188,7 +188,7 @@ def echo(message_str, level):
     Returns: None.
     """
     if level >= logging_level:
-        SHOW_STATUS("pypopt: {}".format(message_str))
+        SHOW_STATUS("poptpy: {}".format(message_str))
 
 
 def list_files(path):
@@ -229,7 +229,7 @@ def get_routine_id():
             else:
                 MSG("The saved routine {} was not found.".format(sys.argv[1]))
 
-        x = SELECT(title="pypopt",
+        x = SELECT(title="poptpy",
                    message="Do you want to use a saved routine?",
                    buttons=["Yes", "No"])
         echo("returned value {}".format(str(x)), cst.DEBUG)
@@ -345,7 +345,7 @@ def get_new_routine_parameters():
     if saved_cfs == []:
         echo("no cost functions found", cst.CRITICAL)
         err_exit("No cost functions have been defined!\n"
-                 "Please reinstall pypopt to get a default set, or define "
+                 "Please reinstall poptpy to get a default set, or define "
                  "your own cost function based on the documentation.")
     else:
         s = ", ".join(saved_cfs)
@@ -383,7 +383,7 @@ def check_routine(routine):
         echo("routine.cf = {}".format(routine.cf), cst.DEBUG)
     except AttributeError:
         err_exit("The routine file is invalid.\n"
-                 "Please delete it and recreate it from within pypopt.")
+                 "Please delete it and recreate it from within poptpy.")
 
 
 def check_python3path():
@@ -399,7 +399,7 @@ def check_python3path():
         check_call([p_python3, "--version"])
     except CalledProcessError:
         err_exit("The python3 executable was not found.\n"
-                 "Please specify p_python3 in pypopt.py.")
+                 "Please specify p_python3 in poptpy.py.")
 
 
 def convert_name_and_getpar(name):
@@ -512,10 +512,10 @@ def create_au_prog():
     Creates an AU programme for acquisition and processing in TopSpin's
     default directory, if it doesn't already exist.
     """
-    pypopt_au_text = "ZG\nEFP\nAPBK\nQUIT"  # Change this if desired
-    p_acqau = os.path.join(tshome, "exp/stan/nmr/au/src/user/pypopt_au")
+    poptpy_au_text = "ZG\nEFP\nAPBK\nQUIT"  # Change this if desired
+    p_acqau = os.path.join(tshome, "exp/stan/nmr/au/src/user/poptpy_au")
     f = open(p_acqau, "w")
-    f.write(pypopt_au_text)
+    f.write(poptpy_au_text)
     f.close()
 
 
