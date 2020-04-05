@@ -11,7 +11,11 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 
 1. Clone this repository: `git clone https://github.com/yongrenjie/poptpy`
 2. `cd` inside and run `./install.sh`
-3. The script will try to automatically detect the path to your Python 3 executable (using `which`), as well as the TopSpin installation directory (it searches inside `/opt`). If either of these are not in the typical location, you can set the environment variables `$PY3PATH` and `$TOPSPINDIR` before running the installer. Note that `$TOPSPINDIR` should point to the `.../exp/stan/nmr` folder in TopSpin.
+3. The script will try to automatically detect the path to your Python 3 executable (using `which`), as well as the TopSpin installation directory (it searches inside `/opt`). If either of these are not in the typical location, you can set the environment variables `$PY3PATH` and `$TOPSPINDIR` when running the installer. For example:
+
+       PY3PATH="/path/to/python3" TOPSPINDIR="/path/to/exp/stan/nmr" ./install.sh
+
+   Note that `$TOPSPINDIR` should point to the `.../exp/stan/nmr` folder in TopSpin.
 
 ## Installation (manual)
 
@@ -51,10 +55,13 @@ In this programme, a collection of these five items is referred to as a **routin
 
 `poptpy` should be run from within TopSpin (simply type `poptpy` into the TopSpin command line). The first time you run `poptpy`, it will prompt you to create a new routine. Once a routine has been created, however, it is stored (technically `pickle`'d) in the directory `.../py/user/poptpy/routines`, and can be selected for reuse in future runs (`poptpy` will recognise the presence of a stored routine).
 
-*[Tip: when entering minimum and maximum values for parameters you can use (e.g.) 2m to denote 2 milliseconds, just like in TopSpin. You cannot, however, perform any arithmetic, because that would necessitate `eval` and we would prefer to avoid that!]*
+*[Tip: when entering minimum and maximum values for parameters you can use (e.g.) 2m to denote 2 milliseconds, just like in TopSpin. You cannot, however, perform any arithmetic, because that would necessitate `eval` (or a complicated expression parsing routine) and we would prefer to avoid that.]*
 
-Once a routine has been specified or created, the optimisation will take place, largely in the background. We strongly recommend turning on TopSpin's "unsafe ZG" option (TopSpin preferences > Acquisition), at least while running the optimisation: otherwise, on *every* function evaluation, TopSpin will ask for confirmation as to whether you really want to acquire a new spectrum.
+Once a routine has been specified or created, the optimisation will take place, largely in the background. **We strongly recommend turning on TopSpin's "unsafe ZG" option (TopSpin preferences > Acquisition), at least while running the optimisation:** otherwise, on *every* function evaluation, TopSpin will ask for confirmation as to whether you really want to acquire a new spectrum.
 
 When the optimisation is complete, the best values found will be displayed and also stored in TopSpin's parameter lists (usually `ased`, for most acquisition parameters) for future retrieval.
 
 There is an optimisation log that is kept at `.../py/user/poptpy/poptpy.log`. This documents how the cost function varies with the parameters and can be useful in troubleshooting optimisations, or for plotting graphs to show the optimisation trajectory.
+
+If the optimisation crashes or is otherwise unresponsive, you can use the TopSpin `kill` function to terminate it. Any errors raised by the backend script will be printed to `.../py/user/poptpy/poptpy_err.log` (technically, `stderr` is redirected to this file). To report a bug, please submit an issue with steps to reproduce it, and attach the the contents of this log file.
+
