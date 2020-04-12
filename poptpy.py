@@ -99,6 +99,9 @@ def main():
             values = line.split()
             echo("Setting parameters to: {}".format(values), cst.INFO)
             if len(values) != len(routine.pars):
+                with open(p_opterr, "a") as fp:
+                    print("Received this bad line from backend: ", file=fp)
+                    print(line, file=fp)
                 err_exit("Invalid message passed from backend. "
                          "Please check the error log for more information.")
             for i in range(len(routine.pars)):
