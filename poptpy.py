@@ -80,7 +80,7 @@ def main():
     # Pass key information to the backend script
     print(routine_id, file=backend.stdin)
     print(p_spectrum, file=backend.stdin)
-    print(p_optlog, file=backend.stdin)
+    print(p_poptpy, file=backend.stdin)
     backend.stdin.flush()
 
     # Enter a loop where: 1) backend script passes values of acquisition params
@@ -99,8 +99,8 @@ def main():
             values = line.split()
             echo("Setting parameters to: {}".format(values), cst.INFO)
             if len(values) != len(routine.pars):
-                err_exit("Number of values found not equal to"
-                         "number of parameters.")
+                err_exit("Invalid message passed from backend. "
+                         "Please check the error log for more information.")
             for i in range(len(routine.pars)):
                 try:
                     float(values[i])
@@ -236,7 +236,7 @@ def get_routine_id():
 
         if x == 0 or x == cst.ENTER:  # user pressed Yes or Enter
             s = ", ".join(saved_routines)
-            y = INPUT_DIALOG(title="Available routines",
+            y = INPUT_DIALOG(title="poptpy: available routines",
                              header="Available routines: " + s,
                              items=["Routine:"])
             echo("returned value {}".format(str(y)), cst.DEBUG)
@@ -273,7 +273,7 @@ def get_new_routine_parameters():
          - cf            : string containing name of cost function
     """
     # Prompt for routine name.
-    name = INPUT_DIALOG(title="Choose a name...",
+    name = INPUT_DIALOG(title="poptpy: choose a name...",
                         header="Please choose a name to save this routine as:",
                         items=["Name:"])
     if name is None or name[0].strip() == "":
@@ -282,7 +282,7 @@ def get_new_routine_parameters():
     name = name[0].replace(".py", "").strip()
 
     # Prompt for parameters to be optimised.
-    opt_pars = INPUT_DIALOG(title="Choose parameters...",
+    opt_pars = INPUT_DIALOG(title="poptpy: choose parameters...",
                             header=("Please select experimental parameters "
                                     "to be optimised (separated by commas or "
                                     "spaces):"),
@@ -300,7 +300,7 @@ def get_new_routine_parameters():
     init = []
     tol = []
     for i in opt_pars:
-        settings = INPUT_DIALOG(title="Settings for {}".format(i),
+        settings = INPUT_DIALOG(title="poptpy: settings for {}".format(i),
                                 header="Please choose the minimum value, "
                                        "maximum value, initial value, and "
                                        "tolerance for {}:".format(i),
@@ -349,7 +349,7 @@ def get_new_routine_parameters():
                  "your own cost function based on the documentation.")
     else:
         s = ", ".join(saved_cfs)
-        x = INPUT_DIALOG(title="Choose a cost function...",
+        x = INPUT_DIALOG(title="poptpy: choose a cost function...",
                          header="Available cost functions: " + s,
                          items=["Cost function:"])
         echo("returned value {}".format(str(x)), cst.DEBUG)
@@ -396,8 +396,8 @@ def check_python3path():
     Returns: None.
     """
     try:
-        check_call([p_python3, "--version"])
-    except CalledProcessError:
+        subprocess.check_call([p_python3, "--version"])
+    except subprocess.CalledProcessError:
         err_exit("The python3 executable was not found.\n"
                  "Please specify p_python3 in poptpy.py.")
 

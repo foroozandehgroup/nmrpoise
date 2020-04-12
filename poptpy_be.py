@@ -1,5 +1,4 @@
-# Check if this is being called from TopSpin
-try:
+# Check if this is being called from TopSpin try:
     ERRMSG("poptpy_be.py: Please run this script outside TopSpin!")
     EXIT()
 except NameError:
@@ -20,10 +19,9 @@ from datetime import datetime
 # Obtain key information from frontend script
 routine_id = input()
 p_spectrum = input()
-p_optlog = input()
+p_poptpy = input()
 
-p_tshome = "/opt/topspin4.0.7/exp/stan/nmr"
-p_poptpy = os.path.join(p_tshome, "py/user/poptpy")
+p_optlog = os.path.join(p_poptpy, "poptpy.log")
 p_routines = os.path.join(p_poptpy, "routines")
 p_costfunctions = os.path.join(p_poptpy, "cost_functions")
 

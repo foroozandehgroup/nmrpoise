@@ -1,6 +1,6 @@
 import os
 
-p_tshome = "/opt/topspin4.0.7/exp/stan/nmr"
+p_tshome = "/opt/topspin4.0.8/exp/stan/nmr"
 p_poptpy = os.path.join(p_tshome, "py/user/poptpy")
 p_costfunctions = os.path.join(p_poptpy, "cost_functions")
 p_python3 = "/usr/local/bin/python3"
@@ -58,7 +58,7 @@ def main():
     p_cf_file = os.path.join(p_costfunctions, cf_name)
     with open(p_cf_file, "wb") as file:
         dill.dump(cf, file)
-    print("Cost function {} successfully"
+    print("Cost function {} successfully "
           "saved to {}.".format(cf_name, p_costfunctions))
 
 
