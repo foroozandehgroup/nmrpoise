@@ -8,6 +8,7 @@ import os
 import sys
 import pickle
 import dill
+import timeit
 import numpy as np
 from scipy import optimize
 from datetime import datetime
@@ -21,6 +22,7 @@ routine_id = input()
 p_spectrum = input()
 p_poptpy = input()
 
+tic = datetime.now()
 p_optlog = os.path.join(p_poptpy, "poptpy.log")
 p_routines = os.path.join(p_poptpy, "routines")
 p_costfunctions = os.path.join(p_poptpy, "cost_functions")
@@ -78,10 +80,15 @@ def main():
     print(" ".join([str(i) for i in best_values]))
 
     # More logging
+    toc = datetime.now()
+    time_taken = str(toc - tic).split(".")[0]  # remove microseconds
     with open(p_optlog, "a") as log:
         print(opt_result, file=log)
         print("", file=log)
-        print("Best values found: {}\n\n".format(best_values), file=log)
+        print("Best values found     - {}".format(best_values), file=log)
+        # TODO: implement nexp in a way that doesn't use a global variable
+        # print("Number of experiments - {}".format(nexp), file=log)
+        print("Total time taken      - {}".format(time_taken), file=log)
 
 
 class Routine:
