@@ -149,7 +149,6 @@ def acquire_nmr(x, optimargs):
         signal = input()
         if signal == "done":
             cf_val = cf.function()
-            print("")
             fmt = "{:^8.2f}  " * (len(x) + 1)
             print(fmt.format(*unscaled_val, cf_val), file=log)
             return cf_val
