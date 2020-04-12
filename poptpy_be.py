@@ -365,10 +365,12 @@ def get_acqu_par(par):
                     break
             # Grab the values and put them in a list
             s = ""
+            line = file.readline()
             while not line.startswith("##"):  # read until the next parameter
                 s = s + line + " "
-            values = s.split()
+                line = file.readline()
             # Pick out the desired value and return it if it's a float
+            values = s.split()
             try:
                 value = float(values[int(parr)])
                 return value
