@@ -61,7 +61,7 @@ Once a routine has been specified or created, the optimisation will take place, 
 
 When the optimisation is complete, the best values found will be displayed and also stored in TopSpin's parameter lists (usually `ased`, for most acquisition parameters) for future retrieval.
 
-There is an optimisation log that is kept at `.../py/user/poptpy/poptpy.log`. This documents how the cost function varies with the parameters and can be useful in troubleshooting optimisations, or for plotting graphs to show the optimisation trajectory.
+There is an optimisation log `poptpy.log` that is stored in the same directory as the spectrum EXPNO. This documents how the cost function varies with the parameters and can be useful in troubleshooting optimisations, or for plotting graphs to show the optimisation trajectory.
 
 If the optimisation crashes or is otherwise unresponsive, you can use the TopSpin `kill` function to terminate it. Any errors raised by the backend script will be printed to `.../py/user/poptpy/poptpy_err.log` (technically, `stderr` is redirected to this file). To report a bug, please submit an issue with steps to reproduce it, and attach the the contents of this log file.
 

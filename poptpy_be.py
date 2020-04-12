@@ -23,7 +23,8 @@ p_spectrum = input()
 p_poptpy = input()
 
 tic = datetime.now()
-p_optlog = os.path.join(p_poptpy, "poptpy.log")
+p_optlog = os.path.join(os.path.dirname(os.path.dirname(p_spectrum)),
+                        "poptpy.log")
 p_routines = os.path.join(p_poptpy, "routines")
 p_costfunctions = os.path.join(p_poptpy, "cost_functions")
 
@@ -246,7 +247,7 @@ def get_fid():
     Note that this does *not* deal with the "group delay" at the beginning
     of the FID.
     """
-    p_fid = os.path.join(p_spectrum, "fid")
+    p_fid = os.path.join(os.path.dirname(os.path.dirname(p_spectrum)), "fid")
     fid = np.fromfile(p_fid, dtype=np.int32)
     td = fid.size
     fid = fid.reshape(int(td/2), 2)
