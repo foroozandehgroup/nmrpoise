@@ -55,13 +55,15 @@ def main():
     # Some logging
     with open(p_optlog, "a") as log:
         now = datetime.now().strftime("%Y-%M-%D %H:%M:%S")
-        print("\n\n", file=log)
+        print("\n\n\n", file=log)
         print(now, file=log)
-        print("Starting optimisation of the following "
-              "parameters: {}".format(routine.pars), file=log)
-        print("Cost function used: {}".format(cf.name), file=log)
-        print("Initial values used: {}".format(routine.init), file=log)
-        print("xatol used: {}".format(xatol_gm), file=log)
+        print("Optimisation parameters - {}".format(routine.pars), file=log)
+        print("Cost function           - {}".format(cf.name), file=log)
+        print("Initial values          - {}".format(routine.init), file=log)
+        print("" , file=log)
+        fmt = "{:^8s}  " * (len(routine.pars) + 1)
+        print(fmt.format(*routine.pars, "cf"), file=log)
+        print("-" * 10 * (len(routine.pars) + 1), file=log)
 
     # Carry out the optimisation
     # TODO: allow user to select optimiser??? Or at least me?
@@ -146,7 +148,9 @@ def acquire_nmr(x, optimargs):
         signal = input()
         if signal == "done":
             cf_val = cf.function()
-            print("    Value of cost function: {}".format(cf_val), file=log)
+            print("")
+            fmt = "{:^8.2f}  " * (len(x) + 1)
+            print(fmt.format(*unscaled_val, cf_val), file=log)
             return cf_val
 
 
