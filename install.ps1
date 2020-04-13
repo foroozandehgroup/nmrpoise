@@ -88,10 +88,7 @@ ForEach ($i in $dependencies) {
 Write-Host "Copying scripts to TopSpin directory... " -NoNewLine
 $tspy="${tsdir}\py\user"
 Copy-Item poptpy.py -Destination $tspy > $null
-New-Item -Path $tspy -Name "poptpy" -ItemType "directory" > $null
-Copy-Item poptpy_be.py -Destination "${tspy}\poptpy" > $null
-New-Item -Path "${tspy}\poptpy" -Name "routines" -ItemType "directory" > $null
-Copy-Item -Path "cost_functions" -Destination "${tspy}\poptpy" -Recurse > $null
+Copy-Item -Path "poptpy" -Destination ${tspy} -Recurse > $null
 Write-Host "done"
 
 # Prompt user to install any missing packages
