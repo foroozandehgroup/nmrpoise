@@ -92,7 +92,7 @@ if sed -i.bak "s:p_tshome = .*$:p_tshome = \"$tspath\":g" $dir/*.py && \
 fi
 
 unset i
-packages=("numpy" "scipy" "dill")
+packages=("numpy" "scipy")
 for i in ${packages[@]}; do
     printf "Checking for $i... "
     if $pyex -c "import pkgutil; exit(not pkgutil.find_loader(\"$i\"))"; then
@@ -110,9 +110,10 @@ done
 
 printf "Copying scripts to TopSpin directory... "
 tspy=$tspath/py/user
-if cp $dir/poptpy.py $dir/poptpy_makecf.py $tspy && \
-        mkdir -p $tspy/poptpy $tspy/poptpy/routines $tspy/poptpy/cost_functions && \
-        cp $dir/poptpy_be.py $tspy/poptpy; then
+if cp $dir/poptpy.py $tspy && \
+        mkdir -p $tspy/poptpy $tspy/poptpy/routines && \
+        cp $dir/poptpy_be.py $tspy/poptpy && \
+        cp -r $dir/cost_functions $tspy/poptpy; then
     printf "done\n"
 else
     printf "failed\n"

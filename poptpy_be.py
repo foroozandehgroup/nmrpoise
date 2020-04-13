@@ -7,8 +7,6 @@ except NameError:
 import os
 import sys
 import pickle
-import dill
-import timeit
 import numpy as np
 from scipy import optimize
 from datetime import datetime
@@ -33,13 +31,11 @@ def main():
     """
     Main routine.
     """
-    # Load the routine and cost function
+    # Load the routine
     with open(os.path.join(p_routines, routine_id), "rb") as f:
         routine = pickle.load(f)
-    with open(os.path.join(p_costfunctions, routine.cf), "rb") as f:
-        cf = dill.load(f)
-    # (possible) TODO: May want to check that the Routine and Cost_Function
-    #                  objects are valid
+    # Load the cost function
+    cf = Cost_Function(os.path.join(p_costfunctions, routine.cf))
 
     # Scale the initial values and tolerances
     x0 = scale(routine.init, routine.lb, routine.ub)
@@ -62,9 +58,9 @@ def main():
         print("Cost function           - {}".format(cf.name), file=log)
         print("Initial values          - {}".format(routine.init), file=log)
         print("" , file=log)
-        fmt = "{:^8s}  " * (len(routine.pars) + 1)
+        fmt = "{:^10s}  " * (len(routine.pars) + 1)
         print(fmt.format(*routine.pars, "cf"), file=log)
-        print("-" * 10 * (len(routine.pars) + 1), file=log)
+        print("-" * 12 * (len(routine.pars) + 1), file=log)
 
     # Carry out the optimisation
     # TODO: allow user to select optimiser??? Or at least me?
@@ -106,9 +102,11 @@ class Routine:
 
 
 class Cost_Function:
-    def __init__(self, name, function):
-        self.name = name
-        self.function = function
+    def __init__(self, fname):
+        exec(open(fname).read())
+        self.name, _ = os.path.splitext(os.path.basename(fname))
+        # for locals(), see e.g. https://stackoverflow.com/q/6561482/
+        self.function = locals()["cf_function"]
 
 
 def acquire_nmr(x, optimargs):
@@ -135,23 +133,27 @@ def acquire_nmr(x, optimargs):
     unscaled_val = unscale(x, lb, ub)
 
     with open(p_optlog, "a") as log:
-        # Log the values
-        print("Evaluating cost function at: {}".format(unscaled_val), file=log)
         # Enforce constraints on optimisation
         if any(x < 0) or any(x > 1):
-            print("Parameters out of bounds -- returning +inf", file=log)
-            return np.inf
+            cf_val = np.inf
+            # Logging
+            fmt = "{:^10.4f}  " * (len(x) + 1)
+            print(fmt.format(*unscaled_val, cf_val), file=log)
+            return cf_val
 
         # Print unscaled values, prompting frontend script to start acquisition
         print(" ".join([str(i) for i in unscaled_val]))
-
         # Wait for acquisition to complete, then calculate cost function
         signal = input()
         if signal == "done":
             cf_val = cf.function()
-            fmt = "{:^8.2f}  " * (len(x) + 1)
+            # Logging
+            fmt = "{:^10.4f}  " * (len(x) + 1)
             print(fmt.format(*unscaled_val, cf_val), file=log)
             return cf_val
+        else:
+            raise ValueError("Incorrect signal passed from frontend: "
+                             "{}".format(signal))
 
 
 def read_routine(routine_name):

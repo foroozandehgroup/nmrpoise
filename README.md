@@ -5,7 +5,7 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 ## Prerequisites
 
 1. **Python 3 installation** (download from https://www.python.org/downloads/). Ideally, the Python 3 executable (`python3` or `python`) should be placed in the `$PATH` environment variable.
-2. The **numpy, scipy and dill** packages. These can all be installed using `pip3` or `pip`.
+2. The **numpy** and **scipy** packages. These can be installed using `pip3` or `pip`.
 
 ## Installation (MacOS / Linux)
 
@@ -20,9 +20,8 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 ## Installation (manual)
 
 1. Clone this repository: `git clone https://github.com/yongrenjie/poptpy`
-2. Specify the path to the Python 3 executable by modifying the `p_python3` variable in the Python scripts. This occurs near the top of both `poptpy.py` and `poptpy_makecf.py`.
-3. Specify the path to the TopSpin directory (this is the `p_tshome` variable). This occurs near the top of `poptpy_makecf.py` only.
-4. Copy `poptpy.py` and `poptpy_makecf.py` to TopSpin's `/exp/stan/nmr/py/user` directory, and copy `poptpy_be.py` to `/exp/stan/nmr/py/user/poptpy` (you will need to make the folder first).
+2. Specify the path to the Python 3 executable by modifying the `p_python3` variable in `poptpy.py`.
+3. Copy `poptpy.py` to TopSpin's `/exp/stan/nmr/py/user` directory, and copy `poptpy_be.py` to `/exp/stan/nmr/py/user/poptpy` (you will need to make the folder first).
 
 ------------------------------------------------------
 
@@ -32,14 +31,7 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 
 A number of pre-built cost functions have already been created, which can cover many simple use cases. These will be fully documented in due course. If all you need is one of these, then you can skip this section entirely.
 
-However, one of the strengths of `poptpy` is its inherent flexibility: one can construct any cost function using the tools offered by the `numpy` package (as well as some custom functions). To create a new cost function, edit the file `.../py/user/poptpy_makecf.py`, either in TopSpin (`edpy poptpy_makecf`) or with a text editor of choice. There are further instructions in the script itself, as well as brief documentation of the custom functions available. Essentially:
-
-- the name of the cost function must be specified (the `cf_name` variable);
-- the function returning the cost (`f()`) must be written.
-
-Once this is done, run the script (either from within TopSpin, or with external Python 3). A cost function object will be created in the directory `.../py/user/cost_functions` with the specified name.
-
-More precisely, the script instantiates a `Cost_Function` object and then serialises it using the `dill` package (an extension of Python's built-in `pickle`). This object can later be read by the backend script.
+However, one of the strengths of `poptpy` is its inherent flexibility: one can construct any cost function using the tools offered by the `numpy` package (as well as some predefined custom functions). To create a new cost function, make a new Python file inside `.../py/user/poptpy/cost_functions` defining the cost function, saving it as `<CF_NAME>.py`. There are further instructions in the script itself, as well as brief documentation of the custom functions available.
 
 ### Performing an optimisation
 
@@ -64,4 +56,3 @@ When the optimisation is complete, the best values found will be displayed and a
 There is an optimisation log `poptpy.log` that is stored in the same directory as the spectrum EXPNO. This documents how the cost function varies with the parameters and can be useful in troubleshooting optimisations, or for plotting graphs to show the optimisation trajectory.
 
 If the optimisation crashes or is otherwise unresponsive, you can use the TopSpin `kill` function to terminate it. Any errors raised by the backend script will be printed to `.../py/user/poptpy/poptpy_err.log` (technically, `stderr` is redirected to this file). To report a bug, please submit an issue with steps to reproduce it, and attach the the contents of this log file.
-

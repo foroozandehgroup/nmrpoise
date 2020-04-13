@@ -194,19 +194,25 @@ def echo(message_str, level):
         SHOW_STATUS("poptpy: {}".format(message_str))
 
 
-def list_files(path):
+def list_files(path, ext=""):
     """
     Lists all files found in a directory, if it exists.
 
     Arguments:
         path (string) : Directory to be searched in.
+        ext (string)  : Extension of files to be searched for.
 
     Returns:
         List containing filenames.
     """
     if os.path.isdir(path):
-        # return [i for i in os.listdir(path) if os.path.isfile(i)]
-        return [i for i in os.listdir(path)]
+        if ext == "":
+            return [i for i in os.listdir(path)
+                      if os.path.isfile(os.path.join(path, i))]
+        else:
+            return [os.path.splitext(i)[0] for i in os.listdir(path)
+                      if i.endswith(ext) and
+                         os.path.isfile(os.path.join(path, i))]
     else:
         return []
 
@@ -343,7 +349,7 @@ def get_new_routine_parameters():
 
     # Prompt for cost function.
     # Search for existing cost functions
-    saved_cfs = list_files(p_costfunctions)
+    saved_cfs = list_files(p_costfunctions, ext=".py")
 
     if saved_cfs == []:
         echo("no cost functions found", cst.CRITICAL)
