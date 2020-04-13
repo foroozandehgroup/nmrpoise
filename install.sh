@@ -61,7 +61,7 @@ else
     unset tsdirs i # from http://mywiki.wooledge.org/BashFAQ/020
     while IFS= read -r -d '' file; do
         tsdirs[i++]="$file"
-    done < <(find /opt -type d -ipath "**/topspin*/exp/stan/nmr" -print0 2>/dev/null)
+    done < <(find /opt -type d -ipath "*/topspin*/exp/stan/nmr" -print0 2>/dev/null)
     ntsdirs=${#tsdirs[@]}
     # offer choices depending on how many were found
     if [[ $ntsdirs -eq 0 ]]; then

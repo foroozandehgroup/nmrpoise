@@ -9,7 +9,7 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 
 ## Installation (MacOS / Linux)
 
-1. Clone this repository: `git clone https://github.com/yongrenjie/poptpy`
+1. Clone this repository: `git clone https://github.com/yongrenjie/poptpy`, or download the latest release and unzip the folder.
 2. `cd` inside and run `./install.sh`
 3. The script will try to automatically detect the path to your Python 3 executable (using `which`), as well as the TopSpin installation directory (it searches inside `/opt`). If either of these are not in the typical location, you can set the environment variables `$PY3PATH` and `$TOPSPINDIR` when running the installer. For example:
 
@@ -17,11 +17,18 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 
    Note that `$TOPSPINDIR` should point to the `.../exp/stan/nmr` folder in TopSpin.
 
+## Installation (Windows)
+
+1. Clone this repository (if you have `git`), or download the latest release and unzip the folder.
+2. Double-click `install.bat` inside (equivalently, run `install.ps1` in PowerShell, but that often leads to permission errors)
+3. The script should typically succeed, but if there are any errors please submit an issue.
+
 ## Installation (manual)
 
 1. Clone this repository: `git clone https://github.com/yongrenjie/poptpy`
-2. Specify the path to the Python 3 executable by modifying the `p_python3` variable in `poptpy.py`.
-3. Copy `poptpy.py` to TopSpin's `/exp/stan/nmr/py/user` directory, and copy `poptpy_be.py` to `/exp/stan/nmr/py/user/poptpy` (you will need to make the folder first).
+2. Specify the path to the Python 3 executable by modifying the `p_python3` variable in `poptpy.py`. Warning: if you are on Windows and the path includes backslashes, you will need to either escape the backslashes or use a raw string.
+3. Copy `poptpy.py` to TopSpin's `/exp/stan/nmr/py/user` directory.
+4. Make a new directory `/exp/stan/nmr/py/user/poptpy`. Then copy the script `pypopt_be.py`, as well as the `cost_functions` folder, inside that new directory.
 
 ------------------------------------------------------
 
