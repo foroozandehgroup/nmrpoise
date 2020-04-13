@@ -1,4 +1,5 @@
-# Check if this is being called from TopSpin try:
+# Check if this is being called from TopSpin
+try:
     ERRMSG("poptpy_be.py: Please run this script outside TopSpin!")
     EXIT()
 except NameError:
@@ -106,7 +107,7 @@ class Cost_Function:
         exec(open(fname).read())
         self.name, _ = os.path.splitext(os.path.basename(fname))
         # for locals(), see e.g. https://stackoverflow.com/q/6561482/
-        self.function = locals()["cf_function"]
+        self.function = locals()["cost_function"]
 
 
 def acquire_nmr(x, optimargs):
