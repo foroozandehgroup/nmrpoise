@@ -3,6 +3,7 @@
 
 dir=$(dirname $0)
 
+# Search for Python 3 executable
 printf "Locating python3 executable... "
 if [[ $PY3PATH ]]; then # if the user set the environment variable already
     pyex=$PY3PATH
@@ -22,6 +23,7 @@ else
     printf "$pyex\n"
 fi
 
+# Check that Python version is >=3
 printf "Checking Python version... "
 pyv=$($pyex --version 2>&1) && printf "$pyv\n"
 if [[ $pyv != "Python 3"* ]]; then
@@ -34,12 +36,18 @@ if [[ $pyv != "Python 3"* ]]; then
     exit 1
 fi
 
+# Set path to Python executable
 printf "Setting Python path in TopSpin scripts... "
 if sed -i.bak "s:p_python3 = .*$:p_python3 = \"$pyex\":g" $dir/*.py && \
         rm $dir/*.py.bak 2>/dev/null; then
     printf "done\n"
+else
+    printf "failed\n"
+    printf "\nError editing TopSpin scripts with sed: please ensure you have the correct permissions to do so.\n"
+    exit 1
 fi
 
+# Search for TopSpin installation directory
 printf "Locating TopSpin installation directory... "
 if [[ $TOPSPINDIR ]]; then # if the user set the environment variable already
     tspath=$TOPSPINDIR
@@ -85,29 +93,23 @@ else
     fi
 fi
 
-printf "Setting TopSpin path in TopSpin scripts... "
-if sed -i.bak "s:p_tshome = .*$:p_tshome = \"$tspath\":g" $dir/*.py && \
-        rm $dir/*.py.bak 2>/dev/null; then
-    printf "done\n"
-fi
-
+# Check for Python packages
 unset i
-packages=("numpy" "scipy")
-for i in ${packages[@]}; do
+dependencies=("numpy" "scipy")
+missing_packages=""
+separator=""
+for i in ${dependencies[@]}; do
     printf "Checking for $i... "
     if $pyex -c "import pkgutil; exit(not pkgutil.find_loader(\"$i\"))"; then
         printf "found\n"
     else
         printf "not found\n"
-        if [[ $pyex == *"conda"* ]]; then
-            conda install $i || (printf "Please install the package $i with your Python package manager.\n" && exit 1)
-        else
-            pip3 install $i || pip install $i || (printf "Please install the package $i with your Python package manager.\n" && exit 1)
-        fi
-        printf "\n"
+        missing_packages="${missing_packages}${separator}${i}"
+        separator=", "
     fi
 done
 
+# Install the files
 printf "Copying scripts to TopSpin directory... "
 tspy=$tspath/py/user
 if cp $dir/poptpy.py $tspy && \
@@ -118,4 +120,13 @@ if cp $dir/poptpy.py $tspy && \
 else
     printf "failed\n"
     printf "\nError copying files to $tspath/py/user: please ensure you have the correct permissions to do so.\n"
+    exit 1
+fi
+
+# Prompt user to install any missing packages
+if [[ -n "${missing_packages}" ]]; then
+    printf "\nThe following Python packages were missing: ${missing_packages}\n"
+    printf "Please install them using your package manager before running poptpy.\n"
+else
+    printf "\nSuccessfully installed poptpy.\n"
 fi
