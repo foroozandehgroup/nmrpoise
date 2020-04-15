@@ -27,6 +27,18 @@ p_optlog = os.path.join(os.path.dirname(os.path.dirname(p_spectrum)),
 p_routines = os.path.join(p_poptpy, "routines")
 p_costfunctions = os.path.join(p_poptpy, "cost_functions")
 
+# Function counter decorator
+fn_count = {}
+def deco_count(fn):
+    # registering the function when it's decorated...
+    fn_count[fn.__name__] = 0
+    def counter(*args, **kwargs):
+        # ...means we don't need to check for the key
+        fn_count[fn.__name__] += 1
+        return fn(*args, **kwargs)
+
+    return counter
+
 
 def main():
     """
@@ -52,12 +64,12 @@ def main():
 
     # Some logging
     with open(p_optlog, "a") as log:
-        now = datetime.now().strftime("%Y-%M-%D %H:%M:%S")
         print("\n\n\n", file=log)
-        print(now, file=log)
-        print("Optimisation parameters - {}".format(routine.pars), file=log)
-        print("Cost function           - {}".format(cf.name), file=log)
-        print("Initial values          - {}".format(routine.init), file=log)
+        print(datetime.now().strftime("%Y-%M-%D %H:%M:%S"), file=log)
+        fmt = "{:25s} - {}"
+        print(fmt.format("Optimisation parameters", routine.pars), file=log)
+        print(fmt.format("Cost function", cf.name), file=log)
+        print(fmt.format("Initial values", routine.init), file=log)
         print("" , file=log)
         fmt = "{:^10s}  " * (len(routine.pars) + 1)
         print(fmt.format(*routine.pars, "cf"), file=log)
@@ -85,10 +97,12 @@ def main():
     with open(p_optlog, "a") as log:
         print(opt_result, file=log)
         print("", file=log)
-        print("Best values found     - {}".format(best_values), file=log)
-        # TODO: implement nexp in a way that doesn't use a global variable
-        # print("Number of experiments - {}".format(nexp), file=log)
-        print("Total time taken      - {}".format(time_taken), file=log)
+        fmt = "{:25s} - {}"
+        print(fmt.format("Best values found", best_values), file=log)
+        print(fmt.format("Number of fevals", fn_counter["acquire_nmr"]), file=log)
+        print(fmt.format("Number of spectra ran", fn_counter["send_values"]),
+              file=log)
+        print(fmt.format("Total time taken", time_taken), file=log)
 
 
 class Routine:
@@ -110,6 +124,7 @@ class Cost_Function:
         self.function = locals()["cost_function"]
 
 
+@deco_count
 def acquire_nmr(x, optimargs):
     """
     Evaluation of cost function for optimisation.
@@ -155,6 +170,15 @@ def acquire_nmr(x, optimargs):
         else:
             raise ValueError("Incorrect signal passed from frontend: "
                              "{}".format(signal))
+
+
+@deco_count
+def send_values(unscaled_val):
+    """Print a list of unscaled values, which prompts frontend script to
+    start acquisition.
+    This needs to be a separate function so that we can decorate it.
+    """
+    print(" ".join([str(i) for i in unscaled_val]))
 
 
 def read_routine(routine_name):
