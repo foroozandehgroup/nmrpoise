@@ -48,7 +48,10 @@ def main():
     with open(os.path.join(p_routines, routine_id), "rb") as f:
         routine = pickle.load(f)
     # Load the cost function
-    cf = Cost_Function(os.path.join(p_costfunctions, routine.cf))
+    p_cf = os.path.join(p_costfunctions, routine.cf)
+    exec(open(p_cf).read())
+    # in p_cf, the cost function is defined as cost_function().
+    # executing the file will define it for us
 
     # Scale the initial values and tolerances
     x0 = scale(routine.init, routine.lb, routine.ub)
@@ -68,7 +71,7 @@ def main():
         print(datetime.now().strftime("%Y-%M-%D %H:%M:%S"), file=log)
         fmt = "{:25s} - {}"
         print(fmt.format("Optimisation parameters", routine.pars), file=log)
-        print(fmt.format("Cost function", cf.name), file=log)
+        print(fmt.format("Cost function", routine.cf), file=log)
         print(fmt.format("Initial values", routine.init), file=log)
         print("" , file=log)
         fmt = "{:^10s}  " * (len(routine.pars) + 1)
@@ -77,7 +80,7 @@ def main():
 
     # Carry out the optimisation
     # TODO: allow user to select optimiser??? Or at least me?
-    optimargs = [cf, routine.lb, routine.ub, p_spectrum, p_optlog]
+    optimargs = [cost_function, routine.lb, routine.ub, p_spectrum, p_optlog]
     opt_result = optimize.minimize(acquire_nmr,
                                    x0,
                                    args=optimargs,
@@ -116,14 +119,6 @@ class Routine:
         self.cf = cf
 
 
-class Cost_Function:
-    def __init__(self, fname):
-        exec(open(fname).read())
-        self.name, _ = os.path.splitext(os.path.basename(fname))
-        # for locals(), see e.g. https://stackoverflow.com/q/6561482/
-        self.function = locals()["cost_function"]
-
-
 @deco_count
 def acquire_nmr(x, optimargs):
     """
@@ -145,7 +140,7 @@ def acquire_nmr(x, optimargs):
         float : value of the cost function.
     """
     # Unpack optimisation arguments
-    cf, lb, ub, p_spectrum, p_optlog = optimargs
+    cost_function, lb, ub, p_spectrum, p_optlog = optimargs
     unscaled_val = unscale(x, lb, ub)
 
     with open(p_optlog, "a") as log:
@@ -162,7 +157,7 @@ def acquire_nmr(x, optimargs):
         # Wait for acquisition to complete, then calculate cost function
         signal = input()
         if signal == "done":
-            cf_val = cf.function()
+            cf_val = cost_function()
             # Logging
             fmt = "{:^10.4f}  " * (len(x) + 1)
             print(fmt.format(*unscaled_val, cf_val), file=log)

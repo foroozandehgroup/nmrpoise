@@ -1,6 +1,6 @@
 # Instructions
 
-Just define a Python `cost_function()` to return the value you want it to, as a float!
+Just define a Python function named `cost_function()` to return the value you want it to, as a float!
 
 Some builtin methods are available:
 
