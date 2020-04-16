@@ -9,6 +9,7 @@ import os
 import sys
 import pickle
 import numpy as np
+import functools
 from scipy import optimize
 from datetime import datetime
 
@@ -28,15 +29,12 @@ p_routines = os.path.join(p_poptpy, "routines")
 p_costfunctions = os.path.join(p_poptpy, "cost_functions")
 
 # Function counter decorator
-fn_count = {}
 def deco_count(fn):
-    # registering the function when it's decorated...
-    fn_count[fn.__name__] = 0
+    @functools.wraps
     def counter(*args, **kwargs):
-        # ...means we don't need to check for the key
-        fn_count[fn.__name__] += 1
+        counter.calls += 1
         return fn(*args, **kwargs)
-
+    counter.calls = 0
     return counter
 
 
@@ -102,8 +100,8 @@ def main():
         print("", file=log)
         fmt = "{:25s} - {}"
         print(fmt.format("Best values found", best_values), file=log)
-        print(fmt.format("Number of fevals", fn_counter["acquire_nmr"]), file=log)
-        print(fmt.format("Number of spectra ran", fn_counter["send_values"]),
+        print(fmt.format("Number of fevals", acquire_nmr.calls), file=log)
+        print(fmt.format("Number of spectra ran", send_values.calls),
               file=log)
         print(fmt.format("Total time taken", time_taken), file=log)
 
