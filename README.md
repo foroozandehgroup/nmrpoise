@@ -4,26 +4,16 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 
 ## Prerequisites
 
-1. **Python 3 installation** (download from https://www.python.org/downloads/). Ideally, the Python 3 executable (`python3` or `python`) should be placed in the `$PATH` environment variable.
+1. **Python 3 installation** (download from https://www.python.org/downloads/). Make sure that the directory containing the Python 3 executable (`python3` or `python`) is added to the `$PATH` environment variable.
 2. The **numpy** and **scipy** packages. These can be installed using `pip3` or `pip`.
 
-## Installation (MacOS / Linux)
+## Automated installation
 
 1. Clone this repository: `git clone https://github.com/yongrenjie/poptpy`, or download the latest release and unzip the folder.
-2. `cd` inside and run `./install.sh`
-3. The script will try to automatically detect the path to your Python 3 executable (using `which`), as well as the TopSpin installation directory (it searches inside `/opt`). If either of these are not in the typical location, you can set the environment variables `$PY3PATH` and `$TOPSPINDIR` when running the installer. For example:
+2. Make sure you have the prerequisites enabled.
+3. Run the `INSTALL.py` script. On Windows you can just double-click the `.py` file; otherwise run `python3 INSTALL.py` from a terminal.
 
-       PY3PATH="/path/to/python3" TOPSPINDIR="/path/to/exp/stan/nmr" ./install.sh
-
-   Note that `$TOPSPINDIR` should point to the `.../exp/stan/nmr` folder in TopSpin.
-
-## Installation (Windows)
-
-1. Clone this repository (if you have `git`), or download the latest release and unzip the folder.
-2. Double-click `install.bat` inside (equivalently, run `install.ps1` in PowerShell, but that often leads to permission errors)
-3. The script should typically succeed, but if there are any errors please submit an issue.
-
-## Installation (manual)
+## Manual installation
 
 1. Clone this repository: `git clone https://github.com/yongrenjie/poptpy`
 2. Specify the path to the Python 3 executable by modifying the `p_python3` variable in `poptpy.py`. Warning: if you are on Windows and the path includes backslashes, you will need to either escape the backslashes or use a raw string.
