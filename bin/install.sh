@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Yeah, the output messages are manually coded
 
-dir=$(dirname $0)
+dir=$(dirname $(dirname $0))
 
 # Search for Python 3 executable
 printf "Locating python3 executable... "
@@ -126,5 +125,5 @@ if [[ -n "${missing_packages}" ]]; then
     printf "\nThe following Python packages were missing: ${missing_packages}\n"
     printf "Please install them using your package manager before running poptpy.\n"
 else
-    printf "\nSuccessfully installed poptpy.\n"
+    printf "\nSuccessfully installed poptpy."
 fi

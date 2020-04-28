@@ -229,6 +229,7 @@ def unscale(scaled_val, lb, ub):
     ub = np.array(ub)
     return lb + scaled_val*(ub - lb)
 
+# Helper functions used in cost functions.
 
 def ppm_to_point(shift):
     """

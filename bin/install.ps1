@@ -3,6 +3,9 @@
 # Silence errors
 $ErrorActionPreference="silentlycontinue"
 
+# cd to the poptpy top-level directory
+Set-Location (Split-Path -Path $PSScriptRoot -Parent)
+
 # Find Python executable
 Write-Host "Locating Python 3 executable... " -NoNewLine
 $pyex=Get-Command python3 | Select-Object -ExpandProperty Definition
@@ -97,5 +100,5 @@ If ($missing_packages) {
     Write-Host "Please install them using your package manager before running poptpy.`n"
 }
 Else {
-    Write-Host "`nSuccessfully installed poptpy.`n"
+    Write-Host "`nSuccessfully installed poptpy."
 }
