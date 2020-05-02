@@ -30,7 +30,7 @@ p_costfunctions = os.path.join(p_poptpy, "cost_functions")
 
 # Function counter decorator
 def deco_count(fn):
-    @functools.wraps
+    @functools.wraps(fn)
     def counter(*args, **kwargs):
         counter.calls += 1
         return fn(*args, **kwargs)
@@ -46,10 +46,13 @@ def main():
     with open(os.path.join(p_routines, routine_id), "rb") as f:
         routine = pickle.load(f)
     # Load the cost function
-    p_cf = os.path.join(p_costfunctions, routine.cf)
-    exec(open(p_cf).read())
+    p_cf = os.path.join(p_costfunctions, routine.cf + ".py")
+    ld = {}
+    exec(open(p_cf).read(), globals(), ld)
+    cost_function = ld["cost_function"]
     # in p_cf, the cost function is defined as cost_function().
     # executing the file will define it for us
+    # but see also https://stackoverflow.com/questions/1463306/
 
     # Scale the initial values and tolerances
     x0 = scale(routine.init, routine.lb, routine.ub)
