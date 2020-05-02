@@ -55,6 +55,7 @@ def main():
     # but see also https://stackoverflow.com/questions/1463306/
 
     # Scale the initial values and tolerances
+    npars = len(routine.pars)
     x0 = scale(routine.init, routine.lb, routine.ub)
     xtol = np.array(routine.tol) / (np.array(routine.ub) -
                                     np.array(routine.lb))
@@ -75,9 +76,20 @@ def main():
         print(fmt.format("Cost function", routine.cf), file=log)
         print(fmt.format("Initial values", routine.init), file=log)
         print("" , file=log)
-        fmt = "{:^10s}  " * (len(routine.pars) + 1)
+        fmt = "{:^10s}  " * (npars + 1)
         print(fmt.format(*routine.pars, "cf"), file=log)
-        print("-" * 12 * (len(routine.pars) + 1), file=log)
+        print("-" * 12 * (npars + 1), file=log)
+
+    # Code to generate initial simplex.
+    # TODO: This code should be removed when I actually code an optimiser.
+    sim = np.zeros((npars + 1, npars))
+    sim[0] = x0
+    for k in range(npars):
+        simk = x0 + ((np.random.rand(npars)*0.2 + 0.2) * \
+                     np.sign(np.random.randn(npars)))
+        simk[simk < 0] = 0.01
+        simk[simk > 1] = 0.99
+        sim[k + 1] = simk
 
     # Carry out the optimisation
     # TODO: allow user to select optimiser??? Or at least me?
@@ -88,6 +100,7 @@ def main():
                                    method="Nelder-Mead",
                                    options={'xatol': xatol_gm,
                                             'fatol': np.inf,
+                                            'initial_simplex': sim,
                                             'disp': False})
 
     # Tell frontend script that the optimisation is done
