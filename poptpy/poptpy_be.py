@@ -70,7 +70,8 @@ def main():
     # Some logging
     with open(p_optlog, "a") as log:
         print("\n\n\n", file=log)
-        print(datetime.now().strftime("%Y-%M-%D %H:%M:%S"), file=log)
+        print("=" * 40, file=log)
+        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=log)
         fmt = "{:25s} - {}"
         print(fmt.format("Optimisation parameters", routine.pars), file=log)
         print(fmt.format("Cost function", routine.cf), file=log)
@@ -112,10 +113,13 @@ def main():
     toc = datetime.now()
     time_taken = str(toc - tic).split(".")[0]  # remove microseconds
     with open(p_optlog, "a") as log:
-        print(opt_result, file=log)
         print("", file=log)
-        fmt = "{:25s} - {}"
+        fmt = "{:27s} - {}"
+        print(fmt.format("Optimisation message", opt_result.message),
+              file=log)
         print(fmt.format("Best values found", best_values), file=log)
+        print(fmt.format("Cost function at minimum", opt_result.fun),
+              file=log)
         print(fmt.format("Number of fevals", acquire_nmr.calls), file=log)
         print(fmt.format("Number of spectra ran", send_values.calls),
               file=log)
