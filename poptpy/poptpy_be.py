@@ -167,7 +167,7 @@ def acquire_nmr(x, optimargs):
             return cf_val
 
         # Print unscaled values, prompting frontend script to start acquisition
-        print(" ".join([str(i) for i in unscaled_val]))
+        send_values(unscaled_val)
         # Wait for acquisition to complete, then calculate cost function
         signal = input()
         if signal == "done":
