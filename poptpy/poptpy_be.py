@@ -5,32 +5,31 @@ try:
 except NameError:
     pass
 
-import os
 import sys
 import pickle
 import numpy as np
-import functools
+from functools import wraps
 from scipy import optimize
 from datetime import datetime
+from pathlib import Path
 
 # TODO Determine minimum version of Python 3 on which this runs.
-#      I have used os.path over pathlib, but if we switch to pathlib, then
-#      this is >=3.4 at least.
+#      Because of pathlib this is at least >= 3.4
+#      Also numpy >= 1.17.0 because of np.fromfile(Path object)
 
 # Obtain key information from frontend script
 routine_id = input()
-p_spectrum = input()
-p_poptpy = input()
+p_spectrum = Path(input())
+p_poptpy = Path(input())
 
 tic = datetime.now()
-p_optlog = os.path.join(os.path.dirname(os.path.dirname(p_spectrum)),
-                        "poptpy.log")
-p_routines = os.path.join(p_poptpy, "routines")
-p_costfunctions = os.path.join(p_poptpy, "cost_functions")
+p_optlog = p_spectrum.parents[1] / "poptpy.log"
+p_routines = p_poptpy / "routines"
+p_costfunctions = p_poptpy / "cost_functions"
 
 # Function counter decorator
 def deco_count(fn):
-    @functools.wraps(fn)
+    @wraps(fn)
     def counter(*args, **kwargs):
         counter.calls += 1
         return fn(*args, **kwargs)
@@ -43,10 +42,10 @@ def main():
     Main routine.
     """
     # Load the routine
-    with open(os.path.join(p_routines, routine_id), "rb") as f:
+    with open(p_routines / routine_id, "rb") as f:
         routine = pickle.load(f)
     # Load the cost function
-    p_cf = os.path.join(p_costfunctions, routine.cf + ".py")
+    p_cf = p_costfunctions / (routine.cf + ".py")
     ld = {}
     exec(open(p_cf).read(), globals(), ld)
     cost_function = ld["cost_function"]
@@ -203,7 +202,7 @@ def read_routine(routine_name):
 
     Returns: Routine object.
     """
-    path = os.path.join(p_routines, routine_name)
+    path = p_routines / routine_name
     with open(path, "rb") as f:
         routine = pickle.load(f)
     return routine
@@ -249,7 +248,10 @@ def unscale(scaled_val, lb, ub):
     ub = np.array(ub)
     return lb + scaled_val*(ub - lb)
 
+# ----------------------------------------
 # Helper functions used in cost functions.
+# ----------------------------------------
+
 
 def ppm_to_point(shift):
     """
@@ -287,7 +289,7 @@ def get_fid():
     Note that this does *not* deal with the "group delay" at the beginning
     of the FID.
     """
-    p_fid = os.path.join(os.path.dirname(os.path.dirname(p_spectrum)), "fid")
+    p_fid = p_spectrum.parents[1] / "fid"
     fid = np.fromfile(p_fid, dtype=np.int32)
     td = fid.size
     fid = fid.reshape(int(td/2), 2)
@@ -312,7 +314,7 @@ def get_real_spectrum(left=None, right=None):
     Returns:
         (np.ndarray) Array containing the spectrum or the desired section.
     """
-    p_1r = os.path.join(p_spectrum, "1r")
+    p_1r = p_spectrum / "1r"
     real_spec = np.fromfile(p_1r, dtype=np.int32)
     nc_proc = int(get_proc_par("NC_proc"))
     real_spec = real_spec * (2 ** nc_proc)
@@ -355,7 +357,7 @@ def get_imag_spectrum(left=None, right=None):
     Returns:
         (np.ndarray) Array containing the spectrum or the desired section.
     """
-    p_1i = os.path.join(p_spectrum, "1i")
+    p_1i = p_spectrum / "1i"
     imag_spec = np.fromfile(p_1i, dtype=np.int32)
     nc_proc = int(get_proc_par("NC_proc"))
     imag_spec = imag_spec * (2 ** nc_proc)
@@ -395,7 +397,7 @@ def get_acqu_par(par):
                 number, or if the parameter doesn't exist.
     """
     # Construct path to acqus file
-    p_acqus = os.path.abspath(os.path.join(p_spectrum, "..", "..", "acqus"))
+    p_acqus = p_spectrum.parents[1] / "acqus"
 
     # Capitalise and remove any spaces from par
     par = par.upper()
@@ -451,8 +453,8 @@ def get_proc_par(par):
         (float) value of the processing parameter. None if the value is not a
                 number, or if the parameter doesn't exist.
     """
-    # Construct path to acqus file
-    p_acqus = os.path.abspath(os.path.join(p_spectrum, "procs"))
+    # Construct path to procs file
+    p_acqus = p_spectrum / "procs"
 
     # Capitalise and remove any spaces from par
     par = par.upper()
