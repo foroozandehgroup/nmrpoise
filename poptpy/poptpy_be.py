@@ -253,21 +253,23 @@ def unscale(scaled_val, lb, ub):
 # ----------------------------------------
 
 
-def ppm_to_point(shift):
+def ppm_to_point(shift, p_spec=p_spectrum):
     """
     Round a specific chemical shift to the nearest point in the spectrum.
-    Needs the global variable p_spectrum to be set.
 
     Arguments:
-        shift (float) : desired chemical shift.
+        shift (float)         : desired chemical shift.
+        p_spec (pathlib.Path) : Path to the folder of the desired spectrum.
+                                Defaults to the spectrum being optimised, i.e.
+                                the global variable p_spectrum.
 
     Returns:
         (int): the desired point. None if the chemical shift lies outside the
                spectral window.
     """
-    si = get_proc_par("SI")
-    o1p = get_acqu_par("O1") / get_acqu_par("SFO1")
-    sw = get_acqu_par("SW")
+    si = get_proc_par("SI", p_spec)
+    o1p = get_acqu_par("O1", p_spec) / get_acqu_par("SFO1", p_spec)
+    sw = get_acqu_par("SW", p_spec)
 
     # Make sure it's within range
     highest_shift = o1p + 0.5*sw
@@ -298,25 +300,36 @@ def get_fid():
     return fid[0] + (1j * fid[1])
 
 
-def get_real_spectrum(left=None, right=None):
+def get_real_spectrum(left=None, right=None, epno=None):
     """
     Get the real spectrum. Needs the global variable p_spectrum to be set.
     Note that this function removes the effects of TopSpin's NC_PROC variable.
 
     Arguments:
         (optional) left (float) : chemical shift corresponding to beginning of
-                                  the desired section
+                                  the desired section. Defaults to the maximum
+                                  of the spectrum.
         (optional) right (float): chemical shift corresponding to end of
-                                  the desired section
-        If the argument left (or right) is not passed, then the array returned
-        will stretch to the left (or right) end of the spectrum.
+                                  the desired section. Defaults to the minimum
+                                  of the spectrum.
+        (optional) epno (list)  : [expno, procno] of spectrum of interest.
+                                  Defaults to the spectrum being optimised.
 
     Returns:
         (np.ndarray) Array containing the spectrum or the desired section.
     """
-    p_1r = p_spectrum / "1r"
+    # Construct the path to the spectrum of interest
+    if epno is None:
+        p_spec = p_spectrum
+    elif len(epno) == 2:
+        p_spec = p_spectrum.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
+    else:
+        raise ValueError("Please provide a valid [expno, procno] combination.")
+
+    p_1r = p_spec / "1r"
+
     real_spec = np.fromfile(p_1r, dtype=np.int32)
-    nc_proc = int(get_proc_par("NC_proc"))
+    nc_proc = int(get_proc_par("NC_proc", p_spec))
     real_spec = real_spec * (2 ** nc_proc)
 
     if left is None and right is None:  # bounds not specified
@@ -329,37 +342,48 @@ def get_real_spectrum(left=None, right=None):
         left = temp
 
     # Get default bounds
-    si = int(get_proc_par("SI"))
+    si = int(get_proc_par("SI", p_spec))
     leftn = 0
     rightn = si - 1
     # Then replace them if necessary
     if left is not None:
-        leftn = ppm_to_point(left)
+        leftn = ppm_to_point(left, p_spec)
     if right is not None:
-        rightn = ppm_to_point(right)
+        rightn = ppm_to_point(right, p_spec)
 
     return real_spec[leftn:rightn + 1]
 
 
-def get_imag_spectrum(left=None, right=None):
+def get_imag_spectrum(left=None, right=None, epno=None):
     """
-    Get the imaginary spectrum. Needs the global variable p_spectrum to be set.
+    Get the imag spectrum. Needs the global variable p_spectrum to be set.
     Note that this function removes the effects of TopSpin's NC_PROC variable.
 
     Arguments:
         (optional) left (float) : chemical shift corresponding to beginning of
-                                  the desired section
+                                  the desired section. Defaults to the maximum
+                                  of the spectrum.
         (optional) right (float): chemical shift corresponding to end of
-                                  the desired section
-        If the argument left (or right) is not passed, then the array returned
-        will stretch to the left (or right) end of the spectrum.
+                                  the desired section. Defaults to the minimum
+                                  of the spectrum.
+        (optional) epno (list)  : [expno, procno] of spectrum of interest.
+                                  Defaults to the spectrum being optimised.
 
     Returns:
         (np.ndarray) Array containing the spectrum or the desired section.
     """
-    p_1i = p_spectrum / "1i"
+    # Construct the path to the spectrum of interest
+    if epno is None:
+        p_spec = p_spectrum
+    elif len(epno) == 2:
+        p_spec = p_spectrum.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
+    else:
+        raise ValueError("Please provide a valid [expno, procno] combination.")
+
+    p_1i = p_spec / "1i"
+
     imag_spec = np.fromfile(p_1i, dtype=np.int32)
-    nc_proc = int(get_proc_par("NC_proc"))
+    nc_proc = int(get_proc_par("NC_proc", p_spec))
     imag_spec = imag_spec * (2 ** nc_proc)
 
     if left is None and right is None:  # bounds not specified
@@ -372,32 +396,34 @@ def get_imag_spectrum(left=None, right=None):
         left = temp
 
     # Get default bounds
-    si = int(get_proc_par("SI"))
+    si = int(get_proc_par("SI", p_spec))
     leftn = 0
     rightn = si - 1
     # Then replace them if necessary
     if left is not None:
-        leftn = ppm_to_point(left)
+        leftn = ppm_to_point(left, p_spec)
     if right is not None:
-        rightn = ppm_to_point(right)
+        rightn = ppm_to_point(right, p_spec)
 
     return imag_spec[leftn:rightn + 1]
 
 
-def get_acqu_par(par):
+def get_acqu_par(par, p_spec=p_spectrum):
     """
     Obtains the value of an acquisition parameter.
-    Needs the global variable p_spectrum to be set.
 
     Arguments:
-        par (str): Name of the acquisition parameter.
+        par (str)             : Name of the acquisition parameter.
+        p_spec (pathlib.Path) : Path to the folder of the desired spectrum.
+                                Defaults to the spectrum being optimised, i.e.
+                                the global variable p_spectrum.
 
     Returns:
         (float) value of the acquisition parameter. None if the value is not a
                 number, or if the parameter doesn't exist.
     """
     # Construct path to acqus file
-    p_acqus = p_spectrum.parents[1] / "acqus"
+    p_acqus = p_spec.parents[1] / "acqus"
 
     # Capitalise and remove any spaces from par
     par = par.upper()
@@ -441,20 +467,22 @@ def get_acqu_par(par):
                         return None
 
 
-def get_proc_par(par):
+def get_proc_par(par, p_spec=p_spectrum):
     """
     Obtains the value of a processing parameter.
-    Needs the global variable p_spectrum to be set.
 
     Arguments:
-        par (str): Name of the processing parameter.
+        par (str)             : Name of the processing parameter.
+        p_spec (pathlib.Path) : Path to the folder of the desired spectrum.
+                                Defaults to the spectrum being optimised, i.e.
+                                the global variable p_spectrum.
 
     Returns:
         (float) value of the processing parameter. None if the value is not a
                 number, or if the parameter doesn't exist.
     """
     # Construct path to procs file
-    p_acqus = p_spectrum / "procs"
+    p_acqus = p_spec / "procs"
 
     # Capitalise and remove any spaces from par
     par = par.upper()
@@ -473,21 +501,25 @@ def get_proc_par(par):
                     return None
 
 
-def getpar(par):
+def getpar(par, p_spec=p_spectrum):
     """
     Obtains the value of an (acquisition or processing) parameter.
     Tries to search for an acquisition parameter first, then processing.
 
     Arguments:
-        par (str): Name of the parameter.
+        par (str)             : Name of the parameter.
+        p_spec (pathlib.Path) : Path to the folder of the desired spectrum.
+                                Defaults to the spectrum being optimised, i.e.
+                                the global variable p_spectrum.
 
     Returns:
         (float) value of the parameter. None if the value is not a number,
                 or if the parameter doesn't exist.
+
     """
-    value = get_acqu_par(par)
+    value = get_acqu_par(par, p_spec)
     if value is None:
-        value = get_proc_par(par)
+        value = get_proc_par(par, p_spec)
     return value
 
 
