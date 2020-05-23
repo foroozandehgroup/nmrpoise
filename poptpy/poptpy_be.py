@@ -8,6 +8,7 @@ except NameError:
 import sys
 import pickle
 import numpy as np
+from traceback import print_exc
 from functools import wraps
 from scipy import optimize
 from datetime import datetime
@@ -137,7 +138,7 @@ class Routine:
 
 
 @deco_count
-def acquire_nmr(x, optimargs):
+def acquire_nmr(x, cost_function, lb, ub, p_spectrum, p_optlog):
     """
     Evaluation of cost function for optimisation.
     Sends a signal to the frontend script to run an NMR acquisition using the
@@ -156,8 +157,6 @@ def acquire_nmr(x, optimargs):
     Returns:
         float : value of the cost function.
     """
-    # Unpack optimisation arguments
-    cost_function, lb, ub, p_spectrum, p_optlog = optimargs
     unscaled_val = unscale(x, lb, ub)
 
     with open(p_optlog, "a") as log:
@@ -190,7 +189,7 @@ def send_values(unscaled_val):
     start acquisition.
     This needs to be a separate function so that we can decorate it.
     """
-    print(" ".join([str(i) for i in unscaled_val]))
+    print("values: " + " ".join([str(i) for i in unscaled_val]))
 
 
 def read_routine(routine_name):
@@ -524,4 +523,16 @@ def getpar(par, p_spec=p_spectrum):
 
 
 if __name__ == "__main__":
-    main()
+    # All errors in main() must be propagated back to the frontend so that
+    # timely feedback can be provided to the user. The frontend is responsible
+    # for the error logging.
+    try:
+        main()
+    except Exception as e:
+        # Because the frontend is only reading one line at a time, there's
+        # no point in printing the entire traceback. Thus we just print a
+        # very short summary line.
+        print("Backend exception: {}({!r})".format(type(e).__name__,
+                                                   e.args))
+        raise  # Prints the full traceback to errlog.
+

@@ -1,8 +1,12 @@
 from __future__ import division, with_statement, print_function
+
 import os
 import pickle
-import de.bruker.nmr.mfw.root.UtilPath as up
 import subprocess
+from traceback import print_exc
+
+import de.bruker.nmr.mfw.root.UtilPath as up
+
 
 tshome = up.getTopspinHome()  # use tshome to avoid installer overwriting
 p_poptpy = os.path.join(tshome, "exp/stan/nmr/py/user/poptpy")
@@ -90,32 +94,48 @@ def main():
     #                        to indicate that it's done
     # The loop is broken when the backend script passes "done" to the frontend
     # script instead of a new set of values (in step 1).
-    while True:
-        line = backend.stdout.readline()
-        if line.strip() == "done":
-            break
-        else:
-            # Obtain the values and set them
-            values = line.split()
-            echo("Setting parameters to: {}".format(values), cst.INFO)
-            if len(values) != len(routine.pars):
-                with open(p_opterr, "a") as fp:
-                    print("Received this bad line from backend: ", file=fp)
-                    print(line, file=fp)
-                err_exit("Invalid message passed from backend. "
-                         "Please check the error log for more information.")
-            for i in range(len(routine.pars)):
-                try:
-                    float(values[i])
-                except ValueError:
-                    err_exit("Invalid parameter value"
-                             "{} found.".format(values[i]))
-                convert_name_and_putpar(routine.pars[i], values[i])
-            # Run acquisition and processing
-            XCMD("xau poptpy_au")
-            # Tell backend script it's done
-            print("done", file=backend.stdin)
-            backend.stdin.flush()
+    # We wrap the whole thing in a try/except block so that we can catch
+    # invalid input passed from the backend.
+    try:
+        while True:
+            line = backend.stdout.readline()
+            # Optimisation converged
+            if line.strip() == "done":
+                break
+            # New values to evaluate the cost function at.
+            elif line.startswith("values:"):
+                # Obtain the values and set them
+                values = line.split()[1:]
+                echo("Setting parameters to: {}".format(values), cst.INFO)
+                if len(values) != len(routine.pars):
+                    raise RuntimeError("invalid values passed from "
+                                       "backend: '{}'".format(line))
+                for value, par in zip(values, routine.pars):
+                    try:
+                        float(value)
+                    except ValueError:
+                        raise RuntimeError("invalid values passed from "
+                                           "backend: '{}'".format(line))
+                    else:
+                        convert_name_and_putpar(par, value)
+                # Run acquisition and processing
+                XCMD("xau poptpy_au")
+                # Tell backend script it's done
+                print("done", file=backend.stdin)
+                backend.stdin.flush()
+            # Otherwise it would be an error. The entire main() routine in the
+            # backend is wrapped by a try/except which catches all exceptions
+            # and propagates them to the frontend by printing the traceback.
+            elif line.startswith("Backend exception: "):
+                raise RuntimeError(line)
+            else:
+                raise RuntimeError("uncaught backend error: {}".format(line))
+    except RuntimeError as e:
+        # Print the full traceback to the file
+        with open(p_opterr, "a") as fp:
+            print_exc(file=fp)
+        # Tell the error the immediate cause and exit
+        err_exit("error during acquisition loop:\n" + e.message)
 
     # If it reaches here, the optimisation should be done
     # Close error output file, delete it if it is empty
@@ -126,9 +146,9 @@ def main():
     line = backend.stdout.readline()
     optima = line.split()
     s = ""
-    for i in range(len(routine.pars)):
-        s = s + "Optimal value for {}: {}\n".format(routine.pars[i], optima[i])
-        convert_name_and_putpar(routine.pars[i], optima[i])
+    for par, optimum in zip(routine.pars, optima):
+        s = s + "Optimal value for {}: {}\n".format(par, optimum)
+        convert_name_and_putpar(par, optimum)
     s = s + "These values have been set in the current experiment.\n"
     s = s + "Detailed information can be found at: {}".format(p_optlog)
     MSG(s)
@@ -243,7 +263,7 @@ def get_routine_id():
                    buttons=["Yes", "No"])
         echo("returned value {}".format(str(x)), cst.DEBUG)
 
-        if x == 0 or x == cst.ENTER:  # user pressed Yes or Enter
+        if x in [0, cst.ENTER]:  # user pressed Yes or Enter
             s = ", ".join(saved_routines)
             y = INPUT_DIALOG(title="poptpy: available routines",
                              header="Available routines: " + s,
@@ -274,11 +294,13 @@ def get_new_routine_parameters():
     Arguments: None.
 
     Returns:
-        A list of objects [params, min_values, max_values, cf, cf_parameters]
+        A list of objects, consisting of (in order):
          - name          : string containing name of routine
-         - params        : list of experimental values to be optimised
-         - min_values    : list of minimum bounds
-         - max_values    : list of maximum bounds
+         - pars          : list of experimental parameters to be optimised
+         - lb            : list of lower bounds
+         - ub            : list of upper bounds
+         - init          : list of initial values
+         - tol           : list of tolerances
          - cf            : string containing name of cost function
     """
     # Prompt for routine name.
@@ -304,10 +326,10 @@ def get_new_routine_parameters():
     opt_pars = [i for i in opt_pars if i]  # remove empty strings
 
     # Prompt for minimum, maximum, initial values, and tolerances..
-    lb = []
-    ub = []
-    init = []
-    tol = []
+    lbs = []
+    ubs = []
+    inits = []
+    tols = []
     for i in opt_pars:
         settings = INPUT_DIALOG(title="poptpy: settings for {}".format(i),
                                 header="Please choose the minimum value, "
@@ -318,32 +340,27 @@ def get_new_routine_parameters():
         if settings is None:
             EXIT()
         else:
-            lb.append(process_values(i, settings[0]))
-            ub.append(process_values(i, settings[1]))
-            init.append(process_values(i, settings[2]))
-            tol.append(process_values(i, settings[3]))
+            lbs.append(process_values(i, settings[0]))
+            ubs.append(process_values(i, settings[1]))
+            inits.append(process_values(i, settings[2]))
+            tols.append(process_values(i, settings[3]))
 
     # Check if the values are sensible
     s = ""
-    for i in range(len(opt_pars)):
-        if (lb[i] >= ub[i]):
+    for par, lb, ub, init, tol in zip(opt_pars, lbs, ubs, inits, tols):
+        if lb > ub:
             s = s + ("Please set the maximum value of {} to be larger "
                      "than the minimum value. "
-                     "[Current values: min={}, max={}]\n").format(opt_pars[i],
-                                                                  lb[i],
-                                                                  ub[i])
+                     "[Current values: min={}, max={}]\n").format(par, lb, ub)
         else:
-            if ((init[i] < lb[i]) or (init[i] > ub[i])):
+            if init < lb or init > ub:
                 s = s + ("Please set the initial value of {} to a value "
                          "to be between {} and {}. "
-                         "[Current value: {}]\n").format(opt_pars[i], lb[i],
-                                                         ub[i], init[i])
-            if ((tol[i] > ub[i] - lb[i]) or (tol[i] <= 0)):
+                         "[Current value: {}]\n").format(par, lb, ub, init)
+            if tol > (ub - lb) or tol <= 0:
                 s = s + ("Please set the tolerance of {} to a positive value "
                          "smaller than {}. "
-                         "[Current value: {}]\n").format(opt_pars[i],
-                                                         ub[i] - lb[i],
-                                                         tol[i])
+                         "[Current value: {}]\n").format(par, (ub - lb), tol)
     if s:
         err_exit(s)
 
@@ -370,7 +387,7 @@ def get_new_routine_parameters():
             echo("unknown cost function specified", cst.CRITICAL)
             err_exit("Cost function {} was not found. Exiting...".format(x[0]))
 
-    return [name, opt_pars, lb, ub, init, tol, cf]
+    return [name, opt_pars, lbs, ubs, inits, tols, cf]
 
 
 def check_routine(routine):
