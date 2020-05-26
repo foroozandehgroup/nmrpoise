@@ -29,7 +29,7 @@ class OptResult:
         return str(self.__dict__)
 
 
-def nelder_mead(cf, x0, xtol, args=(), plot=False):
+def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex="spendley"):
     """
     Nelder-Mead optimiser.
 
@@ -86,20 +86,56 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False):
         raise ValueError("Nelder-Mead: xtol is too large. "
                          "Please reduce the tolerances.")
 
-    # Set up the initial simplex.
+    ### SIMPLEX INITIALISATION
+    # TODO: Refactor this code. It should really go into a class.
     sim = np.zeros((N + 1, N))
-    sim[0] = x0
-    for k in range(N):
-        # Each point x_i (\neq x_0) is equal to x_0 \pm [0.2, 0.4).
-        # However, we also need to make sure that each point is sufficiently
-        # "far away" from x0, so that the optimisation doesn't just converge
-        # immediately. We do this by making sure that the distance between the
-        # two points is at least xtol_gm.
-        y = x0.copy()
-        while np.linalg.norm(y - x0) < xtol_gm:
-            y = x0.copy() + ((np.random.rand(N)*0.2 + 0.2) *
-                             np.sign(np.random.randn(N)))
-        sim[k + 1] = y
+    if simplex == "spendley":
+        # Default method.
+        # Spendley (1962). DOI 10.1080/00401706.1962.10490033
+        # Rosenbrock with x0  = [1.3, 0.7, 0.8, 1.9, 1.2]: 472 nfev, 284 nit
+        p = (1/(N * np.sqrt(2))) * (N - 1 + np.sqrt(N + 1))
+        q = (1/(N * np.sqrt(2))) * (np.sqrt(N + 1) - 1)
+        sim[0] = x0
+        l = max(0.3, xtol_gm * 1.1)
+        for i in range(1, N + 1):
+            for j in range(N):
+                sim[i,j] = x0[j] + l*p if j == i - 1 else x0[j] + l*q
+    elif simplex == "axis":
+        # Axis-by-axis simplex. Each point is just x0 extended along
+        # a different axis.
+        # Rosenbrock with x0  = [1.3, 0.7, 0.8, 1.9, 1.2]: 566 nfev, 342 nit
+        sim[0] = x0
+        l = max(0.3, xtol_gm * 1.1)
+        for i in range(1, N + 1):
+            for j in range(N):
+                sim[i,j] = x0[j] + l if j == i - 1 else x0[j]
+    elif simplex == "random":
+        # Every point except x0 is random.
+        # Rosenbrock with x0  = [1.3, 0.7, 0.8, 1.9, 1.2]: 705 nfev, 431 nit
+        # (average over 1000 iterations)
+        sim[0] = x0
+        for i in range(1, N + 1):
+            sim[i] = np.random.rand(N)
+    elif simplex == "jon":
+        # My own method. It isn't very good. Like, it works, but it's slow.
+        # Rosenbrock with x0  = [1.3, 0.7, 0.8, 1.9, 1.2]: 669 nfev, 409 nit
+        # (average over 1000 iterations)
+        sim = np.zeros((N + 1, N))
+        sim[0] = x0
+        for k in range(N):
+            # Each point x_i (\neq x_0) is equal to x_0 \pm [0.2, 0.4).
+            # However, we also need to make sure that each point is
+            # sufficiently "far away" from x0, so that the optimisation
+            # doesn't just converge immediately. We do this by making sure
+            # that the distance between the two points is at least xtol_gm.
+            y = x0.copy()
+            while np.linalg.norm(y - x0) < xtol_gm:
+                y = x0.copy() + ((np.random.rand(N)*0.2 + 0.2) *
+                                 np.sign(np.random.randn(N)))
+            sim[k + 1] = y
+    else:
+        raise ValueError("invalid simplex generation method "
+                         "'{}' specified".format(simplex))
 
     # Number of iterations. Function evaluations are stored as cf.calls.
     niter = 0
