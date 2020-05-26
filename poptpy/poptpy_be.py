@@ -10,9 +10,10 @@ import pickle
 import numpy as np
 from traceback import print_exc
 from functools import wraps
-from scipy import optimize
 from datetime import datetime
 from pathlib import Path
+
+from poptpy_opt import nelder_mead
 
 # TODO Determine minimum version of Python 3 on which this runs.
 #      Because of pathlib this is at least >= 3.4
@@ -59,13 +60,6 @@ def main():
     x0 = scale(routine.init, routine.lb, routine.ub)
     xtol = np.array(routine.tol) / (np.array(routine.ub) -
                                     np.array(routine.lb))
-    xatol_gm = np.prod(xtol)**(1/np.size(xtol))
-    # TODO: Scipy's optimisers don't allow for an xatol vector -- there is no
-    #       way to differentiate between different tolerances for different
-    #       parameters. For now I have opted to use the geometric mean of the
-    #       (scaled) xtol vector as the input to xatol. In order to change this
-    #       behaviour we would need to change the actual optimiser, i.e. move
-    #       away from scipy.
 
     # Some logging
     with open(p_optlog, "a") as log:
@@ -81,32 +75,13 @@ def main():
         print(fmt.format(*routine.pars, "cf"), file=log)
         print("-" * 12 * (npars + 1), file=log)
 
-    # Code to generate initial simplex.
-    # TODO: This code should be removed when I actually code an optimiser.
-    sim = np.zeros((npars + 1, npars))
-    sim[0] = x0
-    for k in range(npars):
-        simk = x0 + ((np.random.rand(npars)*0.2 + 0.2) * \
-                     np.sign(np.random.randn(npars)))
-        simk[simk < 0] = 0.01
-        simk[simk > 1] = 0.99
-        sim[k + 1] = simk
-
     # Carry out the optimisation
-    # TODO: allow user to select optimiser??? Or at least me?
-    optimargs = [cost_function, routine.lb, routine.ub, p_spectrum, p_optlog]
-    opt_result = optimize.minimize(acquire_nmr,
-                                   x0,
-                                   args=optimargs,
-                                   method="Nelder-Mead",
-                                   options={'xatol': xatol_gm,
-                                            'fatol': np.inf,
-                                            'initial_simplex': sim,
-                                            'disp': False})
+    optimargs = (cost_function, routine.lb, routine.ub, p_spectrum, p_optlog)
+    opt_result = nelder_mead(acquire_nmr, x0, xtol, optimargs, plot=False)
 
     # Tell frontend script that the optimisation is done
     print("done")
-    best_values = unscale(opt_result.x, routine.lb, routine.ub)
+    best_values = unscale(opt_result.xbest, routine.lb, routine.ub)
     print(" ".join([str(i) for i in best_values]))
 
     # More logging
@@ -115,10 +90,8 @@ def main():
     with open(p_optlog, "a") as log:
         print("", file=log)
         fmt = "{:27s} - {}"
-        print(fmt.format("Optimisation message", opt_result.message),
-              file=log)
         print(fmt.format("Best values found", best_values), file=log)
-        print(fmt.format("Cost function at minimum", opt_result.fun),
+        print(fmt.format("Cost function at minimum", opt_result.fbest),
               file=log)
         print(fmt.format("Number of fevals", acquire_nmr.calls), file=log)
         print(fmt.format("Number of spectra ran", send_values.calls),

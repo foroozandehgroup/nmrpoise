@@ -94,7 +94,7 @@ fi
 
 # Check for Python packages
 unset i
-dependencies=("numpy" "scipy")
+dependencies=("numpy")
 missing_packages=""
 separator=""
 for i in ${dependencies[@]}; do

@@ -70,7 +70,7 @@ Else {
 }
 
 # Check for Python packages
-$dependencies="numpy", "scipy"
+$dependencies="numpy"
 $missing_packages=""
 $separator=""
 ForEach ($i in $dependencies) {

@@ -5,7 +5,7 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 ## Prerequisites
 
 1. **Python 3 installation** (download from https://www.python.org/downloads/). Make sure that the directory containing the Python 3 executable (`python3` or `python`) is added to the `$PATH` environment variable.
-2. The **numpy** and **scipy** packages. These can be installed using `pip3` or `pip`.
+2. The **numpy** package. This can be installed using `pip3` or `pip`.
 
 ## Automated installation
 
