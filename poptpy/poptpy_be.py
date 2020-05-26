@@ -50,10 +50,16 @@ def main():
     p_cf = p_costfunctions / (routine.cf + ".py")
     ld = {}
     exec(open(p_cf).read(), globals(), ld)
-    cost_function = ld["cost_function"]
     # in p_cf, the cost function is defined as cost_function().
     # executing the file will define it for us
     # but see also https://stackoverflow.com/questions/1463306/
+    try:
+        cost_function = ld["cost_function"]
+    except KeyError:
+        if len(ld) == 1:
+            cost_function = ld[list(ld)[0]]
+        else:
+            raise e
 
     # Scale the initial values and tolerances
     npars = len(routine.pars)
