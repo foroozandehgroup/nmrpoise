@@ -113,8 +113,8 @@ class Simplex():
 
 
 # Function counter decorator. We should probably keep this here and not in
-# poptpy_be, so that we can reuse code (because of the input() calls to set
-# global variables, poptpy_be cannot be imported).
+# backend, so that we can reuse code (because of the input() calls to set
+# global variables, backend cannot be imported).
 def deco_count(fn):
     @wraps(fn)
     def counter(*args, **kwargs):

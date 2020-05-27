@@ -3,8 +3,8 @@
 # Silence errors
 $ErrorActionPreference="silentlycontinue"
 
-# cd to the poptpy top-level directory
-Set-Location (Split-Path -Path $PSScriptRoot -Parent)
+# cd to the poptpy directory
+Set-Location (Join-Path -Path (Split-Path -Path $PSScriptRoot) -ChildPath poptpy)
 
 # Find Python executable
 Write-Host "Locating Python 3 executable... " -NoNewLine
@@ -69,36 +69,11 @@ Else {
     exit 1
 }
 
-# Check for Python packages
-$dependencies="numpy"
-$missing_packages=""
-$separator=""
-ForEach ($i in $dependencies) {
-    Write-Host "Checking for $i... " -NoNewLine
-    $pycheck=Invoke-Expression "$pyex -c `"import pkgutil; print(pkgutil.find_loader('$i'))`"" | Out-String
-    $pycheck=$pycheck.trim()
-    If ($pycheck -ne "None") {
-        Write-Host "found"
-    }
-    Else {
-        Write-Host "not found"
-        $missing_packages="${missing_packages}${separator}${i}"
-        $separator=", "
-    }
-}
-
 # Install the files
 Write-Host "Copying scripts to TopSpin directory... " -NoNewLine
 $tspy="${tsdir}\py\user"
 Copy-Item poptpy.py -Destination $tspy > $null
-Copy-Item -Path "poptpy" -Destination ${tspy} -Recurse > $null
+Copy-Item -Path "poptpy_backend" -Destination ${tspy} -Recurse > $null
 Write-Host "done"
 
-# Prompt user to install any missing packages
-If ($missing_packages) {
-    Write-Host "`nThe following Python packages were missing: ${missing_packages}"
-    Write-Host "Please install them using your package manager before running poptpy.`n"
-}
-Else {
-    Write-Host "`nSuccessfully installed poptpy."
-}
+Write-Host "`nInstallation to TopSpin directory successful."

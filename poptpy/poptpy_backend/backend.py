@@ -1,10 +1,3 @@
-# Check if this is being called from TopSpin
-try:
-    ERRMSG("poptpy_be.py: Please run this script outside TopSpin!")
-    EXIT()
-except NameError:
-    pass
-
 import sys
 import pickle
 import numpy as np
@@ -13,11 +6,10 @@ from functools import wraps
 from datetime import datetime
 from pathlib import Path
 
-from poptpy_opt import nelder_mead
+from poptimise import nelder_mead
 
 # TODO Determine minimum version of Python 3 on which this runs.
 #      Because of pathlib this is at least >= 3.4
-#      Also numpy >= 1.17.0 because of np.fromfile(Path object)
 
 # Obtain key information from frontend script
 routine_id = input()

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-dir=$(dirname $(dirname $0))
+# Path to the poptpy folder. This folder should contain poptpy.py, as well as the poptpy_backend folder.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"  # directory of this bash script.
+POPTPYDIR="$(dirname $DIR)/poptpy"   # up one directory then down poptpy.
 
 # Search for Python 3 executable
 printf "Locating python3 executable... "
@@ -37,8 +39,8 @@ fi
 
 # Set path to Python executable
 printf "Setting Python path in TopSpin scripts... "
-if sed -i.bak "s:p_python3 = .*$:p_python3 = \"$pyex\":g" $dir/*.py && \
-        rm $dir/*.py.bak 2>/dev/null; then
+if sed -i.bak "s:p_python3 = .*$:p_python3 = \"$pyex\":g" $POPTPYDIR/*.py && \
+        rm $POPTPYDIR/*.py.bak 2>/dev/null; then
     printf "done\n"
 else
     printf "failed\n"
@@ -78,6 +80,11 @@ else
         done
         printf "\nPlease enter a selection: "
         read nselected
+        if [[ -z $nselected ]]; then  # If called via pip, can't provide input, so this is empty.
+            printf "\nNo selection given.\n"
+            printf "Please specify the TopSpin directory with \$TOPSPINDIR.\n"
+            exit 1
+        fi
         tspath=${tsdirs[$((nselected-1))]}
         printf "Selected $tspath as the TopSpin directory.\n"
     else
@@ -92,27 +99,11 @@ else
     fi
 fi
 
-# Check for Python packages
-unset i
-dependencies=("numpy")
-missing_packages=""
-separator=""
-for i in ${dependencies[@]}; do
-    printf "Checking for $i... "
-    if $pyex -c "import pkgutil; exit(not pkgutil.find_loader(\"$i\"))"; then
-        printf "found\n"
-    else
-        printf "not found\n"
-        missing_packages="${missing_packages}${separator}${i}"
-        separator=", "
-    fi
-done
-
 # Install the files
 printf "Copying scripts to TopSpin directory... "
 tspy=$tspath/py/user
-if cp $dir/poptpy.py $tspy && \
-        cp -r $dir/poptpy $tspy; then
+if cp $POPTPYDIR/poptpy.py $tspy && \
+        cp -r $POPTPYDIR/poptpy_backend $tspy; then
     printf "done\n"
 else
     printf "failed\n"
@@ -120,10 +111,4 @@ else
     exit 1
 fi
 
-# Prompt user to install any missing packages
-if [[ -n "${missing_packages}" ]]; then
-    printf "\nThe following Python packages were missing: ${missing_packages}\n"
-    printf "Please install them using your package manager before running poptpy.\n"
-else
-    printf "\nSuccessfully installed poptpy."
-fi
+printf "\nInstallation to TopSpin directory successful.\n"

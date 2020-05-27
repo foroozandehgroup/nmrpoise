@@ -9,8 +9,8 @@ import de.bruker.nmr.mfw.root.UtilPath as up
 
 
 tshome = up.getTopspinHome()  # use tshome to avoid installer overwriting
-p_poptpy = os.path.join(tshome, "exp/stan/nmr/py/user/poptpy")
-p_backend = os.path.join(p_poptpy, "poptpy_be.py")
+p_poptpy = os.path.join(tshome, "exp/stan/nmr/py/user/poptpy_backend")
+p_backend = os.path.join(p_poptpy, "backend.py")
 p_routines = os.path.join(p_poptpy, "routines")
 p_costfunctions = os.path.join(p_poptpy, "cost_functions")
 p_optlog = os.path.join(p_poptpy, "poptpy.log")

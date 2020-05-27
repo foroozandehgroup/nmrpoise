@@ -1,0 +1,6 @@
+include install/*
+include poptpy/*
+include poptpy/poptpy_backend/*
+include poptpy/poptpy_backend/cost_functions/*
+include poptpy/poptpy_backend/routines/*
+include tests/*

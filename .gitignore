@@ -1,2 +1,6 @@
 *.swp
 __pycache__
+venv-poptpy
+build/
+dist/
+ts_poptpy.egg-info/
