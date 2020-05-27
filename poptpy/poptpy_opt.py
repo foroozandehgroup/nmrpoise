@@ -3,6 +3,115 @@ from functools import wraps
 import numpy as np
 
 
+class Simplex():
+    """
+    Simplex class.
+    """
+    def __init__(self, x0, method="spendley", length=0.3):
+        """
+        Initialises a Simplex object.
+
+        Arguments:
+            x0     : Initial guess.
+            method : Method for construction of initial simplex. Options:
+                      - "spendley" : Regular simplex of Spendley et al. (1962)
+                                     DOI 10.1080/00401706.1962.10490033.
+                                     Default, because it works well.
+                      - "axis"     : Simplex extended along each axis by a
+                                     fixed length from x0.
+                      - "random"   : Every point is randomly generated in [0,1]
+                      - "jon"      : It's not very good. Don't do this.
+            length : A measure of the size of the initial simplex.
+        """
+        self.x0 = np.ravel(np.asfarray(x0))
+        self.N = np.size(self.x0)
+
+        # Generate simplex
+        self.x = np.zeros((self.N + 1, self.N))
+        self.f = np.zeros(self.N + 1)
+
+        if method == "spendley":
+            # Default method.
+            # Spendley (1962). DOI 10.1080/00401706.1962.10490033
+            # Rosenbrock with x0 = [1.3, 0.7, 0.8, 1.9, 1.2]: 472 nfev, 284 nit
+            p = (1/(self.N * np.sqrt(2))) * (self.N - 1 + np.sqrt(self.N + 1))
+            q = (1/(self.N * np.sqrt(2))) * (np.sqrt(self.N + 1) - 1)
+            l = length
+            self.x[0] = self.x0
+            for i in range(1, self.N + 1):
+                for j in range(self.N):
+                    self.x[i,j] = self.x0[j] + l*p \
+                        if j == i - 1 else self.x0[j] + l*q
+        elif method == "axis":
+            # Axis-by-axis simplex. Each point is just x0 extended along
+            # a different axis.
+            # Rosenbrock with x0 = [1.3, 0.7, 0.8, 1.9, 1.2]: 566 nfev, 342 nit
+            self.x[0] = self.x0
+            l = length
+            for i in range(1, self.N + 1):
+                for j in range(self.N):
+                    self.x[i,j] = self.x0[j] + l if j == i - 1 else self.x0[j]
+        elif method == "random":
+            # Every point except x0 is random.
+            # Rosenbrock with x0 = [1.3, 0.7, 0.8, 1.9, 1.2]: 705 nfev, 431 nit
+            # (average over 1000 iterations)
+            self.x[0] = self.x0
+            for i in range(1, self.N + 1):
+                self.x[i] = np.random.rand(self.N)
+        elif method == "jon":
+            # My own method. It isn't very good. Like, it works, but it's slow.
+            # Rosenbrock with x0  = [1.3, 0.7, 0.8, 1.9, 1.2]: 669 nfev, 409 nit
+            # (average over 1000 iterations)
+            self.x[0] = self.x0
+            for k in range(self.N):
+                # Each point x_i (\neq x_0) is equal to x_0 \pm [0.2, 0.4).
+                y = self.x0.copy()
+                y = self.x0.copy() + ((np.random.rand(self.N)*0.2 + 0.2) *
+                                      np.sign(np.random.randn(self.N)))
+                self.x[k + 1] = y
+        else:
+            raise ValueError("invalid simplex generation method "
+                             "'{}' specified".format(method))
+
+    def sort(self):
+        """
+        Sorts the simplex and associated function values in ascending order
+        of the cost function, i.e. sim.x[0] contains the current best point,
+        sim.x[N] contains the current worst point.
+        """
+        indices = np.argsort(self.f)
+        self.x = np.take(self.x, indices, 0)
+        self.f = np.take(self.f, indices, 0)
+
+    def xbar(self):
+        """
+        Calculates the centroid. Assumes the function is already sorted.
+        """
+        return np.average(self.x[0:self.N], axis=0)
+
+    def xworst(self):
+        """
+        Worst point. Assumes the simplex is already sorted.
+        """
+        return self.x[self.N]
+
+    def replace_worst(self, xnew, fnew):
+        """
+        Replaces the worst point with the new point xnew, and the corresponding
+        function value fnew.
+        """
+        self.sort()
+        self.x[self.N], self.f[self.N] = xnew, fnew
+
+    def shrink(self):
+        """
+        Performs shrink step (Step 3(f) in Algorithm 8.1.1, Kelley).
+        Doesn't evaluate cost functions!
+        """
+        for i in range(1, self.N + 1):
+            self.x[i] = self.x[0] - (self.x[i] - self.x[0])/2
+
+
 # Function counter decorator. We should probably keep this here and not in
 # poptpy_be, so that we can reuse code (because of the input() calls to set
 # global variables, poptpy_be cannot be imported).
@@ -29,7 +138,7 @@ class OptResult:
         return str(self.__dict__)
 
 
-def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex="spendley"):
+def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
     """
     Nelder-Mead optimiser.
 
@@ -50,6 +159,7 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex="spendley"):
               more slowly (~ 3 orders of magnitude!!). If this is coupled to
               NMR acquisition, though, this isn't an issue, since we go from
               ~ ms to ~ s.
+        simplex_method: Method for generation of initial simplex.
 
     Returns:
         OptResult object 'o' which contains the following attributes:
@@ -74,8 +184,8 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex="spendley"):
     # Default maxiter and maxfev. We could make this customisable in future.
     # For example, we could use TopSpin's `expt' to calculate the duration of
     # one experiment, and then set maxiter to not overshoot a given time.
-    maxiter = 200*N
-    maxfev = 500*N
+    maxiter = 200 * N
+    maxfev = 500 * N
 
     # Check length of xtol
     if len(x0) != len(xtol):
@@ -86,102 +196,22 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex="spendley"):
         raise ValueError("Nelder-Mead: xtol is too large. "
                          "Please reduce the tolerances.")
 
-    ### SIMPLEX INITIALISATION
-    # TODO: Refactor this code. It should really go into a class.
-    sim = np.zeros((N + 1, N))
-    if simplex == "spendley":
-        # Default method.
-        # Spendley (1962). DOI 10.1080/00401706.1962.10490033
-        # Rosenbrock with x0  = [1.3, 0.7, 0.8, 1.9, 1.2]: 472 nfev, 284 nit
-        p = (1/(N * np.sqrt(2))) * (N - 1 + np.sqrt(N + 1))
-        q = (1/(N * np.sqrt(2))) * (np.sqrt(N + 1) - 1)
-        sim[0] = x0
-        l = max(0.3, xtol_gm * 1.1)
-        for i in range(1, N + 1):
-            for j in range(N):
-                sim[i,j] = x0[j] + l*p if j == i - 1 else x0[j] + l*q
-    elif simplex == "axis":
-        # Axis-by-axis simplex. Each point is just x0 extended along
-        # a different axis.
-        # Rosenbrock with x0  = [1.3, 0.7, 0.8, 1.9, 1.2]: 566 nfev, 342 nit
-        sim[0] = x0
-        l = max(0.3, xtol_gm * 1.1)
-        for i in range(1, N + 1):
-            for j in range(N):
-                sim[i,j] = x0[j] + l if j == i - 1 else x0[j]
-    elif simplex == "random":
-        # Every point except x0 is random.
-        # Rosenbrock with x0  = [1.3, 0.7, 0.8, 1.9, 1.2]: 705 nfev, 431 nit
-        # (average over 1000 iterations)
-        sim[0] = x0
-        for i in range(1, N + 1):
-            sim[i] = np.random.rand(N)
-    elif simplex == "jon":
-        # My own method. It isn't very good. Like, it works, but it's slow.
-        # Rosenbrock with x0  = [1.3, 0.7, 0.8, 1.9, 1.2]: 669 nfev, 409 nit
-        # (average over 1000 iterations)
-        sim = np.zeros((N + 1, N))
-        sim[0] = x0
-        for k in range(N):
-            # Each point x_i (\neq x_0) is equal to x_0 \pm [0.2, 0.4).
-            # However, we also need to make sure that each point is
-            # sufficiently "far away" from x0, so that the optimisation
-            # doesn't just converge immediately. We do this by making sure
-            # that the distance between the two points is at least xtol_gm.
-            y = x0.copy()
-            while np.linalg.norm(y - x0) < xtol_gm:
-                y = x0.copy() + ((np.random.rand(N)*0.2 + 0.2) *
-                                 np.sign(np.random.randn(N)))
-            sim[k + 1] = y
-    else:
-        raise ValueError("invalid simplex generation method "
-                         "'{}' specified".format(simplex))
-
+    # Create and initialise simplex object.
+    sim = Simplex(x0, method=simplex_method, length=max(0.3, xtol_gm))
     # Number of iterations. Function evaluations are stored as cf.calls.
     niter = 0
 
-    # Array to store results of function evaluation.
-    fvals = np.zeros(N + 1)
-
     # Set up parameters for Nelder-Mead.
-    # Notation follows that used in Section 8.1 of  Kelley, 'Iterative Methods
+    # Notation follows that used in Section 8.1 of Kelley, 'Iterative Methods
     # for Optimization'.
     mu_ic = -0.5   # Inside contraction parameter
     mu_oc = 0.5    # Outside contraction parameter
     mu_r = 1       # Reflect parameter
     mu_e = 2       # Expansion parameter
 
-    # Helper functions.
+    # Helper function.
     def xnew(mu, sim):
-        """
-        Function which calculates the new point to place in the simplex.
-        Eq 8.2 (Kelley).
-        'sim' must already be sorted in ascending order of fval..
-        """
-        xbar = np.average(sim[0:N], axis=0)   # Centroid.
-        xworst = sim[N]   # Worst point. Note N not N+1 because zero-indexing.
-        return ((1 + mu) * xbar) - (mu * xworst)
-
-    def sort_simplex(sim, fvals):
-        """
-        Sorts the simplex and associated function values in ascending order
-        of the cost function, i.e. sim[0] contains the current best point,
-        sim[N] contains the current worst point.
-        """
-        indices = np.argsort(fvals)
-        sim = np.take(sim, indices, 0)
-        fvals = np.take(fvals, indices, 0)
-        return sim, fvals
-
-    def shrink(sim, fvals):
-        """
-        Performs shrink step (Step 3(f) in Algorithm 8.1.1, Kelley).
-        Doesn't sort the simplex after it's done.
-        """
-        for i in range(1, N + 1):
-            sim[i] = sim[0] - (sim[i] - sim[0])/2
-            fvals[i] = cf(sim[i], *args)
-        return sim, fvals
+        return ((1 + mu) * sim.xbar()) - (mu * sim.xworst())
 
     def converged(sim, xtol):
         """
@@ -189,7 +219,7 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex="spendley"):
         must have a range smaller than or equal to the corresponding xtol in
         that dimension.
         """
-        simplex_range = np.amax(sim, axis=0) - np.amin(sim, axis=0)
+        simplex_range = np.amax(sim.x, axis=0) - np.amin(sim.x, axis=0)
         return all(np.less_equal(simplex_range, xtol))
         ## Scipy convergence criteria. Assumes that the simplex is already
         ## sorted. It is slightly looser (i.e. will converge before mine),
@@ -203,9 +233,9 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex="spendley"):
     # Evaluate the cost function for the initial simplex.
     # Steps 1 and 2 in Algorithm 8.1.1
     for i in range(N + 1):
-        fvals[i] = cf(sim[i], *args)
+        sim.f[i] = cf(sim.x[i], *args)
     # Sort simplex
-    sim, fvals = sort_simplex(sim, fvals)
+    sim.sort()
 
     # Plotting initialisation.
     if plot:
@@ -215,11 +245,12 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex="spendley"):
     # Main loop.
     while not converged(sim, xtol):
         niter += 1
+        sim.sort()  # for good measure
 
         # Plotting
         if plot:
             plot_iters.append(niter)
-            plot_fvals.append(fvals[0])
+            plot_fvals.append(sim.f[0])
             plt.cla()
             plt.xlabel("Iteration number")
             plt.ylabel("Cost function")
@@ -231,69 +262,72 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex="spendley"):
             break
 
         # Step 3(a)
-        f_r = cf(xnew(mu_r, sim), *args)
+        x_r = xnew(mu_r, sim)  # shorthand for x(mu_r)
+        f_r = cf(x_r, *args)
 
         # Step 3(b): Reflect (+ 3g if needed)
         if cf.calls >= maxfev:
             break
-        if fvals[0] <= f_r and f_r < fvals[N - 1]:
-            sim[N] = xnew(mu_r, sim)
-            fvals[N] = f_r
-            sim, fvals = sort_simplex(sim, fvals)  # Step 3(g)
+        if sim.f[0] <= f_r and f_r < sim.f[N - 1]:
+            sim.replace_worst(x_r, f_r)
+            sim.sort()  # Step 3(g)
             continue
 
         # Step 3(c): Expand (+ 3g if needed)
         if cf.calls >= maxfev:
             break
-        if f_r < fvals[0]:
-            f_e = cf(xnew(mu_e, sim), *args)
+        if f_r < sim.f[0]:
+            x_e = xnew(mu_e, sim)
+            f_e = cf(x_e, *args)
             if f_e < f_r:
-                sim[N] = xnew(mu_e, sim)
-                fvals[N] = f_e
+                sim.replace_worst(x_e, f_e)
             else:
-                sim[N] = xnew(mu_r, sim)
-                fvals[N] = f_r
-            sim, fvals = sort_simplex(sim, fvals)  # Step 3(g)
+                sim.replace_worst(x_r, f_r)
+            sim.sort()  # Step 3(g)
             continue
 
         # Step 3(d): Outside contraction (+ 3f and 3g if needed)
         if cf.calls >= maxfev:
             break
-        if fvals[N - 1] <= f_r and f_r < fvals[N]:
-            f_c = cf(xnew(mu_oc, sim), *args)
+        if sim.f[N - 1] <= f_r and f_r < sim.f[N]:
+            x_oc = xnew(mu_oc, sim)
+            f_c = cf(x_oc, *args)
             if f_c <= f_r:
-                sim[N] = xnew(mu_oc, sim)
-                fvals[N] = f_c
-                sim, fvals = sort_simplex(sim, fvals)  # Step 3(g)
+                sim.replace_worst(x_oc, f_c)
+                sim.sort()  # Step 3(g)
                 continue
             else:
                 if cf.calls >= maxfev - N:             # Step 3(f)
                     break
-                sim, fvals = shrink(sim, fvals)
-                sim, fvals = sort_simplex(sim, fvals)  # Step 3(g)
+                sim.shrink()
+                for i in range(1, N + 1):
+                    sim.f[i] = cf(sim.x[i], *args)
+                sim.sort()  # Step 3(g)
                 continue
 
         # Step 3(e): Inside contraction (+ 3f and 3g if needed)
         if cf.calls >= maxfev:
             break
-        if f_r >= fvals[N]:
-            f_c = cf(xnew(mu_ic, sim), *args)
-            if f_c < fvals[N]:
-                sim[N] = xnew(mu_ic, sim)
-                fvals[N] = f_c
-                sim, fvals = sort_simplex(sim, fvals)  # Step 3(g)
+        if f_r >= sim.f[N]:
+            x_ic = xnew(mu_ic, sim)
+            f_c = cf(x_ic, *args)
+            if f_c < sim.f[N]:
+                sim.replace_worst(x_ic, f_c)
+                sim.sort()  # Step 3(g)
                 continue
             else:
                 if cf.calls >= maxfev - N:             # Step 3(f)
                     break
-                sim, fvals = shrink(sim, fvals)
-                sim, fvals = sort_simplex(sim, fvals)  # Step 3(g)
+                sim.shrink()
+                for i in range(1, N + 1):
+                    sim.f[i] = cf(sim.x[i], *args)
+                sim.sort()  # Step 3(g)
                 continue
     # END while loop
 
     # sort the simplex in ascending order of fvals
-    sim, fvals = sort_simplex(sim, fvals)
+    sim.sort()
 
-    return OptResult(xbest=sim[0], fbest=fvals[0],
+    return OptResult(xbest=sim.x[0], fbest=sim.f[0],
                      niter=niter, nfev=cf.calls,
-                     simplex=sim, fvals=fvals)
+                     simplex=sim.x, fvals=sim.f)

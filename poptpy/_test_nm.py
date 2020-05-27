@@ -44,7 +44,7 @@ xtol = 1e-6
 # Test average nfev and niter, i.e. convergence rate.
 #####################################################
 
-nexpts = 1000
+nexpts = 100
 nfevs = {}
 nits = {}
 for m in ["spendley", "axis", "random", "jon"]:
@@ -68,8 +68,8 @@ for i in tqdm(range(nexpts)):
 
     ## This is my optimiser.
     for m in ["spendley", "axis", "random", "jon"]:
-        nfevs[m].append(poptpy_opt.nelder_mead(cf, x0, [xtol] * N, simplex=m).nfev)
-        nits[m].append(poptpy_opt.nelder_mead(cf, x0, [xtol] * N, simplex=m).niter)
+        nfevs[m].append(poptpy_opt.nelder_mead(cf, x0, [xtol] * N, simplex_method=m).nfev)
+        nits[m].append(poptpy_opt.nelder_mead(cf, x0, [xtol] * N, simplex_method=m).niter)
 
     ## Append results.
     # nfev_scipy.append(scipyRes.nfev)
