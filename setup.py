@@ -7,10 +7,10 @@ from setuptools.command.install import install
 
 class poptpyInstall(install):
     def run(self):
-        super().run()
         p = Path(__file__).parent.resolve()
         p_install = p / "install" / "INSTALL.py"
         subprocess.run([sys.executable, str(p_install)], check=True)
+        super().run()
 
 
 with open("README.md", "r") as fp:
@@ -19,7 +19,7 @@ with open("README.md", "r") as fp:
 
 setup(
     name="ts-poptpy",
-    version="0.1.2",
+    version="0.1.4",
     author="Jonathan Yong",
     author_email="yongrenjie@gmail.com",
     description="NMR parameter optimisation in TopSpin",
