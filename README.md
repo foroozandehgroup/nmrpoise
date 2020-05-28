@@ -26,14 +26,13 @@ pip install ts-poptpy
 
 should work.
 
-Alternatively, you can download the package (using `git clone` or from a [release](https://github.com/yongrenjie/poptpy/releases)), `cd` to the `install` folder and run `INSTALL.py`.
+Alternatively (especially for spectrometers which are not directly connected to the Internet), you can download the package (using `git clone` or from a [release](https://github.com/yongrenjie/poptpy/releases)), `cd` inside and run `python3 setup.py install`. If there are still issues with TopSpin directory selection, follow the instructions above to specify the `TSDIR` environment variable.
 
 ## Manual installation
 
 1. Download the package (using `git clone` or from a [release](https://github.com/yongrenjie/poptpy/releases)).
 2. Specify the path to the Python 3 executable by modifying the `p_python3` variable in `poptpy/poptpy.py`. Warning: if you are on Windows and the path includes backslashes, you will need to either escape the backslashes (`p_python3 = "C:\\path\\to\\python3"`) or use a raw string (`p_python3 = r"C:\path\to\python3"`).
 3. Copy `poptpy/poptpy.py`, as well as the `poptpy/poptpy_backend` folder, to TopSpin's `/exp/stan/nmr/py/user` directory.
-4. If there are still issues with TopSpin directory selection, follow the instructions in the previous section to specify the appropriate `TSDIR` environment variable.
 
 ------------------------------------------------------
 
