@@ -5,25 +5,35 @@ A series of Python scripts for the numerical optimisation of NMR parameters, run
 ## Prerequisites
 
 1. **Python 3 installation** (download from https://www.python.org/downloads/). Make sure that the directory containing the Python 3 executable (`python3` or `python`) is added to the `$PATH` environment variable.
-2. The **numpy** package. This can be installed using `pip3` or `pip`.
+2. The **numpy** package. This can be installed using `pip` (or `pip3`).
 
 ## Automatic installation
 
 `pip install ts-poptpy` should work out of the box for many systems.
 
-The most likely reason for failure is if the path to the TopSpin installation cannot be uniquely identified. On Unix/Linux systems, the easiest way around this is to specify the `$TOPSPINDIR` environment variable with the installation. Note that this must point to the `/exp/stan/nmr` folder in TopSpin. For example:
+The most probable reason for failure is if the path to the TopSpin installation cannot be uniquely identified. This can happen if TopSpin was installed to a non-standard location, or if multiple versions of TopSpin are installed. To fix this, provide an environment variable `TSDIR` which points to the `/exp/stan/nmr` folder in TopSpin. For example (modify paths as appropriate):
 
-    TOPSPINDIR=/opt/topspin4.0.8/exp/stan/nmr pip install ts-poptpy
+```Shell
+TSDIR=/opt/topspinX.Y.Z/exp/stan/nmr pip install ts-poptpy      # Unix / Linux.
+```
 
-should work. On Windows you may have to skip to the manual installation section, although we do plan to make the installation procedure more robust.
+or
+
+```Powershell
+$env:TSDIR = "C:\Bruker\TopSpinX.Y.Z\exp\stan\nmr"              # Windows (Powershell). Please don't use cmd.exe
+pip install ts-poptpy
+```
+
+should work.
 
 Alternatively, you can download the package (using `git clone` or from a [release](https://github.com/yongrenjie/poptpy/releases)), `cd` to the `install` folder and run `INSTALL.py`.
 
 ## Manual installation
 
-1. Clone this repository.
+1. Download the package (using `git clone` or from a [release](https://github.com/yongrenjie/poptpy/releases)).
 2. Specify the path to the Python 3 executable by modifying the `p_python3` variable in `poptpy/poptpy.py`. Warning: if you are on Windows and the path includes backslashes, you will need to either escape the backslashes (`p_python3 = "C:\\path\\to\\python3"`) or use a raw string (`p_python3 = r"C:\path\to\python3"`).
 3. Copy `poptpy/poptpy.py`, as well as the `poptpy/poptpy_backend` folder, to TopSpin's `/exp/stan/nmr/py/user` directory.
+4. If there are still issues with TopSpin directory selection, follow the instructions in the previous section to specify the appropriate `TSDIR` environment variable.
 
 ------------------------------------------------------
 

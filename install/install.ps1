@@ -37,36 +37,55 @@ Write-Host "Setting Python path in TopSpin scripts... " -NoNewLine
 (Get-Content poptpy.py) -replace "^p_python3 = .*$", "p_python3 = r`"$pyex`"" | Set-Content poptpy.py
 Write-Host "done"
 
+
 # Find TopSpin installation directory
 Write-Host "Locating TopSpin installation directory... " -NoNewLine
-$tsdirs=Get-ChildItem -Path "\Bruker\topspin*\exp\stan" -Include "nmr" -Recurse -Directory | ForEach-Object {$_.FullName} 
-If ($tsdirs.Count -gt 1) {
-    Write-Host "$($tsdirs.Count) found`n"
-    $x=1
-    ForEach ($i IN $tsdirs) {
-        Write-Host "${x}:  ${i}"
-        $x = $x + 1
+# Check for environment variable
+If (Test-Path env:TSDIR) {
+    Write-Host "provided as `$env:TSDIR: $env:TSDIR"
+    If (Test-Path -Path "${env:TSDIR}\py\user") {
+        $tsdir = $env:TSDIR
     }
-    Write-Host ""
-    $chosen=0
-    While ($chosen -le 0 -Or $chosen -gt $tsdirs.Count) {
-        $chosen=Read-Host -Prompt "Please enter number corresponding to desired TopSpin directory (q to quit)"
-        If ($chosen -eq "q") {
+    Else {
+        Write-Host "The path $env:TSDIR provided as `$env:TSDIR was not a valid TopSpin installation.`n"
+        exit 1
+    }
+}
+Else {
+    $tsdirs=Get-ChildItem -Path "\Bruker\topspin*\exp\stan" -Include "nmr" -Recurse -Directory | ForEach-Object {$_.FullName} 
+    If ($tsdirs.Count -gt 1) {
+        Write-Host "$($tsdirs.Count) found`n"
+        $x=1
+        ForEach ($i IN $tsdirs) {
+            Write-Host "${x}:  ${i}"
+            $x = $x + 1
+        }
+        Write-Host ""
+        $chosen=Read-Host -Prompt "Please enter number corresponding to desired TopSpin directory"
+        If (($chosen -isnot [int])) {
+            Write-Host "`nError: TopSpin installation directory was not uniquely identified.`n"
+            Write-Host "Please specify it using `$env:TSDIR.`n"
             exit 1
         }
         $chosen=[int]$chosen
+        If (($chosen -gt $($tsdirs.Count)) -or ($chosen -lt 0)) {
+            Write-Host "`nError: TopSpin installation directory was not uniquely identified.`n"
+            Write-Host "Please specify it using `$env:TSDIR.`n"
+            exit 1
+        }
+        $tsdir=$tsdirs[$chosen - 1]
+        Write-Host "chose $tsdir"
     }
-    $tsdir=$tsdirs[$chosen - 1]
-    Write-Host "chose $tsdir"
-}
-ElseIf ($tsdirs.Count -eq 1) {
-    $tsdir=$tsdirs
-    Write-Host "$tsdir"
-}
-Else {
-    Write-Host "not found"
-    Write-Host "`nError: TopSpin installation directory was not found."
-    exit 1
+    ElseIf ($tsdirs.Count -eq 1) {
+        $tsdir=$tsdirs
+        Write-Host "$tsdir"
+    }
+    Else {
+        Write-Host "not found"
+        Write-Host "`nError: TopSpin installation directory was not found.`n"
+        Write-Host "Please specify it using `$env:TSDIR.`n"
+        exit 1
+    }
 }
 
 # Install the files
