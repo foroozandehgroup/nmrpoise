@@ -11,13 +11,11 @@ from poptimise import nelder_mead
 # TODO Determine minimum version of Python 3 on which this runs.
 #      Because of pathlib this is at least >= 3.4
 
-# Obtain key information from frontend script
-routine_id = input()
-p_spectrum = Path(input())
-p_poptpy = Path(input())
-
+routine_id = None
+p_spectrum = None
+p_optlog = None
+p_poptpy = Path(__file__).parent.resolve()
 tic = datetime.now()
-p_optlog = p_spectrum.parents[1] / "poptpy.log"
 p_routines = p_poptpy / "routines"
 p_costfunctions = p_poptpy / "cost_functions"
 
@@ -498,6 +496,11 @@ if __name__ == "__main__":
     # timely feedback can be provided to the user. The frontend is responsible
     # for the error logging.
     try:
+        # Set global variables by reading in input from frontend.
+        routine_id = input()
+        p_spectrum = Path(input())
+        p_optlog = p_spectrum.parents[1] / "poptpy.log"
+        # Run main routine.
         main()
     except Exception as e:
         # Because the frontend is only reading one line at a time, there's

@@ -84,7 +84,6 @@ def main():
     # Pass key information to the backend script
     print(routine_id, file=backend.stdin)
     print(p_spectrum, file=backend.stdin)
-    print(p_poptpy, file=backend.stdin)
     backend.stdin.flush()
 
     # Enter a loop where: 1) backend script passes values of acquisition params
@@ -129,7 +128,8 @@ def main():
             elif line.startswith("Backend exception: "):
                 raise RuntimeError(line)
             else:
-                raise RuntimeError("uncaught backend error: {}".format(line))
+                raise RuntimeError("uncaught backend error. Please check "
+                                   "error log for more information.")
     except RuntimeError as e:
         # Print the full traceback to the file
         with open(p_opterr, "a") as fp:
