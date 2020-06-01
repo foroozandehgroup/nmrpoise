@@ -1,0 +1,281 @@
+
+
+
+
+========================================
+2020-05-15 14:35:37
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+
+
+
+
+========================================
+2020-05-15 14:38:16
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+
+
+
+
+========================================
+2020-05-15 14:40:27
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+
+
+
+
+========================================
+2020-05-15 14:41:11
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+
+
+
+
+========================================
+2020-05-15 14:46:14
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+ 50.0000      0.2585    
+ 21.6323      0.2118    
+ -6.7353       inf      
+ 35.8162      0.2144    
+  7.4485       inf      
+ 28.7242      0.2016    
+ 35.8162      0.2154    
+ 25.1783      0.2046    
+ 32.2702      0.2062    
+ 26.9513      0.2006    
+
+Optimisation message        - Optimization terminated successfully.
+Best values found           - [26.95126748]
+Cost function at minimum    - 0.20060960965511554
+Number of fevals            - 10
+Number of spectra ran       - 8
+Total time taken            - 0:04:12
+
+
+
+
+========================================
+2020-05-15 15:42:27
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+ 50.0000      0.2608    
+ 66.5258      0.2950    
+ 33.4742      0.2098    
+ 16.9485      0.2557    
+ 16.9485      0.2546    
+ 25.2114      0.2024    
+ 16.9485      0.2555    
+ 29.3428      0.2036    
+ 21.0799      0.2153    
+ 27.2771      0.2013    
+ 29.3428      0.2017    
+ 28.3099      0.2017    
+
+Optimisation message        - Optimization terminated successfully.
+Best values found           - [27.27708614]
+Cost function at minimum    - 0.20132800790192437
+Number of fevals            - 12
+Number of spectra ran       - 12
+Total time taken            - 0:06:17
+
+
+
+
+========================================
+2020-05-15 15:49:59
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+ 50.0000      0.2600    
+ 22.3330      0.2107    
+ -5.3339       inf      
+ 36.1665      0.2174    
+  8.4996       inf      
+ 29.2498      0.2048    
+ 36.1665      0.2170    
+ 25.7914      0.2062    
+ 32.7081      0.2103    
+ 27.5206      0.2032    
+
+Optimisation message        - Optimization terminated successfully.
+Best values found           - [27.52059456]
+Cost function at minimum    - 0.20324210813443735
+Number of fevals            - 10
+Number of spectra ran       - 8
+Total time taken            - 0:04:15
+
+
+
+
+========================================
+2020-05-26 12:58:08
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+
+
+
+
+========================================
+2020-05-26 12:59:50
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+
+
+
+
+========================================
+2020-05-26 13:12:45
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+
+
+
+
+========================================
+2020-05-26 13:19:12
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+ 50.0000      0.2576    
+ 74.4263      0.2981    
+ 25.5737      0.2004    
+  1.1475       inf      
+  1.1475       inf      
+ 37.7869      0.2185    
+ 13.3606      0.3330    
+ 31.6803      0.2047    
+ 19.4672      0.2273    
+ 28.6270      0.1994    
+ 31.6803      0.2035    
+ 27.1004      0.1996    
+
+Best values found           - [28.62702508]
+Cost function at minimum    - 0.19942915275067782
+Number of fevals            - 12
+Number of spectra ran       - 10
+Total time taken            - 0:05:20
+
+
+
+
+========================================
+2020-05-26 13:26:05
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+
+
+
+
+========================================
+2020-05-26 13:30:30
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [50.0]
+
+  cnst20        cf      
+------------------------
+
+
+
+
+========================================
+2020-05-26 15:48:03
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [45.0]
+
+  cnst20        cf      
+------------------------
+ 45.0000      0.2473    
+ 64.2952      0.2948    
+ 25.7048      0.2052    
+  6.4096       inf      
+  6.4096       inf      
+ 35.3524      0.2176    
+ 16.0572      0.2733    
+ 30.5286      0.2085    
+
+Best values found           - [25.70480301]
+Cost function at minimum    - 0.20516454515702223
+Number of fevals            - 8
+Number of spectra ran       - 6
+Total time taken            - 0:03:19
+
+
+
+
+========================================
+2020-05-26 16:06:44
+Optimisation parameters   - ['cnst20']
+Cost function             - specdiff
+Initial values            - [45.0]
+
+  cnst20        cf      
+------------------------
+ 45.0000      0.2500    
+ 67.1182      0.3008    
+ 22.8818      0.2140    
+  0.7636       inf      
+  0.7636       inf      
+ 33.9409      0.2206    
+ 11.8227      0.3989    
+ 28.4114      0.2082    
+ 33.9409      0.2158    
+ 25.6466      0.2075    
+
+Best values found           - [25.64659196]
+Cost function at minimum    - 0.20748167329690878
+Number of fevals            - 10
+Number of spectra ran       - 8
+Total time taken            - 0:04:16

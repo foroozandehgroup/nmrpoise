@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 3.6.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmr-user
+$$ 2020-06-01 01:01:41.712 +0800  CHEM\nmr-user@GOLDFISH-CRL
+$$ C:/NMR/data/mfgroup/nmr/jy-200531-poptpy-testdata/2/pdata/1/outd
+$$ process C:\Bruker\TopSpin3.6.2\prog\au\bin\iexpno.exe
+##$CURPLOT= <A4>
+##$CURPRIN= <$1#1#0#1#1#1#1#1#0#-1#-1#1#-1>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_H.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

@@ -1,12 +1,20 @@
 import sys
 import pickle
-import numpy as np
 from traceback import print_exc
 from functools import wraps
 from datetime import datetime
 from pathlib import Path
 
-from poptimise import nelder_mead
+import numpy as np
+
+# Enable relative imports when invoked directly as __main__ by TopSpin.
+# cf. PEP 366 and https://stackoverflow.com/a/54490918
+if __name__ == "__main__" and __package__ is None:
+    __package__ = "poptpy_backend"
+    sys.path.insert(1, str(Path(__file__).parents[1].resolve()))
+    __import__(__package__)
+
+from .poptimise import nelder_mead
 
 # TODO Determine minimum version of Python 3 on which this runs.
 #      Because of pathlib this is at least >= 3.4
@@ -37,19 +45,7 @@ def main():
     with open(p_routines / routine_id, "rb") as f:
         routine = pickle.load(f)
     # Load the cost function
-    p_cf = p_costfunctions / (routine.cf + ".py")
-    ld = {}
-    exec(open(p_cf).read(), globals(), ld)
-    # in p_cf, the cost function is defined as cost_function().
-    # executing the file will define it for us
-    # but see also https://stackoverflow.com/questions/1463306/
-    try:
-        cost_function = ld["cost_function"]
-    except KeyError:
-        if len(ld) == 1:
-            cost_function = ld[list(ld)[0]]
-        else:
-            raise e
+    cost_function = get_cf_function(routine.cf)
 
     # Scale the initial values and tolerances
     npars = len(routine.pars)
@@ -104,6 +100,27 @@ class Routine:
         self.init = init
         self.tol = tol
         self.cf = cf
+
+
+def get_cf_function(cf_name):
+    """
+    Finds the cost function script and exec's it, returning the function
+    defined inside it.
+    """
+    p_cf = p_costfunctions / (cf_name + ".py")
+    ld = {}
+    exec(open(p_cf).read(), globals(), ld)
+    # in p_cf, the cost function is defined as cost_function().
+    # executing the file will define it for us
+    # but see also https://stackoverflow.com/questions/1463306/
+    try:
+        cost_function = ld["cost_function"]
+    except KeyError:
+        if len(ld) == 1:
+            cost_function = ld[list(ld)[0]]
+        else:
+            raise
+    return cost_function
 
 
 @deco_count
@@ -225,6 +242,11 @@ def ppm_to_point(shift, p_spec=p_spectrum):
     """
     Round a specific chemical shift to the nearest point in the spectrum.
 
+    For unknown reasons, this does not correlate perfectly to the "index" that
+    is displayed in TopSpin. However, the difference between the indices
+    calculated here and the index in TopSpin is on the order of 1e-4 to 1e-3
+    ppm. (More precisely, it's ca. 0.25 * SW / SI.)
+
     Arguments:
         shift (float)         : desired chemical shift.
         p_spec (pathlib.Path) : Path to the folder of the desired spectrum.
@@ -246,9 +268,9 @@ def ppm_to_point(shift, p_spec=p_spectrum):
         return None
 
     # Calculate the value
-    spacing = (highest_shift - lowest_shift)/si
-    x = round((shift - lowest_shift)/spacing)
-    return int(si - x)
+    spacing = (highest_shift - lowest_shift)/(si - 1)
+    x = 1 + round((highest_shift - shift)/spacing)
+    return int(x)
 
 
 def get_fid():
@@ -268,32 +290,36 @@ def get_fid():
     return fid[0] + (1j * fid[1])
 
 
-def get_real_spectrum(left=None, right=None, epno=None):
+def get_real_spectrum(left=None, right=None, epno=None, p_spec=None):
     """
-    Get the real spectrum. Needs the global variable p_spectrum to be set.
-    Note that this function removes the effects of TopSpin's NC_PROC variable.
+    Get the real spectrum. This function accounts for TopSpin's NC_PROC
+    variable, scaling the spectrum intensity accordingly.
 
     Arguments:
-        (optional) left (float) : chemical shift corresponding to beginning of
-                                  the desired section. Defaults to the maximum
-                                  of the spectrum.
-        (optional) right (float): chemical shift corresponding to end of
-                                  the desired section. Defaults to the minimum
-                                  of the spectrum.
-        (optional) epno (list)  : [expno, procno] of spectrum of interest.
-                                  Defaults to the spectrum being optimised.
+        left (float)          : chemical shift corresponding to beginning of
+                                the desired section. Defaults to the maximum
+                                of the spectrum.
+        right (float)         : chemical shift corresponding to end of the
+                                desired section. Defaults to the minimum of the
+                                spectrum.
+        epno (list)           : [expno, procno] of spectrum of interest.
+                                Defaults to the spectrum being optimised. Other
+                                expnos/procnos are calculated relative to the
+                                spectrum being optimised.
+        p_spec (pathlib.Path) : Path to the spectrum being optimised.
 
     Returns:
         (np.ndarray) Array containing the spectrum or the desired section.
     """
-    # Construct the path to the spectrum of interest
-    if epno is None:
-        p_spec = p_spectrum
-    elif len(epno) == 2:
-        p_spec = p_spectrum.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
-    else:
-        raise ValueError("Please provide a valid [expno, procno] combination.")
+    # Check whether user has specified epno
+    if epno is not None:
+        if len(epno) == 2:
+            p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
+        else:
+            raise ValueError("Please provide a valid [expno, procno] "
+                             "combination.")
 
+    p_spec = p_spectrum if p_spec is None else p_spec
     p_1r = p_spec / "1r"
 
     real_spec = np.fromfile(p_1r, dtype=np.int32)
@@ -322,32 +348,36 @@ def get_real_spectrum(left=None, right=None, epno=None):
     return real_spec[leftn:rightn + 1]
 
 
-def get_imag_spectrum(left=None, right=None, epno=None):
+def get_imag_spectrum(left=None, right=None, epno=None, p_spec=None):
     """
-    Get the imag spectrum. Needs the global variable p_spectrum to be set.
-    Note that this function removes the effects of TopSpin's NC_PROC variable.
+    Get the imaginary spectrum. This function accounts for TopSpin's NC_PROC
+    variable, scaling the spectrum intensity accordingly.
 
     Arguments:
-        (optional) left (float) : chemical shift corresponding to beginning of
-                                  the desired section. Defaults to the maximum
-                                  of the spectrum.
-        (optional) right (float): chemical shift corresponding to end of
-                                  the desired section. Defaults to the minimum
-                                  of the spectrum.
-        (optional) epno (list)  : [expno, procno] of spectrum of interest.
-                                  Defaults to the spectrum being optimised.
+        left (float)          : chemical shift corresponding to beginning of
+                                the desired section. Defaults to the maximum
+                                of the spectrum.
+        right (float)         : chemical shift corresponding to end of the
+                                desired section. Defaults to the minimum of the
+                                spectrum.
+        epno (list)           : [expno, procno] of spectrum of interest.
+                                Defaults to the spectrum being optimised. Other
+                                expnos/procnos are calculated relative to the
+                                spectrum being optimised.
+        p_spec (pathlib.Path) : Path to the spectrum being optimised.
 
     Returns:
         (np.ndarray) Array containing the spectrum or the desired section.
     """
-    # Construct the path to the spectrum of interest
-    if epno is None:
-        p_spec = p_spectrum
-    elif len(epno) == 2:
-        p_spec = p_spectrum.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
-    else:
-        raise ValueError("Please provide a valid [expno, procno] combination.")
+    # Check whether user has specified epno
+    if epno is not None:
+        if len(epno) == 2:
+            p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
+        else:
+            raise ValueError("Please provide a valid [expno, procno] "
+                             "combination.")
 
+    p_spec = p_spectrum if p_spec is None else p_spec
     p_1i = p_spec / "1i"
 
     imag_spec = np.fromfile(p_1i, dtype=np.int32)
@@ -379,6 +409,9 @@ def get_imag_spectrum(left=None, right=None, epno=None):
 def get_acqu_par(par, p_spec=p_spectrum):
     """
     Obtains the value of an acquisition parameter.
+
+    Note that pulse powers in dB (PLdB / SPdB) cannot be obtained using this
+    function, as they are not stored in the acqus file.
 
     Arguments:
         par (str)             : Name of the acquisition parameter.

@@ -13,12 +13,12 @@ xtol = np.array([1e-6] * len(x0))
 simplex_method="spendley"
 nexpt = 1 if simplex_method in ["spendley", "axis"] else 50
 
-def testNMAccuracy():
+def test_NM_accuracy():
     optResult = nelder_mead(cf=rosenbrock, x0=x0, xtol=xtol,
                             simplex_method=simplex_method)
     assert np.all(np.isclose(optResult.xbest, np.ones(len(x0)), atol=1e-6))
 
-def testNMIters():
+def test_NM_iters():
     count = 0
     for i in range(nexpt):
         optResult = nelder_mead(cf=rosenbrock, x0=x0, xtol=xtol,
@@ -27,7 +27,7 @@ def testNMIters():
     count /= nexpt
     assert count < 450
 
-def testNMFevals():
+def test_NM_fevals():
     count = 0
     for i in range(nexpt):
         optResult = nelder_mead(cf=rosenbrock, x0=x0, xtol=xtol,
@@ -40,12 +40,12 @@ def testNMFevals():
 # MDS is very difficult to test with Rosenbrock because it converges awfully
 # slowly. See: Torczon (1989). https://scholarship.rice.edu/handle/1911/16304
 
-# def testMDSAccuracy():
+# def test_MDS_accuracy():
 #     optResult = multid_search(cf=rosenbrock, x0=x0, xtol=xtol,
 #                               simplex_method=simplex_method)
 #     assert np.all(np.isclose(optResult.xbest, np.ones(len(x0)), atol=1e-6))
 
-# def testMDSIters():
+# def test_MDS_iters():
 #     count = 0
 #     for i in range(nexpt):
 #         optResult = multid_search(cf=rosenbrock, x0=x0, xtol=xtol,
@@ -54,7 +54,7 @@ def testNMFevals():
 #     count /= nexpt
 #     assert count < 450
 
-# def testMDSFevals():
+# def test_MDS_fevals():
 #     count = 0
 #     for i in range(nexpt):
 #         optResult = multid_search(cf=rosenbrock, x0=x0, xtol=xtol,

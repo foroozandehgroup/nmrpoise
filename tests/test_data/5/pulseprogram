@@ -1,0 +1,106 @@
+# 1 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt"
+;jy_2saltire_opt
+;90 - tau - double saltire - tau - acquire
+;for optimisation of PSYCHE double saltire
+;last updated 200515
+
+# 1 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Avance.incl" 1
+;Avance3.incl
+;   for AV III
+;
+;avance-version (13/06/17)
+;
+;$CLASS=HighRes Incl
+;$COMMENT=
+
+# 169 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Avance.incl"
+;$Id: Avance3.incl,v 1.10.2.2 2013/08/30 09:43:33 ber Exp $
+# 6 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt" 2
+
+# 1 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Grad.incl" 1
+;Grad2.incl  -  include file for Gradient Spectroscopy
+;   for TCU3
+;
+;avance-version (07/01/17)
+;
+;$CLASS=HighRes Incl
+;$COMMENT=
+
+# 27 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Grad.incl"
+define list<gradient> EA=<EA>
+
+
+# 31 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Grad.incl"
+;$Id: Grad2.incl,v 1.14 2012/01/31 17:49:21 ber Exp $
+# 7 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt" 2
+
+
+"d2=12m"
+"cnst10=(cnst20/360)*sqrt((2*cnst21)/(p20/2000000))" ; rf amplitude of saltire
+"cnst11=1000000/(p1*4)" ; rf amplitude hard pulse
+"spw20=plw1*(cnst10/cnst11)*(cnst10/cnst11)" ; power level of saltire
+"p21=p20"
+# 1 "mc_line 15 file C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt exp. def. part of mc cmd. before ze"
+; dimension 1D; AQ_mode 
+define delay MCWRK
+define delay MCREST
+"MCREST = 30m - 30m"
+"MCWRK = 0.333333*30m"
+
+    dccorr
+# 15 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt"
+# 15 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt"
+1 ze
+# 1 "mc_line 15 file C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt exp. def. of mc cmd. after ze"
+# 16 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt"
+# 1 "mc_line 16 file C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt exp. start label for mc cmd."
+2 MCWRK  * 2
+LBLF0, MCWRK
+  MCREST
+# 17 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt"
+  d1 pl1:f1
+  p1 ph1
+  
+  50u setnmr3|0 setnmr0|34|32|33 ctrlgrad 0
+  d2
+  d16
+  p16:gp1
+  d16 
+  ( center (p20:sp20 ph3):f1 (p21:gp21) )
+  d16
+  p16:gp1
+  d16
+  d2
+  50u setnmr3^0 setnmr0^34^32^33 ctrlgrad 7
+  
+  go=2 ph31
+# 1 "mc_line 33 file C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt exp. mc cmd. in line"
+  MCWRK wr #0
+  MCWRK zd
+  lo to LBLF0 times td0
+
+# 34 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt"
+exit
+
+ph1 = 0
+ph3 = 0 1 2 3
+ph31= 0 2 0 2
+
+# 41 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy_2saltire_opt"
+;pl1 : f1 channel - power level for pulse (default)
+;p1 : f1 channel -  high power pulse
+;p20: shaped pulse in PS element
+;p21: gradient during PS element
+;d1 : relaxation delay; 1-5 * T1
+;d2 : delay on either side of double saltire
+;d16: gradient recovery delay
+;p16: CTP gradient duration
+;ns: 1 * n, total number of scans: NS * TD0
+
+;cnst20: flip angle (degrees)
+;cnst21: bandwidth of PSYCHE element (Hz) (ca. 10000)
+
+;gpnam21: RECT.1
+;gpz21  : 2%
+;gpnam1 : SINE.100
+;gpz1   : 50%
