@@ -16,9 +16,6 @@ if __name__ == "__main__" and __package__ is None:
 
 from .poptimise import nelder_mead
 
-# TODO Determine minimum version of Python 3 on which this runs.
-#      Because of pathlib this is at least >= 3.4
-
 routine_id = None
 p_spectrum = None
 p_optlog = None
