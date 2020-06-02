@@ -27,8 +27,9 @@ tic = datetime.now()
 p_routines = p_poptpy / "routines"
 p_costfunctions = p_poptpy / "cost_functions"
 
-# Function counter decorator
+
 def deco_count(fn):
+    """Function counter decorator."""
     @wraps(fn)
     def counter(*args, **kwargs):
         counter.calls += 1
@@ -62,7 +63,7 @@ def main():
         print(fmt.format("Optimisation parameters", routine.pars), file=log)
         print(fmt.format("Cost function", routine.cf), file=log)
         print(fmt.format("Initial values", routine.init), file=log)
-        print("" , file=log)
+        print("", file=log)
         fmt = "{:^10s}  " * (npars + 1)
         print(fmt.format(*routine.pars, "cf"), file=log)
         print("-" * 12 * (npars + 1), file=log)
@@ -542,4 +543,3 @@ if __name__ == "__main__":
         print("Backend exception: {}({!r})".format(type(e).__name__,
                                                    e.args))
         raise  # Prints the full traceback to errlog.
-

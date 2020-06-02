@@ -12,13 +12,13 @@ def makep(expno, procno):
 
 def test_ppm_to_point():
     p_spec = makep(1, 1)
-    assert be.ppm_to_point(9, p_spec) == None  # out of range
+    assert be.ppm_to_point(9, p_spec) is None  # out of range
     assert be.ppm_to_point(6, p_spec) == 19658
     assert be.ppm_to_point(3, p_spec) == 39324
     # This one is mildly off. 58990 is the "index" in TopSpin, but ppm_to_point
     # calculates an index of 58989. See docstring of ppm_to_point.
     assert be.ppm_to_point(0, p_spec) == 58990 - 1
-    assert be.ppm_to_point(-3, p_spec) == None
+    assert be.ppm_to_point(-3, p_spec) is None
 
 
 def test_get_acqu_par():
@@ -37,9 +37,9 @@ def test_get_acqu_par():
     assert round(be.get_acqu_par("spw 20", p_spec), 8) == 0.00076827
     assert round(be.get_acqu_par("PLW 1", p_spec), 3) == 31.537
     # get_acqu_par refuses to read strings.
-    assert be.get_acqu_par("pulprog", p_spec) == None
+    assert be.get_acqu_par("pulprog", p_spec) is None
     # A nonexistent parameter
-    assert be.get_acqu_par("penguin", p_spec) == None
+    assert be.get_acqu_par("penguin", p_spec) is None
 
 
 def test_get_proc_par():
@@ -57,7 +57,7 @@ def test_get_proc_par():
     # And the seventh option.
     assert be.get_proc_par("ft_mod", p_spec) == 6
     # A nonexistent parameter
-    assert be.get_proc_par("penguin", p_spec) == None
+    assert be.get_proc_par("penguin", p_spec) is None
 
 
 def test_getpar():
@@ -72,7 +72,7 @@ def test_getpar():
     assert round(be.getpar("cnst20", p_spec), 4) == 25.6466
     assert round(be.getpar("spw 20", p_spec), 8) == 0.00076827
     assert round(be.getpar("PLW 1", p_spec), 3) == 31.537
-    assert be.getpar("pulprog", p_spec) == None
+    assert be.getpar("pulprog", p_spec) is None
 
     assert be.getpar("si", p_spec) == 65536
     assert be.getpar("lb", p_spec) == 0.30
@@ -84,7 +84,7 @@ def test_getpar():
     assert be.getpar("wdw", p_spec) == 1
     assert be.getpar("ft_mod", p_spec) == 6
 
-    assert be.getpar("penguin", p_spec) == None
+    assert be.getpar("penguin", p_spec) is None
 
 
 def test_scale_unscale():
@@ -95,4 +95,3 @@ def test_scale_unscale():
     lb, val, ub = mat[0], mat[1], mat[2]
     # Make sure that scaling and unscaling val gives val back again.
     assert np.allclose(be.unscale(be.scale(val, lb, ub), lb, ub), val)
-

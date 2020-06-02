@@ -36,21 +36,20 @@ class Simplex():
             # Rosenbrock with x0 = [1.3, 0.7, 0.8, 1.9, 1.2]: 472 nfev, 284 nit
             p = (1/(self.N * np.sqrt(2))) * (self.N - 1 + np.sqrt(self.N + 1))
             q = (1/(self.N * np.sqrt(2))) * (np.sqrt(self.N + 1) - 1)
-            l = length
             self.x[0] = self.x0
             for i in range(1, self.N + 1):
                 for j in range(self.N):
-                    self.x[i,j] = self.x0[j] + l*p \
-                        if j == i - 1 else self.x0[j] + l*q
+                    self.x[i, j] = self.x0[j] + length*p \
+                        if j == i - 1 else self.x0[j] + length*q
         elif method == "axis":
             # Axis-by-axis simplex. Each point is just x0 extended along
             # a different axis.
             # Rosenbrock with x0 = [1.3, 0.7, 0.8, 1.9, 1.2]: 566 nfev, 342 nit
             self.x[0] = self.x0
-            l = length
             for i in range(1, self.N + 1):
                 for j in range(self.N):
-                    self.x[i,j] = self.x0[j] + l if j == i - 1 else self.x0[j]
+                    self.x[i, j] = self.x0[j] + length \
+                        if j == i - 1 else self.x0[j]
         elif method == "random":
             # Every point except x0 is random.
             # Rosenbrock with x0 = [1.3, 0.7, 0.8, 1.9, 1.2]: 705 nfev, 431 nit
@@ -61,7 +60,7 @@ class Simplex():
                 self.x[i] = rng.uniform(size=self.N)
         elif method == "jon":
             # My own method. It isn't very good. Like, it works, but it's slow.
-            # Rosenbrock with x0  = [1.3, 0.7, 0.8, 1.9, 1.2]: 669 nfev, 409 nit
+            # Rosenbrock with x0 = [1.3, 0.7, 0.8, 1.9, 1.2]: 669 nfev, 409 nit
             # (average over 1000 iterations)
             self.x[0] = self.x0
             rng = np.random.default_rng()
@@ -118,6 +117,7 @@ class Simplex():
 class MaxFevalsReached(Exception):
     pass
 
+
 class MaxItersReached(Exception):
     pass
 
@@ -142,7 +142,6 @@ class OptResult:
     """
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
-
 
     def __repr__(self):
         return str(self.__dict__)
@@ -183,8 +182,8 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
                               general not equal to the number of experiments
                               acquired.
         o.simplex (ndarray) : (N+1, N)-sized matrix of the final simplex.
-        o.fvals (ndarray)   : List of corresponding cost functions at each point
-                              of the simplex.
+        o.fvals (ndarray)   : List of corresponding cost functions at each
+                              point of the simplex.
         o.message (str)     : Message indicating reason for termination.
     """
 
@@ -233,10 +232,11 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
         """
         simplex_range = np.amax(sim.x, axis=0) - np.amin(sim.x, axis=0)
         return all(np.less_equal(simplex_range, xtol))
-        ## Scipy convergence criteria. Assumes that the simplex is already
-        ## sorted. It is slightly looser (i.e. will converge before mine),
-        ## but hardly makes a difference to the average fevals (tested on
-        ## Rosenbrock function).
+        # Scipy convergence criteria. Assumes that the simplex is already
+        # sorted. It is slightly looser (i.e. will converge before mine),
+        # but hardly makes a difference to the average fevals (tested on
+        # Rosenbrock function).
+        #
         # return np.max(np.ravel(np.abs(sim[1:] - sim[0]))) <= xtol[0]
 
     # Decorate cost function so that it keeps tracks of nfev.
@@ -353,7 +353,8 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
                      message=message)
 
 
-def multid_search(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
+def multid_search(cf, x0, xtol, args=(), plot=False,
+                  simplex_method="spendley"):
     """
     Multidimensional search optimiser, as described in Secion 8.2 of Kelley,
     "Iterative Methods for Optimization".
@@ -384,8 +385,8 @@ def multid_search(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
                               general not equal to the number of experiments
                               acquired.
         o.simplex (ndarray) : (N+1, N)-sized matrix of the final simplex.
-        o.fvals (ndarray)   : List of corresponding cost functions at each point
-                              of the simplex.
+        o.fvals (ndarray)   : List of corresponding cost functions at each
+                              point of the simplex.
         o.message (str)     : Message indicating reason for termination.
     """
     # Convert x0 to vector
@@ -426,10 +427,11 @@ def multid_search(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
         """
         simplex_range = np.amax(sim.x, axis=0) - np.amin(sim.x, axis=0)
         return all(np.less_equal(simplex_range, xtol))
-        ## Scipy convergence criteria. Assumes that the simplex is already
-        ## sorted. It is slightly looser (i.e. will converge before mine),
-        ## but hardly makes a difference to the average fevals (tested on
-        ## Rosenbrock function).
+        # Scipy convergence criteria. Assumes that the simplex is already
+        # sorted. It is slightly looser (i.e. will converge before mine),
+        # but hardly makes a difference to the average fevals (tested on
+        # Rosenbrock function).
+        #
         # return np.max(np.ravel(np.abs(sim[1:] - sim[0]))) <= xtol[0]
 
     # Decorate cost function so that it keeps tracks of nfev.
@@ -515,5 +517,3 @@ def multid_search(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
                      niter=niter, nfev=cf.calls,
                      simplex=sim.x, fvals=sim.f,
                      message=message)
-
-

@@ -228,11 +228,11 @@ def list_files(path, ext=""):
     if os.path.isdir(path):
         if ext == "":
             return [i for i in os.listdir(path)
-                      if os.path.isfile(os.path.join(path, i))]
+                    if os.path.isfile(os.path.join(path, i))]
         else:
             return [os.path.splitext(i)[0] for i in os.listdir(path)
-                      if i.endswith(ext) and
-                         os.path.isfile(os.path.join(path, i))]
+                    if i.endswith(ext)
+                    and os.path.isfile(os.path.join(path, i))]
     else:
         return []
 

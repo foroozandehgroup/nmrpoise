@@ -4,4 +4,5 @@ def cost_function():
     sfo1 = getpar("SFO1")
     maxshift = (f + bw/2.0)/sfo1
     minshift = (f - bw/2.0)/sfo1
-    return -abs(np.sum(get_real_spectrum(None, maxshift)) + np.sum(get_real_spectrum(minshift, None)))
+    return -abs(np.sum(get_real_spectrum(None, maxshift)) +
+                np.sum(get_real_spectrum(minshift, None)))
