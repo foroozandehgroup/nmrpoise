@@ -22,19 +22,12 @@ def main():
     """
     Main routine.
     """
-    # Set verbosity of programme
-    global logging_level
-    logging_level = cst.DEBUG
-
     # Make sure user has opened a dataset
     if CURDATA() is None:
-        echo("no dataset found", cst.CRITICAL)
         err_exit("Please select a dataset!")
 
     # Check that dataset is 1D
     if GETACQUDIM() != 1:
-        echo("{}D dataset found -- only works for 1D".format(GETACQUDIM()),
-             cst.CRITICAL)
         err_exit("Please select a 1D dataset!\n"
                  "Currently poptpy does not work with "
                  "multidimensional experiments.")
@@ -49,13 +42,11 @@ def main():
 
     # Create or read the Routine object
     if routine_id is None:  # New routine was requested
-        echo("new routine selected", cst.DEBUG)
         routine = Routine(*get_new_routine_parameters())
         with open(os.path.join(p_routines, routine.name), "wb") as f:
             pickle.dump(routine, f)
         routine_id = routine.name
     else:  # Saved routine was requested
-        echo("routine {} selected".format(routine_id), cst.DEBUG)
         with open(os.path.join(p_routines, routine_id), "rb") as f:
             routine = pickle.load(f)
 
@@ -75,7 +66,6 @@ def main():
     # Run the backend script
     if not os.path.isfile(p_backend):
         err_exit("Backend script not found. Please reinstall poptpy.")
-    echo("Loading backend script...", cst.INFO)
 
     # We need to catch java.lang.Error so that cleanup can be performed
     # if the script is killed from within TopSpin. See #23.
@@ -109,7 +99,6 @@ def main():
                 elif line.startswith("values:"):
                     # Obtain the values and set them
                     values = line.split()[1:]
-                    echo("Setting parameters to: {}".format(values), cst.INFO)
                     if len(values) != len(routine.pars):
                         raise RuntimeError("invalid values passed from "
                                            "backend: '{}'".format(line))
@@ -181,11 +170,6 @@ class cst:
     """
     Constants used throughout the programme.
     """
-    # logging levels
-    DEBUG = 0
-    INFO = 1
-    WARNING = 2
-    CRITICAL = 3
     # TopSpin's internal codes for keypresses
     ENTER = -10
     ESCAPE = -27
@@ -202,26 +186,6 @@ def err_exit(error):
     """
     ERRMSG(title="poptpy", message=error)
     EXIT()
-
-
-def echo(message_str, level):
-    """
-    Prints text to TopSpin status bar if its importance is above a certain
-    threshold (logging_level).
-
-    Set logging_level = cst.DEBUG to get debugging info, cst.INFO for general
-    info, cst.WARNING for warnings and errors only, cst.CRITICAL for critical
-    errors only.
-
-    Arguments:
-        message_str (string): Message to be displayed.
-        level (int)         : Level of severity (cst.DEBUG, cst.INFO,
-                               cst.WARNING, cst.CRITICAL).
-
-    Returns: None.
-    """
-    if level >= logging_level:
-        SHOW_STATUS("poptpy: {}".format(message_str))
 
 
 def list_files(path, ext=""):
@@ -271,14 +235,12 @@ def get_routine_id():
         x = SELECT(title="poptpy",
                    message="Do you want to use a saved routine?",
                    buttons=["Yes", "No"])
-        echo("returned value {}".format(str(x)), cst.DEBUG)
 
         if x in [0, cst.ENTER]:  # user pressed Yes or Enter
             s = ", ".join(saved_routines)
             y = INPUT_DIALOG(title="poptpy: available routines",
                              header="Available routines: " + s,
                              items=["Routine:"])
-            echo("returned value {}".format(str(y)), cst.DEBUG)
 
             if y is None:  # user closed the dialog
                 EXIT()
@@ -318,7 +280,6 @@ def get_new_routine_parameters():
                         header="Please choose a name to save this routine as:",
                         items=["Name:"])
     if name is None or name[0].strip() == "":
-        echo("no name provided!", cst.CRITICAL)
         EXIT()
     name = name[0].replace(".py", "").strip()
 
@@ -330,7 +291,6 @@ def get_new_routine_parameters():
                             items=["Parameters:"])
     # Quit if nothing is given
     if opt_pars is None or opt_pars[0].strip() == "":
-        echo("no parameters provided!", cst.CRITICAL)
         EXIT()
     opt_pars = opt_pars[0].replace(",", " ").split()
     opt_pars = [i for i in opt_pars if i]  # remove empty strings
@@ -379,7 +339,6 @@ def get_new_routine_parameters():
     saved_cfs = list_files(p_costfunctions, ext=".py")
 
     if saved_cfs == []:
-        echo("no cost functions found", cst.CRITICAL)
         err_exit("No cost functions have been defined!\n"
                  "Please reinstall poptpy to get a default set, or define "
                  "your own cost function based on the documentation.")
@@ -388,13 +347,11 @@ def get_new_routine_parameters():
         x = INPUT_DIALOG(title="poptpy: choose a cost function...",
                          header="Available cost functions: " + s,
                          items=["Cost function:"])
-        echo("returned value {}".format(str(x)), cst.DEBUG)
         if x is None:  # user closed the dialog
             EXIT()
         elif x[0] in saved_cfs:
             cf = x[0]
         else:
-            echo("unknown cost function specified", cst.CRITICAL)
             err_exit("Cost function {} was not found. Exiting...".format(x[0]))
 
     return [name, opt_pars, lbs, ubs, inits, tols, cf]
@@ -410,13 +367,8 @@ def check_routine(routine):
     Returns: None.
     """
     try:
-        echo("routine.name = {}".format(routine.name), cst.DEBUG)
-        echo("routine.pars = {}".format(routine.pars), cst.DEBUG)
-        echo("routine.lb = {}".format(routine.lb), cst.DEBUG)
-        echo("routine.ub = {}".format(routine.ub), cst.DEBUG)
-        echo("routine.init = {}".format(routine.init), cst.DEBUG)
-        echo("routine.tol = {}".format(routine.tol), cst.DEBUG)
-        echo("routine.cf = {}".format(routine.cf), cst.DEBUG)
+        routine.name, routine.pars, routine.lb, routine.ub
+        routine.init, routine.tol, routine.cf
     except AttributeError:
         err_exit("The routine file is invalid.\n"
                  "Please delete it and recreate it from within poptpy.")
