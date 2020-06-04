@@ -23,6 +23,8 @@ p_poptpy = Path(__file__).parent.resolve()
 tic = datetime.now()
 p_routines = p_poptpy / "routines"
 p_costfunctions = p_poptpy / "cost_functions"
+spec_f1p = None
+spec_f2p = None
 
 
 def deco_count(fn):
@@ -64,6 +66,13 @@ def main():
         fmt = "{:^10s}  " * (npars + 1)
         print(fmt.format(*routine.pars, "cf"), file=log)
         print("-" * 12 * (npars + 1), file=log)
+
+    # Get F1P/F2P parameters
+    x, y = getpar("F1P"), getpar("F2P")
+    if x != 0 and y != 0 and x > y:
+        # Need to declare as global because we are assigning to the variable.
+        global spec_f1p, spec_f2p
+        spec_f1p, spec_f2p = x, y
 
     # Carry out the optimisation
     optimargs = (cost_function, routine.lb, routine.ub, p_spectrum, p_optlog)
@@ -319,31 +328,30 @@ def get_real_spectrum(left=None, right=None, epno=None, p_spec=None):
 
     p_spec = p_spectrum if p_spec is None else p_spec
     p_1r = p_spec / "1r"
-
     real_spec = np.fromfile(p_1r, dtype=np.int32)
     nc_proc = int(get_proc_par("NC_proc", p_spec))
     real_spec = real_spec * (2 ** nc_proc)
 
     if left is None and right is None:  # bounds not specified
-        return real_spec
+        if spec_f1p is None and spec_f2p is None:  # DPL not used
+            return real_spec
+        else:
+            left, right = spec_f1p, spec_f2p
 
     # Swap both bounds if they were both specified, but not in the right order
     if left is not None and right is not None and left < right:
-        temp = right
-        right = left
-        left = temp
+        left, right = right, left
 
     # Get default bounds
     si = int(get_proc_par("SI", p_spec))
-    leftn = 0
-    rightn = si - 1
+    left_point, right_point = 0, si - 1
     # Then replace them if necessary
     if left is not None:
-        leftn = ppm_to_point(left, p_spec)
+        left_point = ppm_to_point(left, p_spec)
     if right is not None:
-        rightn = ppm_to_point(right, p_spec)
+        right_point = ppm_to_point(right, p_spec)
 
-    return real_spec[leftn:rightn + 1]
+    return real_spec[left_point:right_point + 1]
 
 
 def get_imag_spectrum(left=None, right=None, epno=None, p_spec=None):
@@ -377,34 +385,33 @@ def get_imag_spectrum(left=None, right=None, epno=None, p_spec=None):
 
     p_spec = p_spectrum if p_spec is None else p_spec
     p_1i = p_spec / "1i"
-
     imag_spec = np.fromfile(p_1i, dtype=np.int32)
     nc_proc = int(get_proc_par("NC_proc", p_spec))
     imag_spec = imag_spec * (2 ** nc_proc)
 
     if left is None and right is None:  # bounds not specified
-        return imag_spec
+        if spec_f1p is None and spec_f2p is None:  # DPL not used
+            return imag_spec
+        else:
+            left, right = spec_f1p, spec_f2p
 
     # Swap both bounds if they were both specified, but not in the right order
     if left is not None and right is not None and left < right:
-        temp = right
-        right = left
-        left = temp
+        left, right = right, left
 
     # Get default bounds
     si = int(get_proc_par("SI", p_spec))
-    leftn = 0
-    rightn = si - 1
+    left_point, right_point = 0, si - 1
     # Then replace them if necessary
     if left is not None:
-        leftn = ppm_to_point(left, p_spec)
+        left_point = ppm_to_point(left, p_spec)
     if right is not None:
-        rightn = ppm_to_point(right, p_spec)
+        right_point = ppm_to_point(right, p_spec)
 
-    return imag_spec[leftn:rightn + 1]
+    return imag_spec[left_point:right_point + 1]
 
 
-def get_acqu_par(par, p_spec=p_spectrum):
+def get_acqu_par(par, p_spec=None):
     """
     Obtains the value of an acquisition parameter.
 
@@ -421,6 +428,9 @@ def get_acqu_par(par, p_spec=p_spectrum):
         (float) value of the acquisition parameter. None if the value is not a
                 number, or if the parameter doesn't exist.
     """
+    if p_spec is None:
+        p_spec = p_spectrum
+
     # Construct path to acqus file
     p_acqus = p_spec.parents[1] / "acqus"
 
@@ -466,7 +476,7 @@ def get_acqu_par(par, p_spec=p_spectrum):
                         return None
 
 
-def get_proc_par(par, p_spec=p_spectrum):
+def get_proc_par(par, p_spec=None):
     """
     Obtains the value of a processing parameter.
 
@@ -480,6 +490,9 @@ def get_proc_par(par, p_spec=p_spectrum):
         (float) value of the processing parameter. None if the value is not a
                 number, or if the parameter doesn't exist.
     """
+    if p_spec is None:
+        p_spec = p_spectrum
+
     # Construct path to procs file
     p_acqus = p_spec / "procs"
 
@@ -514,12 +527,9 @@ def getpar(par, p_spec=p_spectrum):
     Returns:
         (float) value of the parameter. None if the value is not a number,
                 or if the parameter doesn't exist.
-
     """
-    value = get_acqu_par(par, p_spec)
-    if value is None:
-        value = get_proc_par(par, p_spec)
-    return value
+    # The docstring is 14 lines. The code is 1 line. *rolls eyes*
+    return get_acqu_par(par, p_spec) or get_proc_par(par, p_spec)
 
 
 if __name__ == "__main__":
