@@ -76,66 +76,76 @@ def main():
     if not os.path.isfile(p_backend):
         err_exit("Backend script not found. Please reinstall poptpy.")
     echo("Loading backend script...", cst.INFO)
-    ferr = open(p_opterr, "a")
-    backend = subprocess.Popen([p_python3, '-u', p_backend],
-                               stdin=subprocess.PIPE,
-                               stdout=subprocess.PIPE,
-                               stderr=ferr)
-    # Pass key information to the backend script
-    print(routine_id, file=backend.stdin)
-    print(p_spectrum, file=backend.stdin)
-    backend.stdin.flush()
 
-    # Enter a loop where: 1) backend script passes values of acquisition params
-    #                        to frontend script
-    #                     2) frontend script runs acquisition
-    #                     3) frontend script passes "done" to backend script
-    #                        to indicate that it's done
-    # The loop is broken when the backend script passes "done" to the frontend
-    # script instead of a new set of values (in step 1).
-    # We wrap the whole thing in a try/except block so that we can catch
-    # invalid input passed from the backend.
+    # We need to catch java.lang.Error so that cleanup can be performed
+    # if the script is killed from within TopSpin. See #23.
     try:
-        while True:
-            line = backend.stdout.readline()
-            # Optimisation converged
-            if line.strip() == "done":
-                break
-            # New values to evaluate the cost function at.
-            elif line.startswith("values:"):
-                # Obtain the values and set them
-                values = line.split()[1:]
-                echo("Setting parameters to: {}".format(values), cst.INFO)
-                if len(values) != len(routine.pars):
-                    raise RuntimeError("invalid values passed from "
-                                       "backend: '{}'".format(line))
-                for value, par in zip(values, routine.pars):
-                    try:
-                        float(value)
-                    except ValueError:
+        ferr = open(p_opterr, "a")
+        backend = subprocess.Popen([p_python3, '-u', p_backend],
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE,
+                                   stderr=ferr)
+        # Pass key information to the backend script
+        print(routine_id, file=backend.stdin)
+        print(p_spectrum, file=backend.stdin)
+        backend.stdin.flush()
+
+        # Enter a loop where: 1) backend script passes values of acquisition
+        #                        params to frontend script
+        #                     2) frontend script runs acquisition
+        #                     3) frontend script passes "done" to backend
+        #                        script to indicate that it's done
+        # The loop is broken when the backend script passes "done" to the
+        # frontend # script instead of a new set of values (in step 1).
+        # We wrap this whole bit in a try/except block so that we can catch
+        # invalid input passed from the backend.
+        try:
+            while True:
+                line = backend.stdout.readline()
+                # Optimisation converged
+                if line.strip() == "done":
+                    break
+                # New values to evaluate the cost function at.
+                elif line.startswith("values:"):
+                    # Obtain the values and set them
+                    values = line.split()[1:]
+                    echo("Setting parameters to: {}".format(values), cst.INFO)
+                    if len(values) != len(routine.pars):
                         raise RuntimeError("invalid values passed from "
                                            "backend: '{}'".format(line))
-                    else:
-                        convert_name_and_putpar(par, value)
-                # Run acquisition and processing
-                XCMD("xau poptpy_au")
-                # Tell backend script it's done
-                print("done", file=backend.stdin)
-                backend.stdin.flush()
-            # Otherwise it would be an error. The entire main() routine in the
-            # backend is wrapped by a try/except which catches all exceptions
-            # and propagates them to the frontend by printing the traceback.
-            elif line.startswith("Backend exception: "):
-                raise RuntimeError(line)
-            else:
-                raise RuntimeError("uncaught backend error. Please check "
-                                   "error log for more information.")
-    except RuntimeError as e:
-        # Print the full traceback to the file
-        with open(p_opterr, "a") as fp:
-            print_exc(file=fp)
-        # Tell the error the immediate cause and exit
-        err_exit("error during acquisition loop:\n" + e.message)
+                    for value, par in zip(values, routine.pars):
+                        try:
+                            float(value)
+                        except ValueError:
+                            raise RuntimeError("invalid values passed from "
+                                               "backend: '{}'".format(line))
+                        else:
+                            convert_name_and_putpar(par, value)
+                    # Run acquisition and processing
+                    XCMD("xau poptpy_au")
+                    # Tell backend script it's done
+                    print("done", file=backend.stdin)
+                    backend.stdin.flush()
+                # Otherwise it would be an error. The entire main() routine in
+                # the backend is wrapped by a try/except which catches all
+                # exceptions and propagates them to the frontend by printing
+                # the traceback.
+                elif line.startswith("Backend exception: "):
+                    raise RuntimeError(line)
+                else:
+                    raise RuntimeError("uncaught backend error. Please check "
+                                       "error log for more information.")
+        except RuntimeError as e:
+            # Print the full traceback to the file
+            with open(p_opterr, "a") as fp:
+                print_exc(file=fp)
+            # Tell the error the immediate cause and exit
+            err_exit("error during acquisition loop:\n" + e.message)
+    # cleanup code
+    except Error:
+        backend.terminate()
+        ferr.close()
+        raise
 
     # If it reaches here, the optimisation should be done
     # Close error output file, delete it if it is empty
