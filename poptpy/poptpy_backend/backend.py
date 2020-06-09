@@ -245,7 +245,7 @@ def unscale(scaled_val, lb, ub):
 # ----------------------------------------
 
 
-def ppm_to_point(shift, p_spec=p_spectrum):
+def ppm_to_point(shift, p_spec=None):
     """
     Round a specific chemical shift to the nearest point in the spectrum.
 
@@ -264,6 +264,7 @@ def ppm_to_point(shift, p_spec=p_spectrum):
         (int): the desired point. None if the chemical shift lies outside the
                spectral window.
     """
+    p_spec = p_spec or p_spectrum
     si = get_proc_par("SI", p_spec)
     o1p = get_acqu_par("O1", p_spec) / get_acqu_par("SFO1", p_spec)
     sw = get_acqu_par("SW", p_spec)
@@ -326,7 +327,7 @@ def get_real_spectrum(left=None, right=None, epno=None, p_spec=None):
             raise ValueError("Please provide a valid [expno, procno] "
                              "combination.")
 
-    p_spec = p_spectrum if p_spec is None else p_spec
+    p_spec = p_spec or p_spectrum
     p_1r = p_spec / "1r"
     real_spec = np.fromfile(p_1r, dtype=np.int32)
     nc_proc = int(get_proc_par("NC_proc", p_spec))
@@ -383,7 +384,7 @@ def get_imag_spectrum(left=None, right=None, epno=None, p_spec=None):
             raise ValueError("Please provide a valid [expno, procno] "
                              "combination.")
 
-    p_spec = p_spectrum if p_spec is None else p_spec
+    p_spec = p_spec or p_spectrum
     p_1i = p_spec / "1i"
     imag_spec = np.fromfile(p_1i, dtype=np.int32)
     nc_proc = int(get_proc_par("NC_proc", p_spec))
@@ -428,8 +429,7 @@ def get_acqu_par(par, p_spec=None):
         (float) value of the acquisition parameter. None if the value is not a
                 number, or if the parameter doesn't exist.
     """
-    if p_spec is None:
-        p_spec = p_spectrum
+    p_spec = p_spec or p_spectrum
 
     # Construct path to acqus file
     p_acqus = p_spec.parents[1] / "acqus"
@@ -490,8 +490,7 @@ def get_proc_par(par, p_spec=None):
         (float) value of the processing parameter. None if the value is not a
                 number, or if the parameter doesn't exist.
     """
-    if p_spec is None:
-        p_spec = p_spectrum
+    p_spec = p_spec or p_spectrum
 
     # Construct path to procs file
     p_acqus = p_spec / "procs"
@@ -513,7 +512,7 @@ def get_proc_par(par, p_spec=None):
                     return None
 
 
-def getpar(par, p_spec=p_spectrum):
+def getpar(par, p_spec=None):
     """
     Obtains the value of an (acquisition or processing) parameter.
     Tries to search for an acquisition parameter first, then processing.
@@ -528,7 +527,8 @@ def getpar(par, p_spec=p_spectrum):
         (float) value of the parameter. None if the value is not a number,
                 or if the parameter doesn't exist.
     """
-    # The docstring is 14 lines. The code is 1 line. *rolls eyes*
+    # The docstring is 14 lines. The code is 2 lines. *rolls eyes*
+    p_spec = p_spec or p_spectrum
     return get_acqu_par(par, p_spec) or get_proc_par(par, p_spec)
 
 
