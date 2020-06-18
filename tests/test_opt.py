@@ -44,25 +44,31 @@ def test_NM_fevals():
 # MDS is very difficult to test with Rosenbrock because it converges awfully
 # slowly. See: Torczon (1989). https://scholarship.rice.edu/handle/1911/16304
 
-# def test_MDS_accuracy():
-#     optResult = multid_search(cf=rosenbrock, x0=x0, xtol=xtol,
-#                               simplex_method=simplex_method)
-#     assert np.all(np.isclose(optResult.xbest, np.ones(len(x0)), atol=1e-6))
+def quadratic(x):
+    return np.sum(x ** 2)
 
-# def test_MDS_iters():
-#     count = 0
-#     for i in range(nexpt):
-#         optResult = multid_search(cf=rosenbrock, x0=x0, xtol=xtol,
-#                                   simplex_method=simplex_method)
-#         count += optResult.niter
-#     count /= nexpt
-#     assert count < 450
 
-# def test_MDS_fevals():
-#     count = 0
-#     for i in range(nexpt):
-#         optResult = multid_search(cf=rosenbrock, x0=x0, xtol=xtol,
-#                                   simplex_method=simplex_method)
-#         count += optResult.nfev
-#     count /= nexpt
-#     assert count < 750
+def test_MDS_accuracy():
+    optResult = multid_search(cf=quadratic, x0=x0, xtol=xtol,
+                              simplex_method=simplex_method)
+    assert np.all(np.isclose(optResult.xbest, np.zeros(len(x0)), atol=1e-6))
+
+
+def test_MDS_iters():
+    count = 0
+    for i in range(nexpt):
+        optResult = multid_search(cf=quadratic, x0=x0, xtol=xtol,
+                                  simplex_method=simplex_method)
+        count += optResult.niter
+    count /= nexpt
+    assert count < 500
+
+
+def test_MDS_fevals():
+    count = 0
+    for i in range(nexpt):
+        optResult = multid_search(cf=quadratic, x0=x0, xtol=xtol,
+                                  simplex_method=simplex_method)
+        count += optResult.nfev
+    count /= nexpt
+    assert count < 1000

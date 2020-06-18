@@ -17,7 +17,9 @@ def main():
     poptpy_py_out = dirname / "poptpy/poptpy.py.out"
     # Iterate over lines in poptpy.py and print them to poptpy.py.out
     # Essentially this is sed -i behaviour.
-    with open(poptpy_py, "r") as infile, open(poptpy_py_out, "w") as outfile:
+    # open() only takes Path objects in >= 3.6
+    with open(str(poptpy_py), "r") as infile, \
+            open(str(poptpy_py_out), "w") as outfile:
         for line in infile:
             if line.startswith("p_python3 = "):
                 line = "p_python3 = r\"{}\"".format(Path(sys.executable))

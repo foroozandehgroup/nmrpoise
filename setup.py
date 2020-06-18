@@ -5,12 +5,17 @@ from setuptools import setup, find_packages
 from setuptools.command.install import install
 
 
-class poptpyInstall(install):
+class TopSpinInstall(install):
     def run(self):
         p = Path(__file__).parent.resolve()
         p_install = p / "topspin_install.py"
         subprocess.run([sys.executable, str(p_install)], check=True)
         super().run()
+
+
+class noTopSpinInstall(install):
+    """Doesn't install to TopSpin. Useful for testing."""
+    pass
 
 
 with open("README.md", "r") as fp:
@@ -37,5 +42,7 @@ setup(
     ],
     python_requires='>=3.5',
     install_requires=["numpy>=1.17.0"],
-    cmdclass={"install": poptpyInstall},
+    cmdclass={"install": TopSpinInstall,
+              "notopspin": noTopSpinInstall,
+    }
 )

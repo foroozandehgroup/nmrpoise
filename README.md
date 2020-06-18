@@ -1,3 +1,5 @@
+[![Travis CI Build Status](https://travis-ci.com/yongrenjie/poptpy.svg?branch=master)](https://travis-ci.com/github/yongrenjie/poptpy)
+
 # poptpy
 
 A series of Python scripts for the numerical optimisation of NMR parameters, running in Bruker's TopSpin software.

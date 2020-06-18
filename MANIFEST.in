@@ -1,4 +1,4 @@
-include install/*
+include topspin_install.py
 include poptpy/*
 include poptpy/poptpy_backend/*
 include poptpy/poptpy_backend/cost_functions/*
