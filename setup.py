@@ -8,7 +8,7 @@ from setuptools.command.install import install
 class poptpyInstall(install):
     def run(self):
         p = Path(__file__).parent.resolve()
-        p_install = p / "install" / "INSTALL.py"
+        p_install = p / "topspin_install.py"
         subprocess.run([sys.executable, str(p_install)], check=True)
         super().run()
 
