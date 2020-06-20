@@ -2,9 +2,10 @@ from __future__ import division, with_statement, print_function
 
 import os
 import re
-import pickle
+import json
 import subprocess
 from traceback import print_exc
+from collections import namedtuple
 
 from de.bruker.nmr.mfw.root.UtilPath import getTopspinHome
 from de.bruker.nmr.prsc.dbxml.ParfileLocator import getParfileDirs
@@ -18,6 +19,8 @@ p_costfunctions = os.path.join(p_poptpy, "cost_functions")
 p_optlog = os.path.join(p_poptpy, "poptpy.log")
 p_opterr = os.path.join(p_poptpy, "poptpy_err.log")
 p_python3 = "/usr/local/bin/python3"
+
+Routine = namedtuple("Routine", "name pars lb ub init tol cf")
 
 
 def main():
@@ -46,11 +49,11 @@ def main():
     if routine_id is None:  # New routine was requested
         routine = Routine(*get_new_routine_parameters())
         with open(os.path.join(p_routines, routine.name), "wb") as f:
-            pickle.dump(routine, f)
+            json.dump(routine._asdict(), f)
         routine_id = routine.name
     else:  # Saved routine was requested
         with open(os.path.join(p_routines, routine_id), "rb") as f:
-            routine = pickle.load(f)
+            routine = Routine(**json.load(f))
 
     # Check that the Routine object is valid
     check_routine(routine)
@@ -158,17 +161,6 @@ def main():
     MSG(s)
     # TODO: Prompt user to save optima found (can overwrite the routine file)
     EXIT()
-
-
-class Routine:
-    def __init__(self, name, pars, lb, ub, init, tol, cf):
-        self.name = name
-        self.pars = pars
-        self.lb = lb
-        self.ub = ub
-        self.init = init
-        self.tol = tol
-        self.cf = cf
 
 
 class cst:

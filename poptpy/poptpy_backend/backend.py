@@ -1,9 +1,10 @@
 import sys
-import pickle
+import json
 from traceback import print_exc
 from functools import wraps
 from datetime import datetime
 from pathlib import Path
+from collections import namedtuple
 
 import numpy as np
 
@@ -26,6 +27,8 @@ p_costfunctions = p_poptpy / "cost_functions"
 spec_f1p = None
 spec_f2p = None
 
+Routine = namedtuple("Routine", "name pars lb ub init tol cf")
+
 
 def deco_count(fn):
     """Function counter decorator."""
@@ -43,7 +46,7 @@ def main():
     """
     # Load the routine
     with open(p_routines / routine_id, "rb") as f:
-        routine = pickle.load(f)
+        routine = Routine(**json.load(f))
     # Load the cost function
     cost_function = get_cf_function(routine.cf)
 
@@ -96,17 +99,6 @@ def main():
         print(fmt.format("Number of spectra ran", send_values.calls),
               file=log)
         print(fmt.format("Total time taken", time_taken), file=log)
-
-
-class Routine:
-    def __init__(self, name, pars, lb, ub, init, tol, cf):
-        self.name = name
-        self.pars = pars
-        self.lb = lb
-        self.ub = ub
-        self.init = init
-        self.tol = tol
-        self.cf = cf
 
 
 def get_cf_function(cf_name):
@@ -183,24 +175,6 @@ def send_values(unscaled_val):
     This needs to be a separate function so that we can decorate it.
     """
     print("values: " + " ".join([str(i) for i in unscaled_val]))
-
-
-def read_routine(routine_name, p_rout=None):
-    """
-    Reads a routine from the p_routines subdirectory.
-
-    Arguments:
-        routine_name (str)   : Name of routine to be read in.
-        p_rout (pathlib.Path): Path to the routine folder. Defaults to the
-                               global variable p_routines.
-
-    Returns: Routine object.
-    """
-    p_rout = p_rout or p_routines
-    path = p_rout / routine_name
-    with open(path, "rb") as f:
-        routine = pickle.load(f)
-    return routine
 
 
 def scale(val, lb, ub):
