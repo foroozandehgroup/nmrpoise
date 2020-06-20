@@ -20,7 +20,6 @@ class Simplex():
                       - "axis"     : Simplex extended along each axis by a
                                      fixed length from x0.
                       - "random"   : Every point is randomly generated in [0,1]
-                      - "jon"      : It's not very good. Don't do this.
             length : A measure of the size of the initial simplex.
         """
         self.x0 = np.ravel(np.asfarray(x0))
@@ -58,18 +57,6 @@ class Simplex():
             rng = np.random.default_rng()
             for i in range(1, self.N + 1):
                 self.x[i] = rng.uniform(size=self.N)
-        elif method == "jon":
-            # My own method. It isn't very good. Like, it works, but it's slow.
-            # Rosenbrock with x0 = [1.3, 0.7, 0.8, 1.9, 1.2]: 669 nfev, 409 nit
-            # (average over 1000 iterations)
-            self.x[0] = self.x0
-            rng = np.random.default_rng()
-            for k in range(self.N):
-                # Each point x_i (\neq x_0) is equal to x_0 \pm [0.2, 0.4).
-                y = self.x0.copy()
-                y = y + (rng.uniform(0.2, 0.4, self.N) *
-                         rng.choice([1, -1], self.N))
-                self.x[k + 1] = y
         else:
             raise ValueError("invalid simplex generation method "
                              "'{}' specified".format(method))
