@@ -98,9 +98,20 @@ def test_scale_unscale():
     assert np.allclose(be.unscale(be.scale(val, lb, ub), lb, ub), val)
 
 
-def test_get_cf_function():
-    cf_name = "specdiff"
-    cf = be.get_cf_function(cf_name)
+def test_get_routine_cf():
+    routine_id = "test_routine"   # serialised by TS 4.0.8, macOS 10.15.5
+    p_routine_dir = Path(__file__).parent / "test_data"
+    p_cf_dir = (Path(__file__).parents[1] / "poptpy" /
+                "poptpy_backend" / "cost_functions")
+
+    routine, cf = be.get_routine_cf(routine_id, p_routine_dir, p_cf_dir)
+    assert routine.name == "test_routine"
+    assert routine.pars == ["p1", "cnst20"]
+    assert routine.lb == [10, 0.2]
+    assert routine.ub == [20, 0.4]
+    assert routine.init == [15, 0.3]
+    assert routine.tol == [0.2, 0.00015]
+    assert routine.cf == "specdiff"
     assert cf.__doc__.strip() == ("Obtains the distance between the current "
                                   "spectrum and a target spectrum.")
 

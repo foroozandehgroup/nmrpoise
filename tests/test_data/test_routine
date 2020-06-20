@@ -1,0 +1,1 @@
+{"name": "test_routine", "pars": ["p1", "cnst20"], "lb": [10.0, 0.2], "ub": [20.0, 0.4], "init": [15.0, 0.3], "tol": [0.2, 0.00015], "cf": "specdiff"}

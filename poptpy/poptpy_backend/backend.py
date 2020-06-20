@@ -22,8 +22,6 @@ p_spectrum = None
 p_optlog = None
 p_poptpy = Path(__file__).parent.resolve()
 tic = datetime.now()
-p_routines = p_poptpy / "routines"
-p_costfunctions = p_poptpy / "cost_functions"
 spec_f1p = None
 spec_f2p = None
 
@@ -44,11 +42,8 @@ def main():
     """
     Main routine.
     """
-    # Load the routine
-    with open(p_routines / routine_id, "rb") as f:
-        routine = Routine(**json.load(f))
-    # Load the cost function
-    cost_function = get_cf_function(routine.cf)
+    # Load the routine and cost function.
+    routine, cost_function = get_routine_cf(routine_id)
 
     # Scale the initial values and tolerances
     npars = len(routine.pars)
@@ -101,14 +96,34 @@ def main():
         print(fmt.format("Total time taken", time_taken), file=log)
 
 
-def get_cf_function(cf_name):
+def get_routine_cf(routine_id, p_routine_dir=None, p_cf_dir=None):
     """
-    Finds the cost function script and exec's it, returning the function
-    defined inside it.
+    First finds the routine file and instantiates a Routine. Then finds the
+    associated cost function script and exec's it.
+
+    Arguments:
+        routine_id (str)            : Name of the routine being used.
+        p_routine_dir (pathlib.Path): Path to the folder containing the
+                                      routines. Defaults to the "routines"
+                                      directory in p_poptpy.
+        p_cf_dir (pathlib.Path)     : Path to the folder containing the
+                                      cost functions. Defaults to the
+                                      "cost_functions" directory in p_poptpy.
+
+    Returns:
+        Tuple of (Routine, function).
     """
-    p_cf = p_costfunctions / (cf_name + ".py")
+    # Load the routine.
+    p_routine_dir = p_routine_dir or (p_poptpy / "routines")
+    with open(p_routine_dir / routine_id, "rb") as f:
+        routine = Routine(**json.load(f))
+
+    # Load the cost function
+    p_cf_dir = p_cf_dir or (p_poptpy / "cost_functions")
+    cf_name = routine.cf
+    p_cf_file = p_cf_dir / (cf_name + ".py")
     ld = {}
-    exec(open(p_cf).read(), globals(), ld)
+    exec(open(p_cf_file).read(), globals(), ld)
     # in p_cf, the cost function is defined as cost_function().
     # executing the file will define it for us
     # but see also https://stackoverflow.com/questions/1463306/
@@ -119,7 +134,7 @@ def get_cf_function(cf_name):
             cost_function = ld[list(ld)[0]]
         else:
             raise
-    return cost_function
+    return routine, cost_function
 
 
 @deco_count
@@ -306,6 +321,7 @@ def get_real_spectrum(left=None, right=None, epno=None, p_spec=None):
     # Check whether user has specified epno
     if epno is not None:
         if len(epno) == 2:
+            p_spec = p_spec or p_spectrum
             p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
         else:
             raise ValueError("Please provide a valid [expno, procno] "
