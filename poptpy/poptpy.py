@@ -1,14 +1,16 @@
 from __future__ import division, with_statement, print_function
 
 import os
+import re
 import pickle
 import subprocess
 from traceback import print_exc
 
-import de.bruker.nmr.mfw.root.UtilPath as up
+from de.bruker.nmr.mfw.root.UtilPath import getTopspinHome
+from de.bruker.nmr.prsc.dbxml.ParfileLocator import getParfileDirs
 
 
-tshome = up.getTopspinHome()  # use tshome to avoid installer overwriting
+tshome = getTopspinHome()  # use tshome to avoid installer overwriting
 p_poptpy = os.path.join(tshome, "exp/stan/nmr/py/user/poptpy_backend")
 p_backend = os.path.join(p_poptpy, "backend.py")
 p_routines = os.path.join(p_poptpy, "routines")
@@ -110,6 +112,9 @@ def main():
                                                "backend: '{}'".format(line))
                         else:
                             convert_name_and_putpar(par, value)
+                    # Generate WaveMaker shapes if necessary
+                    if pulprog_contains_wvm():
+                        XCMD("wvm -q")
                     # Run acquisition and processing
                     XCMD("xau poptpy_au")
                     # Tell backend script it's done
@@ -493,6 +498,30 @@ def process_values(parname, input_string):
     except ValueError:
         err_exit("'{}' was not a valid input for {}. "
                  "Please try again.".format(input_string, parname))
+
+
+def pulprog_contains_wvm():
+    """
+    Checks if the currently active pulse programme uses WaveMaker pulses.
+
+    Returns: True if it does, False if it doesn't.
+    """
+    ppname = GETPAR("PULPROG")
+
+    # Get path to the pulse programme text
+    ppdirs = getParfileDirs(0)
+    for ppdir in ppdirs:
+        if ppname in os.listdir(ppdir):
+            fname = os.path.join(ppdir, ppname)
+            break
+
+    # Search for lines containing WaveMaker directives
+    wvm_rgx = re.compile(r"^\s*;[A-Za-z0-9]+:wvm:")
+    with open(fname, "r") as file:
+        for line in file:
+            if re.search(wvm_rgx, line):
+                return True
+    return False
 
 
 def create_au_prog():
