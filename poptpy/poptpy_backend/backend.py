@@ -185,16 +185,19 @@ def send_values(unscaled_val):
     print("values: " + " ".join([str(i) for i in unscaled_val]))
 
 
-def read_routine(routine_name):
+def read_routine(routine_name, p_rout=None):
     """
     Reads a routine from the p_routines subdirectory.
 
     Arguments:
-        routine_name (str): Name of routine to be read in.
+        routine_name (str)   : Name of routine to be read in.
+        p_rout (pathlib.Path): Path to the routine folder. Defaults to the
+                               global variable p_routines.
 
     Returns: Routine object.
     """
-    path = p_routines / routine_name
+    p_rout = p_rout or p_routines
+    path = p_rout / routine_name
     with open(path, "rb") as f:
         routine = pickle.load(f)
     return routine
@@ -281,15 +284,22 @@ def ppm_to_point(shift, p_spec=None):
     return int(x)
 
 
-def get_fid():
+def get_fid(p_spec=None):
     """
     Returns the FID as a (complex) np.ndarray.
     Needs the global variable p_spectrum to be set.
 
     Note that this does *not* deal with the "group delay" at the beginning
     of the FID.
+
+    Arguments:
+        p_spec (pathlib.Path) : Path to the spectrum being optimised.
+
+    Returns:
+        (np.ndarray) Array containing the FID.
     """
-    p_fid = p_spectrum.parents[1] / "fid"
+    p_spec = p_spec or p_spectrum
+    p_fid = p_spec.parents[1] / "fid"
     fid = np.fromfile(p_fid, dtype=np.int32)
     td = fid.size
     fid = fid.reshape(int(td/2), 2)

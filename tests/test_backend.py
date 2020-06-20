@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 
 import poptpy.poptpy_backend.backend as be
+from poptpy.poptpy_backend.backend import Routine
 
 
 def makep(expno, procno):
@@ -95,3 +96,104 @@ def test_scale_unscale():
     lb, val, ub = mat[0], mat[1], mat[2]
     # Make sure that scaling and unscaling val gives val back again.
     assert np.allclose(be.unscale(be.scale(val, lb, ub), lb, ub), val)
+
+
+def test_get_cf_function():
+    cf_name = "specdiff"
+    cf = be.get_cf_function(cf_name)
+    assert cf.__doc__.strip() == ("Obtains the distance between the current "
+                                  "spectrum and a target spectrum.")
+
+
+def test_get_real_spectrum():
+    p_spec = makep(1, 1)
+    real = be.get_real_spectrum(p_spec=p_spec)
+    npff = np.fromfile(p_spec / "1r", dtype=np.int32)
+    assert be.getpar("NC_proc", p_spec) == -8
+    assert np.array_equal(real, npff * (2 ** -8))
+
+    # Check whether bounds work
+    left, right = 4, 6
+    lpoint = be.ppm_to_point(left, p_spec)
+    rpoint = be.ppm_to_point(right, p_spec)
+    lpoint, rpoint = sorted([lpoint, rpoint])  # if left < right
+    subarray = be.get_real_spectrum(left=left, right=right, p_spec=p_spec)
+    assert np.array_equal(subarray, npff[lpoint:rpoint + 1] * (2 ** -8))
+
+    left, right = 6, 4
+    lpoint = be.ppm_to_point(left, p_spec)
+    rpoint = be.ppm_to_point(right, p_spec)
+    lpoint, rpoint = sorted([lpoint, rpoint])  # if left < right
+    subarray = be.get_real_spectrum(left=left, right=right, p_spec=p_spec)
+    assert np.array_equal(subarray, npff[lpoint:rpoint + 1] * (2 ** -8))
+
+    left, right = 6, None
+    lpoint = be.ppm_to_point(left, p_spec)
+    si = int(be.getpar("si", p_spec))
+    subarray = be.get_real_spectrum(left=left, right=right, p_spec=p_spec)
+    assert np.array_equal(subarray, npff[lpoint:si] * (2 ** -8))
+
+    left, right = None, 6
+    rpoint = be.ppm_to_point(right, p_spec)
+    subarray = be.get_real_spectrum(left=left, right=right, p_spec=p_spec)
+    assert np.array_equal(subarray, npff[0:rpoint + 1] * (2 ** -8))
+
+
+def test_get_imag_spectrum():
+    p_spec = makep(1, 1)
+    imag = be.get_imag_spectrum(p_spec=p_spec)
+    npff = np.fromfile(p_spec / "1i", dtype=np.int32)
+    assert be.getpar("NC_proc", p_spec) == -8
+    assert np.array_equal(imag, npff * (2 ** -8))
+
+    # Check whether bounds work
+    left, right = 4, 6
+    lpoint = be.ppm_to_point(left, p_spec)
+    rpoint = be.ppm_to_point(right, p_spec)
+    lpoint, rpoint = sorted([lpoint, rpoint])  # if left < right
+    subarray = be.get_imag_spectrum(left=left, right=right, p_spec=p_spec)
+    assert np.array_equal(subarray, npff[lpoint:rpoint + 1] * (2 ** -8))
+
+    left, right = 6, 4
+    lpoint = be.ppm_to_point(left, p_spec)
+    rpoint = be.ppm_to_point(right, p_spec)
+    lpoint, rpoint = sorted([lpoint, rpoint])  # if left < right
+    subarray = be.get_imag_spectrum(left=left, right=right, p_spec=p_spec)
+    assert np.array_equal(subarray, npff[lpoint:rpoint + 1] * (2 ** -8))
+
+    left, right = 6, None
+    lpoint = be.ppm_to_point(left, p_spec)
+    si = int(be.getpar("si", p_spec))
+    subarray = be.get_imag_spectrum(left=left, right=right, p_spec=p_spec)
+    assert np.array_equal(subarray, npff[lpoint:si] * (2 ** -8))
+
+    left, right = None, 6
+    rpoint = be.ppm_to_point(right, p_spec)
+    subarray = be.get_imag_spectrum(left=left, right=right, p_spec=p_spec)
+    assert np.array_equal(subarray, npff[0:rpoint + 1] * (2 ** -8))
+
+
+def test_get_fid():
+    p_spec = makep(1, 1)
+    fid = be.get_fid(p_spec)
+
+    npff = np.fromfile(p_spec.parents[1] / "fid", dtype=np.int32)
+
+    assert np.array_equal(np.real(fid), npff[0::2])
+    assert np.array_equal(np.imag(fid), npff[1::2])
+
+
+def test_deco_count():
+    @be.deco_count
+    def peep():
+        print("PEEP")
+
+    n = 10
+    for i in range(n):
+        peep()
+    assert peep.calls == n
+
+
+def test_send_values(capsys):
+    be.send_values([0.1, 0.2, 0.3, 0.4, 0.5])
+    assert capsys.readouterr().out == "values: 0.1 0.2 0.3 0.4 0.5\n"
