@@ -27,7 +27,7 @@ def delete_file_force(path):
 
 @pytest.mark.skipif(all(host not in platform.node()
                         for host in hostname_to_tspath_dict.keys()),
-                    reason="Testing on {} is not supported.".format(hostname))
+                    reason=f"Testing on {hostname} is not supported.")
 def test_topspin_installation(tmpdir):
     # Path to TopSpin py/user.
     for host in hostname_to_tspath_dict.keys():

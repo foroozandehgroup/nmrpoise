@@ -179,8 +179,7 @@ def acquire_nmr(x, cost_function, lb, ub, p_spectrum, p_optlog):
             print(fmt.format(*unscaled_val, cf_val), file=log)
             return cf_val
         else:
-            raise ValueError("Incorrect signal passed from frontend: "
-                             "{}".format(signal))
+            raise ValueError(f"Invalid signal passed from frontend: {signal}")
 
 
 @deco_count
@@ -450,7 +449,7 @@ def get_acqu_par(par, p_spec=None):
         with open(p_acqus, "r") as file:
             # Read up to the line declaring the parameters
             for line in file:
-                if line.upper().startswith("##${}=".format(parl)):
+                if line.upper().startswith(f"##${parl}="):
                     break
             # Grab the values and put them in a list
             s = ""
@@ -468,7 +467,7 @@ def get_acqu_par(par, p_spec=None):
     else:                                             # e.g. sfo1 or rga
         with open(p_acqus, "r") as file:
             for line in file:
-                if line.upper().startswith("##${}=".format(par)):
+                if line.upper().startswith(f"##${par}="):
                     try:
                         value = float(line.split()[-1].strip())
                         return value
@@ -504,7 +503,7 @@ def get_proc_par(par, p_spec=None):
     # CNST/D/P)
     with open(p_acqus, "r") as file:
         for line in file:
-            if line.upper().startswith("##${}=".format(par)):
+            if line.upper().startswith(f"##${par}="):
                 try:
                     value = float(line.split()[-1].strip())
                     return value
@@ -547,6 +546,5 @@ if __name__ == "__main__":
         # Because the frontend is only reading one line at a time, there's
         # no point in printing the entire traceback. Thus we just print a
         # very short summary line.
-        print("Backend exception: {}({!r})".format(type(e).__name__,
-                                                   e.args))
+        print(f"Backend exception: {type(e).__name__}({repr(e.args)})")
         raise  # Prints the full traceback to errlog.

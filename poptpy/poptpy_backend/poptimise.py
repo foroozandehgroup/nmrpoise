@@ -58,8 +58,8 @@ class Simplex():
             for i in range(1, self.N + 1):
                 self.x[i] = rng.uniform(size=self.N)
         else:
-            raise ValueError("invalid simplex generation method "
-                             "'{}' specified".format(method))
+            raise ValueError(f"invalid simplex generation method "
+                             "'{method}' specified")
 
     def sort(self):
         """

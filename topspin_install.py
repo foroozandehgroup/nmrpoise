@@ -22,12 +22,11 @@ def main():
             open(str(poptpy_py_out), "w") as outfile:
         for line in infile:
             if line.startswith("p_python3 = "):
-                line = "p_python3 = r\"{}\"".format(Path(sys.executable))
+                line = f"p_python3 = r\"{Path(sys.executable)}\""
             # Use rstrip() to remove extra newlines since print() already
             # includes one for us.
             print(line.rstrip(), file=outfile)
     # Replace the old file with the new file.
-    # We need str() to support Python 3.5
     copy_file(str(poptpy_py_out), str(poptpy_py))
 
     # Find TopSpin installation path.
