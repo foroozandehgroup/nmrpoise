@@ -16,7 +16,6 @@ p_poptpy = os.path.join(tshome, "exp/stan/nmr/py/user/poptpy_backend")
 p_backend = os.path.join(p_poptpy, "backend.py")
 p_routines = os.path.join(p_poptpy, "routines")
 p_costfunctions = os.path.join(p_poptpy, "cost_functions")
-p_optlog = os.path.join(p_poptpy, "poptpy.log")
 p_opterr = os.path.join(p_poptpy, "poptpy_err.log")
 p_python3 = "/usr/local/bin/python3"
 
@@ -153,6 +152,8 @@ def main():
     line = backend.stdout.readline()
     optima = line.split()
     s = ""
+    x = CURDATA()
+    p_optlog = os.path.join(x[3], x[0], x[1], "poptpy.log")
     for par, optimum in zip(routine.pars, optima):
         s = s + "Optimal value for {}: {}\n".format(par, optimum)
         convert_name_and_putpar(par, optimum)

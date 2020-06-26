@@ -24,7 +24,7 @@ with open("README.md", "r") as fp:
 
 setup(
     name="ts-poptpy",
-    version="0.1.5",
+    version="0.1.6",
     author="Jonathan Yong",
     author_email="yongrenjie@gmail.com",
     description="NMR parameter optimisation in TopSpin",
