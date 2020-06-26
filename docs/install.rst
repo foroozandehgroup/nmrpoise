@@ -9,6 +9,8 @@ On top of the existing Python implementation in TopSpin, **poptpy further requir
 
 poptpy also uses the **numpy** package (version >= 1.17.0).
 
+If you would like to use the `BOBYQA algorithm <https://github.com/numericalalgorithmsgroup/pybobyqa>`_ for the optimisation, you additionally need the **scipy**, **pandas**, and **Py-BOBYQA** packages. All can be downloaded via ``pip``.
+
 
 From PyPI
 ---------
@@ -16,6 +18,10 @@ From PyPI
 poptpy can be installed directly using ``pip``::
 
     pip install ts-poptpy
+
+If you would like to use the BOBYQA optimiser, run::
+
+    pip install ts-poptpy[bobyqa]
 
 The installer attempts to detect your TopSpin installation directory and add the necessary files there.
 The most probable reason for failure is if the path to the TopSpin installation cannot be uniquely identified.
