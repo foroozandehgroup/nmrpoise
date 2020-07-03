@@ -453,6 +453,7 @@ def convert_name_and_putpar(name, val):
         val = float(val)
         PUTPAR(ts_name, str(val))
     except ValueError:
+        raise
         err_exit("The value {} for parameter {} "
                  "was invalid.".format(val, name))
 

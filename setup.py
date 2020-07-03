@@ -24,7 +24,7 @@ with open("README.md", "r") as fp:
 
 setup(
     name="ts-poptpy",
-    version="0.1.6",
+    version="0.1.7",
     author="Jonathan Yong",
     author_email="yongrenjie@gmail.com",
     description="NMR parameter optimisation in TopSpin",
@@ -42,6 +42,9 @@ setup(
     ],
     python_requires='>=3.5',
     install_requires=["numpy>=1.17.0"],
+    extras_require={
+        "bobyqa": ["scipy", "pandas", "Py-BOBYQA"]
+    },
     cmdclass={"install": TopSpinInstall,
               "notopspin": noTopSpinInstall,
     }

@@ -504,3 +504,34 @@ def multid_search(cf, x0, xtol, args=(), plot=False,
                      niter=niter, nfev=cf.calls,
                      simplex=sim.x, fvals=sim.f,
                      message=message)
+
+
+def pybobyqa_interface(cf, x0, xtol, args=(), plot=False):
+    # This should be optional, i.e. we shouldn't force people to install it.
+    try:
+        import pybobyqa as pb
+    except ImportError:
+        # Give a nice useful message.
+        raise ImportError("The Py-BOBYQA package and/or its dependencies "
+                          "have not been installed. Please install them "
+                          "before using the Py-BOBYQA optimiser.")
+    x0 = np.asfarray(x0).flatten()
+    # Instead of returning np.inf when x is out of bounds, we'll use
+    # PyBOBYQA's bounds argument. But first we need to calculate the bounds.
+    # The unscaled bounds are attributes of the Routine object which is the
+    # second element of args.
+    r = args[1]
+    lb, ub, tol = (np.array(i) for i in (r.lb, r.ub, r.tol))
+    scaled_lb = (lb - lb) * 0.03 / tol
+    scaled_ub = (ub - lb) * 0.03 / tol
+    # Run the optimisation.
+    pb_sol = pb.solve(cf, x0, args=args,
+                      rhobeg=min(0.3, max(ub)), rhoend=0.03,
+                      bounds=(scaled_lb, scaled_ub), objfun_has_noise=True,
+                      user_params={'restarts.use_restarts': False})
+    # We just need to coerce the returned information into our OptResult
+    # format, so that the backend sees a unified interface for all optimisers.
+    # Note that niter is not applicable to PyBOBYQA.
+    return OptResult(xbest=pb_sol.x, fbest=pb_sol.f,
+                     niter=0, nfev=pb_sol.nf,
+                     message=pb_sol.msg)

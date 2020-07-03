@@ -15,7 +15,9 @@ if __name__ == "__main__" and __package__ is None:
     sys.path.insert(1, str(Path(__file__).parents[1].resolve()))
     __import__(__package__)
 
-from .poptimise import nelder_mead
+from .poptimise import nelder_mead, multid_search, pybobyqa_interface
+
+optimiser = "bobyqa"  # "nm", "mds", or "bobyqa". Case-insensitive.
 
 routine_id = None
 p_spectrum = None
@@ -24,7 +26,6 @@ p_poptpy = Path(__file__).parent.resolve()
 tic = datetime.now()
 spec_f1p = None
 spec_f2p = None
-
 Routine = namedtuple("Routine", "name pars lb ub init tol cf")
 
 
@@ -45,11 +46,25 @@ def main():
     # Load the routine and cost function.
     routine, cost_function = get_routine_cf(routine_id)
 
+    # Check that the optimiser is set to a legitimate value.
+    global optimiser
+    # Choose the optimisation function. poptimise implements a PyBOBYQA
+    # interface so that the returned result has the same attributes as our
+    # other optimisers.
+    optimfndict = {"nm": nelder_mead,
+                   "mds": multid_search,
+                   "bobyqa": pybobyqa_interface
+                   }
+    try:
+        optimfn = optimfndict[optimiser.lower()]
+    except KeyError:
+        raise ValueError(f"Invalid optimiser {optimiser} specified.")
+
     # Scale the initial values and tolerances
     npars = len(routine.pars)
-    x0 = scale(routine.init, routine.lb, routine.ub)
-    xtol = np.array(routine.tol) / (np.array(routine.ub) -
-                                    np.array(routine.lb))
+    scaleby = "bounds" if optimiser in ["nm", "mds"] else "tols"
+    x0, _, _, xtol = scale(routine.init, routine.lb,
+                           routine.ub, routine.tol, scaleby=scaleby)
 
     # Some logging
     with open(p_optlog, "a") as log:
@@ -60,6 +75,7 @@ def main():
         print(fmt.format("Optimisation parameters", routine.pars), file=log)
         print(fmt.format("Cost function", routine.cf), file=log)
         print(fmt.format("Initial values", routine.init), file=log)
+        print(fmt.format("Optimisation algorithm", optimiser), file=log)
         print("", file=log)
         fmt = "{:^10s}  " * (npars + 1)
         print(fmt.format(*routine.pars, "cf"), file=log)
@@ -72,13 +88,16 @@ def main():
         global spec_f1p, spec_f2p
         spec_f1p, spec_f2p = x, y
 
+    # Set up optimisation arguments
+    optimargs = (cost_function, routine)
     # Carry out the optimisation
-    optimargs = (cost_function, routine.lb, routine.ub, p_spectrum, p_optlog)
-    opt_result = nelder_mead(acquire_nmr, x0, xtol, optimargs, plot=False)
+    opt_result = optimfn(acquire_nmr, x0, xtol, optimargs, plot=False)
 
     # Tell frontend script that the optimisation is done
     print("done")
-    best_values = unscale(opt_result.xbest, routine.lb, routine.ub)
+    scaleby = "bounds" if optimiser in ["nm", "mds"] else "tols"
+    best_values = unscale(opt_result.xbest, routine.lb,
+                          routine.ub, routine.tol, scaleby=scaleby)
     print(" ".join([str(i) for i in best_values]))
 
     # More logging
@@ -138,7 +157,7 @@ def get_routine_cf(routine_id, p_routine_dir=None, p_cf_dir=None):
 
 
 @deco_count
-def acquire_nmr(x, cost_function, lb, ub, p_spectrum, p_optlog):
+def acquire_nmr(x, cost_function, routine):
     """
     Evaluation of cost function for optimisation.
     Sends a signal to the frontend script to run an NMR acquisition using the
@@ -157,11 +176,14 @@ def acquire_nmr(x, cost_function, lb, ub, p_spectrum, p_optlog):
     Returns:
         float : value of the cost function.
     """
-    unscaled_val = unscale(x, lb, ub)
+    scaleby = "bounds" if optimiser in ["nm", "mds"] else "tols"
+    unscaled_val = unscale(x, routine.lb, routine.ub,
+                           routine.tol, scaleby=scaleby)
 
     with open(p_optlog, "a") as log:
         # Enforce constraints on optimisation
-        if any(x < 0) or any(x > 1):
+        if np.any(unscaled_val < routine.lb) or \
+                np.any(unscaled_val > routine.ub):
             cf_val = np.inf
             # Logging
             fmt = "{:^10.4f}  " * (len(x) + 1)
@@ -191,45 +213,74 @@ def send_values(unscaled_val):
     print("values: " + " ".join([str(i) for i in unscaled_val]))
 
 
-def scale(val, lb, ub):
+def scale(val, lb, ub, tol, scaleby="bounds"):
     """
-    Scales a set of values to between 0 and 1 (which are the lower and upper
-    optimisation bounds respectively). Returns None if any of the values are
-    outside the bounds.
+    For scaleby="bounds", scales a set of values such that the lower and upper
+    bounds for all variables are 0 and 1 respectively).
+
+    For scaleby="tols", scales a set of values such that the tolerances for all
+    variables are 0.03.
+
+    Returns None if any of the values are outside the bounds.
 
     Arguments:
         val: list/array of float - the values to be scaled
         lb : list/array of float - the lower bounds
         ub : list/array of float - the upper bounds
+        tol: list/array of float - the tolerances
+        scaleby: string - Method to scale by. Either "bounds" or "tols".
 
     Returns:
-        np.ndarray of float - the scaled values
+        scaled_val: np.ndarray of float - the scaled values
+        scaled_lb : np.ndarray of float - the scaled lower bounds
+        scaled_ub : np.ndarray of float - the scaled upper bounds
+        scaled_tol: np.ndarray of float - the scaled tolerances
     """
-    val = np.array(val)
-    lb = np.array(lb)
-    ub = np.array(ub)
-    scaled_val = (val - lb)/(ub - lb)
-    if np.any(scaled_val < 0) or np.any(scaled_val > 1):
+    if scaleby not in ["bounds", "tols"]:
+        raise ValueError(f"Invalid argument scaleby={scaleby} given.")
+    # Convert to ndarray
+    val, lb, ub, tol = (np.array(i) for i in (val, lb, ub, tol))
+    # Check if any are outside bounds
+    if np.any(val < lb) or np.any(val > ub):
         return None
-    return scaled_val
+    # Scale them
+    if scaleby == "bounds":
+        scaled_val = (val - lb)/(ub - lb)
+        scaled_lb = (lb - lb)/(ub - lb)  # all 0's
+        scaled_ub = (ub - lb)/(ub - lb)  # all 1's
+        scaled_tol = tol/(ub - lb)
+    elif scaleby == "tols":
+        scaled_val = (val - lb) * 0.03 / tol
+        scaled_lb = (lb - lb) * 0.03 / tol   # all 0's
+        scaled_ub = (ub - lb) * 0.03 / tol
+        scaled_tol = tol * 0.03 / tol        # all 0.03's
+    return scaled_val, scaled_lb, scaled_ub, scaled_tol
 
 
-def unscale(scaled_val, lb, ub):
+def unscale(scaled_val, orig_lb, orig_ub, orig_tol, scaleby="bounds"):
     """
     Unscales a set of scaled values to their original values.
 
     Arguments:
         scaled_val: list/array of float - the values to be unscaled
-        lb        : list/array of float - the lower bounds
-        ub        : list/array of float - the upper bounds
+        orig_lb   : list/array of float - the original lower bounds
+        orig_ub   : list/array of float - the original upper bounds
+        orig_tol  : list/array of float - the original tolerances
+        scaleby   : string - Method to scale by. Either "bounds" or "tols".
 
     Returns:
         np.ndarray of float - the unscaled values
     """
-    scaled_val = np.array(scaled_val)
-    lb = np.array(lb)
-    ub = np.array(ub)
-    return lb + scaled_val*(ub - lb)
+    if scaleby not in ["bounds", "tols"]:
+        raise ValueError(f"Invalid argument scaleby={scaleby} given.")
+    scaled_val, orig_lb, orig_ub, orig_tol = (np.array(i) for i in (scaled_val,
+                                                                    orig_lb,
+                                                                    orig_ub,
+                                                                    orig_tol))
+    if scaleby == "bounds":
+        return orig_lb + (scaled_val * (orig_ub - orig_lb))
+    elif scaleby == "tols":
+        return (scaled_val * orig_tol / 0.03) + orig_lb
 
 # ----------------------------------------
 # Helper functions used in cost functions.
