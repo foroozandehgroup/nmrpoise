@@ -313,6 +313,7 @@ def _parse_bounds_string(b):
 def _ppm_to_point(shift, axis=None, p_spec=None):
     """
     Round a specific chemical shift to the nearest point in the spectrum.
+    Note that this only works for 1D spectra!
 
     For unknown reasons, this does not correlate perfectly to the "index" that
     is displayed in TopSpin. However, the difference between the indices

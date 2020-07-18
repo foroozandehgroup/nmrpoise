@@ -32,12 +32,6 @@ def main():
     if CURDATA() is None:
         err_exit("Please select a dataset!")
 
-    # Check that dataset is 1D
-    if GETACQUDIM() != 1:
-        err_exit("Please select a 1D dataset!\n"
-                 "Currently poptpy does not work with "
-                 "multidimensional experiments.")
-
     # Make folders if they don't exist
     for folder in [p_poptpy, p_routines, p_costfunctions]:
         if not os.path.isdir(folder):
@@ -76,27 +70,25 @@ def main():
     # We need to catch java.lang.Error so that cleanup can be performed
     # if the script is killed from within TopSpin. See #23.
     try:
-        ferr = open(p_opterr, "a")
-        backend = subprocess.Popen([p_python3, '-u', p_backend],
-                                   stdin=subprocess.PIPE,
-                                   stdout=subprocess.PIPE,
-                                   stderr=ferr)
-        # Pass key information to the backend script
-        print(optimiser, file=backend.stdin)
-        print(routine_id, file=backend.stdin)
-        print(p_spectrum, file=backend.stdin)
-        backend.stdin.flush()
+        backend = None
+        with open(p_opterr, "a") as ferr:
+            backend = subprocess.Popen([p_python3, '-u', p_backend],
+                                       stdin=subprocess.PIPE,
+                                       stdout=subprocess.PIPE,
+                                       stderr=ferr)
+            # Pass key information to the backend script
+            print(optimiser, file=backend.stdin)
+            print(routine_id, file=backend.stdin)
+            print(p_spectrum, file=backend.stdin)
+            backend.stdin.flush()
 
-        # Enter a loop where: 1) backend script passes values of acquisition
-        #                        params to frontend script
-        #                     2) frontend script runs acquisition
-        #                     3) frontend script passes "done" to backend
-        #                        script to indicate that it's done
-        # The loop is broken when the backend script passes "done" to the
-        # frontend # script instead of a new set of values (in step 1).
-        # We wrap this whole bit in a try/except block so that we can catch
-        # invalid input passed from the backend.
-        try:
+            # Enter a loop where: 1) backend script passes values of
+            #                        acquisition params to frontend script
+            #                     2) frontend script runs acquisition
+            #                     3) frontend script passes "done" to backend
+            #                        script to indicate that it's done
+            # The loop is broken when the backend script passes "done" to the
+            # frontend # script instead of a new set of values (in step 1).
             while True:
                 line = backend.stdout.readline()
                 # Optimisation converged
@@ -133,21 +125,30 @@ def main():
                 # the backend is wrapped by a try/except which catches all
                 # exceptions and propagates them to the frontend by printing
                 # the traceback.
+                # We check that the backend is done writing to errlog *before*
+                # exiting the with block, or else we get a nice race condition.
                 elif line.startswith("Backend exception: "):
+                    while backend.poll() is None:
+                        SLEEP(0.1)
                     raise RuntimeError(line)
                 else:
+                    while backend.poll() is None:
+                        SLEEP(0.1)
                     raise RuntimeError("uncaught backend error. Please check "
                                        "error log for more information.")
-        except RuntimeError as e:
-            # Print the full traceback to the file
-            with open(p_opterr, "a") as fp:
-                print_exc(file=fp)
-            # Tell the error the immediate cause and exit
-            err_exit("error during acquisition loop:\n" + e.message)
+    except RuntimeError as e:
+        # After exiting the with block, ferr should be closed, so we need to
+        # reopen it.
+        with open(p_opterr, "a") as fp:
+            print_exc(file=fp)
+        # Tell the error the immediate cause and exit
+        err_exit("error during acquisition loop:\n" + e.message)
     # cleanup code
     except Error:
-        backend.terminate()
-        ferr.close()
+        # Kill the backend process if it's still running.
+        if backend is not None:  # means it was created
+            if backend.poll() is None:  # means it's still running
+                backend.terminate()
         raise
 
     # If it reaches here, the optimisation should be done
@@ -167,7 +168,6 @@ def main():
     s = s + "These values have been set in the current experiment.\n"
     s = s + "Detailed information can be found at: {}".format(p_optlog)
     MSG(s)
-    # TODO: Prompt user to save optima found (can overwrite the routine file)
     EXIT()
 
 
@@ -530,7 +530,10 @@ def create_au_prog():
     Creates an AU programme for acquisition and processing in TopSpin's
     default directory, if it doesn't already exist.
     """
-    poptpy_au_text = "ZG\nEFP\nAPBK\nQUIT"  # Change this if desired
+    # poptpy_au_text = "ZG\nEFP\nAPBK\nQUIT"  # Change this if desired
+    poptpy_au_text = ("RPROCNO(1)\nZG\nXFB\nXCMD(\"apk2d\")\n" +
+                      "ABS2\nF2PROJP(125,825,999)\n" +
+                      "RPROCNO(999)\nVIEWDATA_SAMEWIN\nABS\nQUIT")
     p_acqau = os.path.join(tshome, "exp/stan/nmr/au/src/user/poptpy_au")
     f = open(p_acqau, "w")
     f.write(poptpy_au_text)
