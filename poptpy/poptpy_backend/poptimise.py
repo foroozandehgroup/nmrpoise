@@ -190,12 +190,9 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
         raise ValueError("Nelder-Mead: x0 and xtol have incompatible lengths")
     # Calculate geometric mean of xtol and make sure that it's sensible
     xtol_gm = np.prod(xtol) ** (1 / np.size(xtol))
-    if xtol_gm > 0.35:
-        raise ValueError("Nelder-Mead: xtol is too large. "
-                         "Please reduce the tolerances.")
 
     # Create and initialise simplex object.
-    sim = Simplex(x0, method=simplex_method, length=max(0.3, xtol_gm))
+    sim = Simplex(x0, method=simplex_method, length=min(10 * xtol_gm, 0.999))
     # Number of iterations. Function evaluations are stored as cf.calls.
     niter = 0
 
@@ -393,12 +390,9 @@ def multid_search(cf, x0, xtol, args=(), plot=False,
                          "incompatible lengths")
     # Calculate geometric mean of xtol and make sure that it's sensible
     xtol_gm = np.prod(xtol) ** (1 / np.size(xtol))
-    if xtol_gm > 0.35:
-        raise ValueError("Multidimensional search: xtol is too large. "
-                         "Please reduce the tolerances.")
 
     # Create and initialise simplex object.
-    sim = Simplex(x0, method=simplex_method, length=max(0.3, xtol_gm))
+    sim = Simplex(x0, method=simplex_method, length=min(10 * xtol_gm, 0.999))
     # Number of iterations. Function evaluations are stored as cf.calls.
     niter = 0
 
@@ -526,7 +520,7 @@ def pybobyqa_interface(cf, x0, xtol, args=(), plot=False):
     scaled_ub = (ub - lb) * 0.03 / tol
     # Run the optimisation.
     pb_sol = pb.solve(cf, x0, args=args,
-                      rhobeg=min(0.3, max(ub)), rhoend=0.03,
+                      rhobeg=min(0.3, max(ub) * 0.999), rhoend=0.03,
                       bounds=(scaled_lb, scaled_ub), objfun_has_noise=True,
                       user_params={'restarts.use_restarts': False})
     # We just need to coerce the returned information into our OptResult
