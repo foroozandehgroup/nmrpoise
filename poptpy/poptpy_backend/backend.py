@@ -17,8 +17,7 @@ if __name__ == "__main__" and __package__ is None:
 
 from .poptimise import nelder_mead, multid_search, pybobyqa_interface
 
-optimiser = "bobyqa"  # "nm", "mds", or "bobyqa". Case-insensitive.
-
+optimiser = None  # Set this in frontend script ('edpy poptpy' in TopSpin)
 routine_id = None
 p_spectrum = None
 p_optlog = None
@@ -588,6 +587,7 @@ if __name__ == "__main__":
     # for the error logging.
     try:
         # Set global variables by reading in input from frontend.
+        optimiser = input()
         routine_id = input()
         p_spectrum = Path(input())
         p_optlog = p_spectrum.parents[1] / "poptpy.log"

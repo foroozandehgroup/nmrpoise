@@ -18,8 +18,10 @@ p_routines = os.path.join(p_poptpy, "routines")
 p_costfunctions = os.path.join(p_poptpy, "cost_functions")
 p_opterr = os.path.join(p_poptpy, "poptpy_err.log")
 p_python3 = "/usr/local/bin/python3"
-
 Routine = namedtuple("Routine", "name pars lb ub init tol cf")
+
+### Settings
+optimiser = "nm"   # "nm", "mds", or "bobyqa". Case-insensitive.
 
 
 def main():
@@ -80,6 +82,7 @@ def main():
                                    stdout=subprocess.PIPE,
                                    stderr=ferr)
         # Pass key information to the backend script
+        print(optimiser, file=backend.stdin)
         print(routine_id, file=backend.stdin)
         print(p_spectrum, file=backend.stdin)
         backend.stdin.flush()
