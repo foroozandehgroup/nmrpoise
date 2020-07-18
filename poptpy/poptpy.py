@@ -122,6 +122,10 @@ def main():
                         XCMD("wvm -q")
                     # Run acquisition and processing
                     XCMD("xau poptpy_au")
+                    # Check whether NS scans were completed
+                    if GETPAR("NS") != GETPARSTAT("NS"):
+                        raise RuntimeError("Acquisition stopped prematurely. "
+                                           "poptpy has been terminated.")
                     # Tell backend script it's done
                     print("done", file=backend.stdin)
                     backend.stdin.flush()
