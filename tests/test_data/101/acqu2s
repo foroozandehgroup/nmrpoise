@@ -1,0 +1,24 @@
+##TITLE= Parameter file, TopSpin 3.6.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 67	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmr-user
+$$ 2020-07-18 21:47:50.630 +0800  CHEM\nmr-user@JELLYFISH-CRL
+$$ C:/NMR/data/mfgroup/nmr/jy-200718-poptpy-asapferu/101/acqu2s
+$$ process C:\Bruker\TopSpin3.6.2\prog\mod\go4.exe
+##$ACQT0= 0
+##$BF1= 150.915381036
+##$FnILOOP= 0
+##$FnMODE= 6
+##$NUC1= <13C>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 32
+##$O1= 18864.4226295
+##$ProjAngle= 0
+##$SFO1= 150.93424545863
+##$SW= 60.0126961708997
+##$SW_h= 9057.97101449275
+##$TD= 32
+##END=

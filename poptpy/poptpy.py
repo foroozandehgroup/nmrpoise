@@ -20,7 +20,7 @@ p_opterr = os.path.join(p_poptpy, "poptpy_err.log")
 p_python3 = "/usr/local/bin/python3"
 Routine = namedtuple("Routine", "name pars lb ub init tol cf")
 
-### Settings
+# Settings
 optimiser = "nm"   # "nm", "mds", or "bobyqa". Case-insensitive.
 
 

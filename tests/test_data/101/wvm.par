@@ -1,0 +1,19 @@
+## Wavemaker parameter file. 
+## PULPROG: jy-hsqcetgpsp.3 
+
+wu180C13:f2 
+  cawurst-20(220 ppm, 0.5 ms; L2H)
+  nuc = 13C 
+  p90 =  10.000 us
+  pl =   64.000000 W
+  BF =  150.9153810 MHz
+  ofs =  80.000000 ppm 
+
+wudec:f2 
+  cawurst_d-20(220 ppm, 1.4 ms; L2H)
+  nuc = 13C 
+  p90 =  10.000 us
+  pl =   64.000000 W
+  BF =  150.9153810 MHz
+  ofs =  80.000000 ppm 
+

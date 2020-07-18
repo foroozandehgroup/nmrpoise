@@ -1,0 +1,36 @@
+
+WaveMaker (rev 3.6.2) log file: 2020-07-05 21:44:43
+
+Pulprog: C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-hsqcetgpsp.3 
+Opening: C:/NMR/data/mfgroup/nmr/jy-200705-andro-S+C-SN/2/wvm.par
+
+sp3(p14): 
+ spnam3: wu180C13.wv (500 steps, stepsize 1.0000 us, phi(max) = 0.00 deg)
+ p14: 0.5000000 ms
+ spw3: 7.0001917 W (-8.45 dB), B1max = 8268.1 Hz (ref: p90=10.00 us @ -18.06 dB)
+ B1rms = 7276.5 Hz, 5.4218063 W (-7.34 dB)
+ SP saved in C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/wave/user/wu180C13.wv
+
+cpd2: 
+ cpdprg2: wudec.cpd 
+ pcpd2: 27.9680000 ms 
+ spnam15: wudec.wv (7360 steps, stepsize 3.8000 us, phi(max) = 0.00 deg)
+ plw12: 1.2514645 W (-0.97 dB), B1max = 3495.9 Hz (ref: p90=10.00 us @ -18.06 dB)
+ B1rms = 3077.7 Hz, 0.9699814 W (0.13 dB)
+ SP saved in C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/wave/user/wudec.wv
+ CPD saved in C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/cpd/user/wudec.cpd
+
+Experiment Setup:
+
+ spnam3 = wu180C13.wv 
+ p14 = 500.0000 us 
+ spw3 = 7.00019 W (8268.09 Hz)
+ spnam15 = wudec.wv 
+ spw15 = 1.25146 W (3495.90 Hz)
+ cpdprg2 = wudec.cpd 
+ pcpd2 = 27968.0000 us 
+ plw12 = 1.25146 W
+
+
+Wavemaker auto-setup completed
+

@@ -81,11 +81,14 @@ def main():
         print("-" * 12 * (npars + 1), file=log)
 
     # Get F1P/F2P parameters
+    global spec_f1p, spec_f2p
     x, y = getpar("F1P"), getpar("F2P")
-    if x != 0 and y != 0 and x > y:
-        # Need to declare as global because we are assigning to the variable.
-        global spec_f1p, spec_f2p
-        spec_f1p, spec_f2p = x, y
+    if isinstance(x, float) and isinstance(y, float):  # 1D
+        if x != 0 and y != 0:
+            spec_f1p, spec_f2p = x, y
+    elif isinstance(x, np.ndarray) and isinstance(y, np.ndarray):  # 2D
+        if not np.array_equal(x, [0, 0]) and not np.array_equal(y, [0, 0]):
+            spec_f1p, spec_f2p = x, y
 
     # Set up optimisation arguments
     optimargs = (cost_function, routine)
@@ -286,7 +289,28 @@ def unscale(scaled_val, orig_lb, orig_ub, orig_tol, scaleby="bounds"):
 # ----------------------------------------
 
 
-def ppm_to_point(shift, p_spec=None):
+def _parse_bounds_string(b):
+    """
+    Parses the bounds strings "xf..yf", returning (xf, yf) as a tuple. If
+    either xf or yf are not specified, returns None in their place.
+    """
+    try:
+        if b == "":
+            return None, None
+        elif b.startswith(".."):   # "..5" -> (None, 5)
+            return None, float(b[2:])
+        elif b.endswith(".."):   # "3.." -> (3, None)
+            return float(b[:-2]), None
+        elif ".." in b:
+            x, y = b.split("..")
+            return float(x), float(y)
+        else:
+            raise ValueError
+    except ValueError:
+        raise ValueError(f"Invalid value {b} provided for bounds.")
+
+
+def _ppm_to_point(shift, axis=None, p_spec=None):
     """
     Round a specific chemical shift to the nearest point in the spectrum.
 
@@ -297,6 +321,10 @@ def ppm_to_point(shift, p_spec=None):
 
     Arguments:
         shift (float)         : desired chemical shift.
+        axis (int)            : axis along which to calculate this. For 1D
+                                spectra this should be left as None. For 2D
+                                spectra, axis=0 and axis=1 correspond to the
+                                f1 and f2 dimensions respectively.
         p_spec (pathlib.Path) : Path to the folder of the desired spectrum.
                                 Defaults to the spectrum being optimised, i.e.
                                 the global variable p_spectrum.
@@ -306,9 +334,16 @@ def ppm_to_point(shift, p_spec=None):
                spectral window.
     """
     p_spec = p_spec or p_spectrum
-    si = get_proc_par("SI", p_spec)
-    o1p = get_acqu_par("O1", p_spec) / get_acqu_par("SFO1", p_spec)
-    sw = get_acqu_par("SW", p_spec)
+    si = getpar("SI", p_spec)
+    o1p = getpar("O1", p_spec) / getpar("SFO1", p_spec)
+    sw = getpar("SW", p_spec)
+
+    # Pick out the appropriate value according to the relevant axis
+    if axis is not None:
+        if axis in [0, 1]:
+            si, o1p, sw = si[axis], o1p[axis], sw[axis]
+        else:
+            raise ValueError(f"Invalid value '{axis}' for axis.")
 
     # Make sure it's within range
     highest_shift = o1p + 0.5*sw
@@ -346,18 +381,27 @@ def get_fid(p_spec=None):
     return fid[0] + (1j * fid[1])
 
 
-def get_real_spectrum(left=None, right=None, epno=None, p_spec=None):
+def get_real_spectrum(bounds="", epno=None, p_spec=None):
     """
     Get the real spectrum. This function accounts for TopSpin's NC_PROC
     variable, scaling the spectrum intensity accordingly.
 
+    Note that this function only works for 1D spectra. It does NOT work for 1D
+    projections of 2D spectra. If you want to work with projections, you can
+    use get_2d_spectrum() to get the full 2D spectrum, then manipulate it using
+    numpy functions as appropriate. Examples can be found in the docs.
+
+    The bounds parameter may be specified in the following formats:
+       - between 5 and 8 ppm:   bounds="5..8"
+       - greater than 9.3 ppm:  bounds="9.3.."
+       - less than -2 ppm:      bounds="..-2"
+
     Arguments:
-        left (float)          : chemical shift corresponding to beginning of
-                                the desired section. Defaults to the maximum
-                                of the spectrum.
-        right (float)         : chemical shift corresponding to end of the
-                                desired section. Defaults to the minimum of the
-                                spectrum.
+        bounds (str)          : String describing the region of interest. See
+                                above for examples. If no bounds are provided,
+                                uses the spectral bounds specified via 'dpl';
+                                if these are not specified, defaults to the
+                                whole spectrum.
         epno (list)           : [expno, procno] of spectrum of interest.
                                 Defaults to the spectrum being optimised. Other
                                 expnos/procnos are calculated relative to the
@@ -379,43 +423,50 @@ def get_real_spectrum(left=None, right=None, epno=None, p_spec=None):
     p_spec = p_spec or p_spectrum
     p_1r = p_spec / "1r"
     real_spec = np.fromfile(p_1r, dtype=np.int32)
-    nc_proc = int(get_proc_par("NC_proc", p_spec))
+    nc_proc = int(getpar("NC_proc", p_spec))
     real_spec = real_spec * (2 ** nc_proc)
 
-    if left is None and right is None:  # bounds not specified
+    if bounds == "":
         if spec_f1p is None and spec_f2p is None:  # DPL not used
             return real_spec
         else:
             left, right = spec_f1p, spec_f2p
-
-    # Swap both bounds if they were both specified, but not in the right order
-    if left is not None and right is not None and left < right:
-        left, right = right, left
+    else:
+        right, left = _parse_bounds_string(bounds)
 
     # Get default bounds
-    si = int(get_proc_par("SI", p_spec))
+    si = int(getpar("SI", p_spec))
     left_point, right_point = 0, si - 1
     # Then replace them if necessary
     if left is not None:
-        left_point = ppm_to_point(left, p_spec)
+        left_point = _ppm_to_point(left, p_spec=p_spec)
     if right is not None:
-        right_point = ppm_to_point(right, p_spec)
+        right_point = _ppm_to_point(right, p_spec=p_spec)
 
     return real_spec[left_point:right_point + 1]
 
 
-def get_imag_spectrum(left=None, right=None, epno=None, p_spec=None):
+def get_imag_spectrum(bounds="", epno=None, p_spec=None):
     """
     Get the imaginary spectrum. This function accounts for TopSpin's NC_PROC
     variable, scaling the spectrum intensity accordingly.
 
+    Note that this function only works for 1D spectra. It does NOT work for 1D
+    projections of 2D spectra. If you want to work with projections, you can
+    use get_2d_spectrum() to get the full 2D spectrum, then manipulate it using
+    numpy functions as appropriate. Examples can be found in the docs.
+
+    The bounds parameter may be specified in the following formats:
+       - between 5 and 8 ppm:   bounds="5..8"
+       - greater than 9.3 ppm:  bounds="9.3.."
+       - less than -2 ppm:      bounds="..-2"
+
     Arguments:
-        left (float)          : chemical shift corresponding to beginning of
-                                the desired section. Defaults to the maximum
-                                of the spectrum.
-        right (float)         : chemical shift corresponding to end of the
-                                desired section. Defaults to the minimum of the
-                                spectrum.
+        bounds (str)          : String describing the region of interest. See
+                                above for examples. If no bounds are provided,
+                                uses the spectral bounds specified via 'dpl';
+                                if these are not specified, defaults to the
+                                whole spectrum.
         epno (list)           : [expno, procno] of spectrum of interest.
                                 Defaults to the spectrum being optimised. Other
                                 expnos/procnos are calculated relative to the
@@ -428,6 +479,7 @@ def get_imag_spectrum(left=None, right=None, epno=None, p_spec=None):
     # Check whether user has specified epno
     if epno is not None:
         if len(epno) == 2:
+            p_spec = p_spec or p_spectrum
             p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
         else:
             raise ValueError("Please provide a valid [expno, procno] "
@@ -436,32 +488,116 @@ def get_imag_spectrum(left=None, right=None, epno=None, p_spec=None):
     p_spec = p_spec or p_spectrum
     p_1i = p_spec / "1i"
     imag_spec = np.fromfile(p_1i, dtype=np.int32)
-    nc_proc = int(get_proc_par("NC_proc", p_spec))
+    nc_proc = int(getpar("NC_proc", p_spec))
     imag_spec = imag_spec * (2 ** nc_proc)
 
-    if left is None and right is None:  # bounds not specified
+    if bounds == "":
         if spec_f1p is None and spec_f2p is None:  # DPL not used
             return imag_spec
         else:
             left, right = spec_f1p, spec_f2p
-
-    # Swap both bounds if they were both specified, but not in the right order
-    if left is not None and right is not None and left < right:
-        left, right = right, left
+    else:
+        right, left = _parse_bounds_string(bounds)
 
     # Get default bounds
-    si = int(get_proc_par("SI", p_spec))
+    si = int(getpar("SI", p_spec))
     left_point, right_point = 0, si - 1
     # Then replace them if necessary
     if left is not None:
-        left_point = ppm_to_point(left, p_spec)
+        left_point = _ppm_to_point(left, p_spec=p_spec)
     if right is not None:
-        right_point = ppm_to_point(right, p_spec)
+        right_point = _ppm_to_point(right, p_spec=p_spec)
 
     return imag_spec[left_point:right_point + 1]
 
 
-def get_acqu_par(par, p_spec=None):
+def get_2d_spectrum(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
+    """
+    Get the doubly real part of a 2D spectrum. This function takes into account
+    the NC_proc value in TopSpin's processing parameters.
+
+    The f1_bounds and f2_bounds parameters may be specified in the following
+    formats:
+       - between 5 and 8 ppm:   bounds="5..8"
+       - greater than 9.3 ppm:  bounds="9.3.."
+       - less than -2 ppm:      bounds="..-2"
+
+    Arguments:
+        f1_bounds (str)       : String indicating f1 region of interest.
+        f2_bounds (str)       : String indicating f2 region of interest.
+        epno (list)           : [expno, procno] of spectrum of interest.
+                                Defaults to the spectrum being optimised. Other
+                                expnos/procnos are calculated relative to the
+                                spectrum being optimised.
+        p_spec (pathlib.Path) : Path to the spectrum being optimised.
+
+    Returns:
+        (np.ndarray) 2D array containing the spectrum or the desired section.
+    """
+    # Check whether user has specified epno
+    if epno is not None:
+        if len(epno) == 2:
+            p_spec = p_spec or p_spectrum
+            p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
+        else:
+            raise ValueError("Please provide a valid [expno, procno] "
+                             "combination.")
+
+    p_spec = p_spec or p_spectrum
+    p_rr = p_spec / "2rr"
+
+    # Check data type (TopSpin 3 int vs TopSpin 4 float)
+    dtypp = getpar("dtypp", p_spec)
+    if dtypp[0] == 0 and dtypp[1] == 0:  # TS3 data
+        dt = "<" if np.all(getpar("bytordp", p_spec) == 0) else ">"
+        dt += "i4"
+    else:
+        raise NotImplementedError("get_2d_spectrum(): "
+                                  "float data not yet accepted")
+    sp = np.fromfile(p_rr, dtype=np.dtype(dt))
+    # Format according to xdim. See TopSpin "data format" manual.
+    # See also http://docs.nmrfx.org/viewer/files/datasets.
+    # Get si and xdim
+    si = getpar("si", p_spec)
+    si = (int(si[0]), int(si[1]))
+    xdim = getpar("xdim", p_spec)
+    xdim = (int(xdim[0]), int(xdim[1]))
+    sp = sp.reshape(si)
+    # Reshape.
+    nrows, ncols = int(si[0]/xdim[0]), int(si[1]/xdim[1])
+    submatrix_size = np.prod(xdim)
+    sp = sp.reshape(si[0] * ncols, xdim[1])
+    sp = np.vsplit(sp, nrows * ncols)
+    sp = np.concatenate(sp, axis=1)
+    sp = np.hsplit(sp, nrows)
+    sp = np.concatenate(sp, axis=0)
+    sp = sp.reshape(si)
+    sp = sp * (2 ** getpar("nc_proc", p_spec)[1])
+
+    # Read in DPL and overwrite bounds if the bounds were not set
+    if f1_bounds == "":
+        if spec_f1p is not None and spec_f2p is not None:  # DPL was used
+            # f2p is lower than f1p.
+            f1_bounds = f"{spec_f2p[0]}..{spec_f1p[0]}"
+    if f2_bounds == "":
+        if spec_f1p is not None and spec_f2p is not None:  # DPL was used
+            f2_bounds = f"{spec_f2p[1]}..{spec_f1p[1]}"
+    f1_lower, f1_upper = _parse_bounds_string(f1_bounds)
+    f2_lower, f2_upper = _parse_bounds_string(f2_bounds)
+    # Convert ppm to points
+    f1_lower_point = _ppm_to_point(f1_lower, axis=0, p_spec=p_spec) \
+        if f1_lower is not None else si[0] - 1
+    f1_upper_point = _ppm_to_point(f1_upper, axis=0, p_spec=p_spec) \
+        if f1_upper is not None else 0
+    f2_lower_point = _ppm_to_point(f2_lower, axis=1, p_spec=p_spec) \
+        if f2_lower is not None else si[1] - 1
+    f2_upper_point = _ppm_to_point(f2_upper, axis=1, p_spec=p_spec) \
+        if f2_upper is not None else 0
+    return sp[f1_upper_point:f1_lower_point + 1,
+              f2_upper_point:f2_lower_point + 1]
+
+
+def _get_acqu_par(par, p_acqus):
     """
     Obtains the value of an acquisition parameter.
 
@@ -469,20 +605,16 @@ def get_acqu_par(par, p_spec=None):
     function, as they are not stored in the acqus file.
 
     Arguments:
-        par (str)             : Name of the acquisition parameter.
-        p_spec (pathlib.Path) : Path to the folder of the desired spectrum.
-                                Defaults to the spectrum being optimised, i.e.
-                                the global variable p_spectrum.
+        par (str)              : Name of the acquisition parameter.
+        p_acqus (pathlib.Path) : Path to the status acquisition file (this is
+                                 'acqus' for 1D spectra and direct dimension of
+                                 2D spectra, or 'acqu2s' for indirect dimension
+                                 of 2D spectra).
 
     Returns:
-        (float) value of the acquisition parameter. None if the value is not a
+        (float) Value of the acquisition parameter. None if the value is not a
                 number, or if the parameter doesn't exist.
     """
-    p_spec = p_spec or p_spectrum
-
-    # Construct path to acqus file
-    p_acqus = p_spec.parents[1] / "acqus"
-
     # Capitalise and remove any spaces from par
     par = par.upper()
     if len(par.split()) > 1:
@@ -493,7 +625,6 @@ def get_acqu_par(par, p_spec=None):
     parr = par[len(parl):]
     params_with_space = ["CNST", "D", "P", "PLW", "PCPD", "GPX", "GPY", "GPZ",
                          "SPW", "SPOAL", "SPOFFS", "L", "IN", "INP", "PHCOR"]
-
     # Get the parameter
     if (parr != "") and (parl in params_with_space):  # e.g. cnst2
         with open(p_acqus, "r") as file:
@@ -501,62 +632,67 @@ def get_acqu_par(par, p_spec=None):
             for line in file:
                 if line.upper().startswith(f"##${parl}="):
                     break
+            else:   # triggers if didn't break -- i.e. parameter was not found
+                return None
             # Grab the values and put them in a list
             s = ""
+            # Read until next parameter
             line = file.readline()
-            while not line.startswith("##"):  # read until the next parameter
+            while line != "" and not line.startswith("##"):
                 s = s + line + " "
                 line = file.readline()
-            # Pick out the desired value and return it if it's a float
-            values = s.split()
+            # Pick out the desired value and return it
+            value = s.split()[int(parr)]
             try:
-                value = float(values[int(parr)])
-                return value
-            except ValueError:
+                return float(value)
+            except ValueError:  # not a float
                 return None
-    else:                                             # e.g. sfo1 or rga
+    else:                                             # e.g. sfo1 or rg
         with open(p_acqus, "r") as file:
             for line in file:
                 if line.upper().startswith(f"##${par}="):
+                    value = line.split(maxsplit=1)[-1].strip()
+                    # strip away surrounding angle brackets
+                    if value[0] == '<' and value[-1] == '>':
+                        value = value[1:-1]
                     try:
-                        value = float(line.split()[-1].strip())
-                        return value
-                    except ValueError:
+                        return float(value)
+                    except ValueError:  # not a float
                         return None
+    # If it hasn't been found
+    return None
 
 
-def get_proc_par(par, p_spec=None):
+def _get_proc_par(par, p_procs):
     """
     Obtains the value of a processing parameter.
 
     Arguments:
-        par (str)             : Name of the processing parameter.
-        p_spec (pathlib.Path) : Path to the folder of the desired spectrum.
-                                Defaults to the spectrum being optimised, i.e.
-                                the global variable p_spectrum.
+        par (str)              : Name of the processing parameter.
+        p_procs (pathlib.Path) : Path to the status processing file (this is
+                                 'procs' for 1D spectra and direct dimension of
+                                 2D spectra, or 'proc2s' for indirect dimension
+                                 of 2D spectra).
 
     Returns:
         (float) value of the processing parameter. None if the value is not a
                 number, or if the parameter doesn't exist.
     """
-    p_spec = p_spec or p_spectrum
-
-    # Construct path to procs file
-    p_acqus = p_spec / "procs"
-
     # Capitalise and remove any spaces from par
     par = par.upper()
     if len(par.split()) > 1:
         par = "".join(par.split())
-
     # Get the value (for processing parameters there aren't any lists like
     # CNST/D/P)
-    with open(p_acqus, "r") as file:
+    with open(p_procs, "r") as file:
         for line in file:
             if line.upper().startswith(f"##${par}="):
+                value = line.split(maxsplit=1)[-1].strip()
+                # strip away surrounding angle brackets
+                if value[0] == '<' and value[-1] == '>':
+                    value = value[1:-1]
                 try:
-                    value = float(line.split()[-1].strip())
-                    return value
+                    return float(value)
                 except ValueError:
                     return None
 
@@ -566,6 +702,11 @@ def getpar(par, p_spec=None):
     Obtains the value of an (acquisition or processing) parameter.
     Tries to search for an acquisition parameter first, then processing.
 
+    Works on both 1D and 2D spectra. For parameters that are applicable to
+    both dimensions of 2D spectra, getpar() returns a np.ndarray consisting of
+    (f1_value, f2_value). Otherwise (for 1D spectra, or for 2D parameters which
+    only apply to the direct dimension), getpar() returns a float.
+
     Arguments:
         par (str)             : Name of the parameter.
         p_spec (pathlib.Path) : Path to the folder of the desired spectrum.
@@ -573,12 +714,40 @@ def getpar(par, p_spec=None):
                                 the global variable p_spectrum.
 
     Returns:
-        (float) value of the parameter. None if the value is not a number,
-                or if the parameter doesn't exist.
+        (float or np.ndarray) Value(s) of the requested parameter. None if the
+            given parameter was not found.
     """
-    # The docstring is 14 lines. The code is 2 lines. *rolls eyes*
     p_spec = p_spec or p_spectrum
-    return get_acqu_par(par, p_spec) or get_proc_par(par, p_spec)
+
+    # Try to get acquisition parameter first.
+    # Check indirect dimension
+    p_acqus = p_spec.parents[1] / "acqus"
+    p_acqu2s = p_spec.parents[1] / "acqu2s"
+    v1, v2 = None, None
+    if p_acqu2s.exists():
+        v1 = _get_acqu_par(par, p_acqu2s)
+    v2 = _get_acqu_par(par, p_acqus)
+    if v1 is not None and v2 is not None:
+        return np.array([v1, v2])
+    elif v2 is not None:
+        return v2
+
+    # If reached here, means that acquisition parameter was not found
+    # Try to get processing parameter
+    # Check indirect dimension
+    p_procs = p_spec / "procs"
+    p_proc2s = p_spec / "proc2s"
+    v1, v2 = None, None
+    if p_proc2s.exists():
+        v1 = _get_proc_par(par, p_proc2s)
+    v2 = _get_proc_par(par, p_procs)
+    if v1 is not None and v2 is not None:
+        return np.array([v1, v2])
+    elif v2 is not None:
+        return v2
+
+    # If reached here, neither was found
+    return None
 
 
 if __name__ == "__main__":

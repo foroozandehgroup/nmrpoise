@@ -1,0 +1,355 @@
+# 1 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS"
+;jy-asapS
+;modified from Luy et al. version to include internal power calculations
+;also gradients swapped round, not sure why the original version doesn't work as is...
+;added extra delay d30 before experiment starts
+;
+;avance-version (02/07/15)
+;ASAP-HSQC
+;2D H-1/X correlation via double inept transfer
+;phase sensitive using Echo/Antiecho-TPPI gradient selection
+;with decoupling during acquisition
+;with DIPSI-2 mixing after acquisition for ASAP
+;using shaped pulses on f1 and f2.
+;David Schulze-Sünninghausen, Johanna Becker, Burkhard Luy
+;"Rapid Heteronuclear Single Quantum Correlation NMR Spectra at Natural Abundance"
+;J. Am. Chem. Soc., 2014, 136 (4), pp 1242?1245. 
+
+
+# 1 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Avance.incl" 1
+;Avance3aqs.incl
+;   for AV III with AQS IPSO
+;
+;avance-version (15/06/05)
+;
+;$CLASS=HighRes Incl
+;$COMMENT=
+# 170 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Avance.incl"
+;$Id: Avance3aqs.incl,v 1.1.8.3 2015/03/05 16:46:54 ber Exp $
+# 18 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS" 2
+
+# 1 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Grad.incl" 1
+;Grad2.incl  -  include file for Gradient Spectroscopy
+;   for TCU3
+;
+;avance-version (07/01/17)
+;
+;$CLASS=HighRes Incl
+;$COMMENT=
+
+# 27 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Grad.incl"
+define list<gradient> EA=<EA>
+
+
+# 31 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Grad.incl"
+;$Id: Grad2.incl,v 1.14 2012/01/31 17:49:21 ber Exp $
+# 19 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS" 2
+
+# 1 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Delay.incl" 1
+;Delay.incl  -  include file for commonly used delays
+;
+;version (13/08/07)
+;
+;$CLASS=HighRes Incl
+;$COMMENT=
+
+# 9 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Delay.incl"
+;general delays
+
+define delay DELTA
+define delay DELTA1
+define delay DELTA2
+define delay DELTA3
+define delay DELTA4
+define delay DELTA5
+define delay DELTA6
+define delay DELTA7
+define delay DELTA8
+define delay DELTA9
+define delay DELTA10
+define delay DELTA11
+define delay DELTA12
+define delay DELTA13
+define delay DELTA14
+define delay DELTA15
+define delay DELTA16
+
+define delay TAU
+define delay TAU1
+define delay TAU2
+define delay TAU3
+define delay TAU4
+define delay TAU5
+define delay TAU6
+define delay TAU7
+define delay TAU8
+define delay TAU9
+# 40 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Delay.incl"
+define delay INCR1
+define delay INCR2
+define delay INCR3
+define delay INCR4
+define delay INCR5
+define delay INCR6
+
+
+;delays for centering pulses
+# 50 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Delay.incl"
+define delay CEN_HN1
+define delay CEN_HN2
+define delay CEN_HN3
+define delay CEN_HC1
+define delay CEN_HC2
+define delay CEN_HC3
+define delay CEN_HC4
+define delay CEN_HP1
+define delay CEN_HP2
+define delay CEN_CN1
+define delay CEN_CN2
+define delay CEN_CN3
+define delay CEN_CN4
+define delay CEN_CP1
+define delay CEN_CP2
+
+
+;loop counters
+# 69 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Delay.incl"
+define loopcounter COUNTER
+define loopcounter SCALEF
+define loopcounter FACTOR1
+define loopcounter FACTOR2
+define loopcounter FACTOR3
+define loopcounter FACTOR4
+define loopcounter FACTOR5
+define loopcounter FACTOR6
+
+
+# 80 "C:/Bruker/TopSpin3.6.2/exp/stan/nmr/lists/pp/Delay.incl"
+;$Id: Delay.incl,v 1.14.2.1 2013/08/30 09:43:33 ber Exp $
+# 20 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS" 2
+
+
+; *** Echo-/Antiecho gradient strenght calculation
+"cnst12=1/(1+sfo2/sfo1)"
+"cnst13=(1-sfo2/sfo1)"
+define list<gradient> EA1 = { 1 cnst12 }
+define list<gradient> EA2 = { cnst13 1 }
+; ***
+"p2=p1*2"
+"d0=3u"
+"d11=30m"
+"d16=200u"
+"d20=1m"
+"FACTOR1=(d9/(p6*115.112))/2" 
+"l1=FACTOR1*2" ; TOCSY loop counter                 
+"d0=3u"
+"in0=inf1/2"
+"d4=1s/(4*cnst4)" ; 1/(4J)XH 
+"d3=1s/(4*cnst3)" ; reduced d4 
+"DELTA=0.5*(2*d3+p21-p1)"
+"DELTA1=0.5*(2*d3-p21+p1)"
+"DELTA4=d4-p16-d16-3u"
+"DELTA3=p16+3u+d16+p21-p25+p1"
+"DELTA2=0.5*(DELTA3+p16+d16+3u-2*d0)"
+# 45 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS"
+"cnst21=20000"
+"spw21=plw1*(cnst21/(1000000/(4*p1)))*(cnst21/(1000000/(4*p1)))"
+"spw22=spw21"
+"cnst23=10000"
+"spw23=plw2*(cnst23/(1000000/(4*p3)))*(cnst23/(1000000/(4*p3)))" 
+"spw24=spw23"
+"spw25=spw23"
+"spw26=spw23"
+
+; calculate mixing length
+"cnst9=p6*115.112*l1/1000"
+"cnst9=cnst9" ; so that it's displayed in ased
+; calculate 90deg pulse duration & power level for mixing
+"p6=(1000000/(4*cnst10))"
+"plw10=plw1*(p1/p6)*(p1/p6)"
+
+# 1 "mc_line 63 file C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS exp. def. part of mc cmd. before ze"
+; dimension 2D; AQ_mode  (F1) Echo-Antiecho
+define delay MCWRK
+define delay MCREST
+define loopcounter ST1CNT
+"ST1CNT = trunc(td1 / 2)"
+"MCREST = d1 - d1"
+"MCWRK = 0.142857*d1"
+
+    dccorr
+# 63 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS"
+# 63 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS"
+1 ze
+# 1 "mc_line 63 file C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS exp. def. of mc cmd. after ze"
+LBLAV, MCWRK
+# 64 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS"
+  d30
+  d11 pl12:f2 
+# 1 "mc_line 66 file C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS exp. start label for mc cmd."
+2 MCWRK  * 2 do:f2
+LBLSTS1, MCWRK  * 4
+LBLF1, MCWRK 
+  MCREST
+# 67 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS"
+3 d20 setnmr3|0 setnmr0|34|32|33 ctrlgrad 0 
+  p16:gp2
+  d16 pl10:f1
+; *** begin DIPSI-2
+4 p6*3.556 ph23
+  p6*4.556 ph25
+  p6*3.222 ph23
+  p6*3.167 ph25
+  p6*0.333 ph23
+  p6*2.722 ph25
+  p6*4.167 ph23
+  p6*2.944 ph25
+  p6*4.111 ph23
+  
+  p6*3.556 ph25
+  p6*4.556 ph23
+  p6*3.222 ph25
+  p6*3.167 ph23
+  p6*0.333 ph25
+  p6*2.722 ph23
+  p6*4.167 ph25
+  p6*2.944 ph23
+  p6*4.111 ph25
+
+  p6*3.556 ph25
+  p6*4.556 ph23
+  p6*3.222 ph25
+  p6*3.167 ph23
+  p6*0.333 ph25
+  p6*2.722 ph23
+  p6*4.167 ph25
+  p6*2.944 ph23
+  p6*4.111 ph25
+
+  p6*3.556 ph23
+  p6*4.556 ph25
+  p6*3.222 ph23
+  p6*3.167 ph25
+  p6*0.333 ph23
+  p6*2.722 ph25
+  p6*4.167 ph23
+  p6*2.944 ph25
+  p6*4.111 ph23
+ lo to 4 times l1
+; *** end DIPSI-2
+  p16:gp3
+  d16 
+# 115 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS"
+; *** INEPT with reduced coupling delay d3
+  (p21:sp21 ph1):f1
+  DELTA   
+  (center (p22:sp22 ph1):f1 (p22:sp23 ph6):f2)
+  DELTA1 pl1:f1
+  (ralign (p1 ph1):f1 (p21:sp24 ph9):f2)
+; ***
+
+; *** t1 incrementation
+  DELTA2                                          
+  d0
+  (p22:sp22 ph5):f1
+  d0
+  DELTA2 pl1:f1 
+; ***
+  (lalign (p1 ph7):f1 (p25:sp25 ph10):f2); 12C-bound protons aligned along z, 13C-bound protons remain transversal  
+  DELTA3 
+  (p22:sp22 ph1):f1
+  3u
+  p16:gp1*EA1 ; first Echo-/Antiecho selection gradient     
+  d16 
+
+; *** Back transfer
+  (p21:sp26 ph10):f2
+  d4
+  (center (p22:sp22 ph1):f1 (p22:sp23 ph6):f2)
+  3u
+  p16:gp1*EA2 ; final Echo-/Antiecho selection gradient
+  d16 pl12:f2 
+  DELTA4 setnmr3^0 setnmr0^34^32^33 ctrlgrad 7
+; ***
+  go=2 ph31 cpd2:f2
+# 1 "mc_line 147 file C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS exp. mc cmd. in line"
+  MCWRK  do:f2 wr #0 if #0 zd igrad EA1  MCWRK  igrad EA2
+  lo to LBLSTS1 times 2
+  MCWRK id0  MCWRK  ip9*2  MCWRK  ip6*2  MCWRK  ip31*2
+  lo to LBLF1 times ST1CNT
+  MCWRK rf #0
+  lo to LBLAV times tdav
+# 149 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS"
+exit
+# 154 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS"
+ph1=0 
+ph2=1
+ph5=0 0 2 2
+ph6=0
+ph7=3
+ph8=3
+ph9=2 0
+ph10=0 0 0 0 2 2 2 2
+ph23=3
+ph25=1
+ph31=0 2 0 2 2 0 2 0
+  
+;pl0 : 0W
+;pl1 : f1 channel - power level for pulse (default)
+;pl2 : f2 channel - power level for pulse (default)
+;pl10 : f1 channel - power level for mixing sequence (DIPSI-2)
+;pl12: f2 channel - power level for CPD/BB decoupling
+;p1 : f1 channel -  90 degree high power pulse
+;p2 : f1 channel -  180 degree high power pulse
+;p6 : f1 channel - 90 degree pulse for mixing sequence (DIPSI-2)
+;p21 : 550u excitation pulses
+;p22 : 600u UR and Inversion pulses
+;p25 : 1100u 13C refocusing pulse
+;p16: homospoil/gradient pulse
+;spnam21 : jc01_BEBOP_zx_550u_BW10_RF20_pm20_Hc0.99997119.pul
+;spnam22 : jc02_BURBOP_x_600u_BW10_RF20_pm20_matched.pul
+;spnam23 : jc03_BIBOP_600u_BW37.5_RF10_pm5_matched.pul
+;spnam24 : jc05_BEBOP_zy_550u_BW37.5_RF10_pm5_matched.pul
+;spnam25 : jc07_BURBOP_y_1100u_BW37.5_RF10_pm5_Hc0.999876221.pul
+;spnam26 : jc09_BEBOP_-yz_550u_BW37.5_RF10_pm5_matched.pul
+;sp21 : 20 kHz Rf Amplitude
+;sp22 : 20 kHz Rf Amplitude
+;sp23 : 10 kHz Rf Amplitude
+;sp24 : 10 kHz Rf Amplitude
+;sp25 : 10 kHz Rf Amplitude
+;sp26 : 10 kHz Rf Amplitude
+;d0 : incremented delay (2D)                [3 usec]
+;d1 : relaxation delay; 1-5 * T1
+;d4 : 1/(4J)XH   
+;d3 : reduced d4
+;d9 : TOCSY mixing time
+;d11: delay for disk I/O                    [30 msec]
+;d16: delay for homospoil/gradient recovery [200ms]
+;d30: delay before experiment starts (use if running extended multizgs)
+;cnst4: = J(XH)
+;cnst3: reduced cnst4 ('ernst angle')
+;inf1: 1/SW(X) = 2 * DW(X)
+;in0: 1/(2 * SW(X)) = DW(X)
+;nd0: 2
+;NS: 1 * n
+;DS: >= 16
+;td1: number of experiments
+;FnMODE: echo-antiecho
+;cpd2: decoupling according to sequence defined by cpdprg2
+;pcpd2: f2 channel - 90 degree pulse for decoupling sequence
+
+;use gradient ratio:	gp 1 : gp 2 : gp 3
+;			                80   : 33   : 43  
+
+;for z-only gradients:
+;gpz1: 80%
+;gpz2: 33% ; gradient before mixing
+;gpz3: 43% ; gradient after mixing
+# 218 "C:/NMR/data/mfgroup/nmr/_JonY/pp/jy-asapS"
+;use gradient files:   
+;gpnam1: SMSQ10.100
+;gpnam2: SMSQ10.100
+;gpnam3: SMSQ10.100
+
+
+;$Id: asap!hsqcetgp_sp,v 1.5.2.1 2011/02/24 17:27:48 ber Exp $
