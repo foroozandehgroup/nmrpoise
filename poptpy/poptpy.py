@@ -42,6 +42,12 @@ def main():
     if CURDATA() is None:
         err_exit("Please select a dataset!")
 
+    # Issue a warning if dataset is > 2D
+    if GETACQUDIM() > 2:
+        MSG("Warning: poptpy is only designed for 1D and 2D data.\n"
+            "If you are sure you want to use it on this {}D dataset, press "
+            "OK to dismiss this warning.".format(GETACQUDIM()))
+
     # Make folders if they don't exist
     for folder in [p_poptpy, p_routines, p_costfunctions]:
         if not os.path.isdir(folder):
@@ -131,8 +137,8 @@ def main():
                         XCMD("wvm -q")
                     # Run acquisition and processing
                     XCMD("xau poptpy_au")
-                    # Check whether NS scans were completed
-                    if GETPAR("NS") != GETPARSTAT("NS"):
+                    # Check whether acquisition is complete
+                    if not acqu_done():
                         raise RuntimeError("Acquisition stopped prematurely. "
                                            "poptpy has been terminated.")
                     # Tell backend script it's done
@@ -519,6 +525,22 @@ def make_p_spectrum():
     x = CURDATA()
     p = os.path.join(x[3], x[0], x[1], "pdata", x[2])
     return p
+
+
+def acqu_done():
+    """
+    Checks whether the current acquisition has been completed and returns
+    True/False accordingly. Useful for stopping poptpy if acquisition is
+    prematurely terminated (e.g. by 'stop').
+    """
+    # Check NS
+    if GETPAR("NS") != GETPARSTAT("NS"):
+        return False
+    # Check indirect dimension TD for 2Ds
+    if GETACQUDIM() > 1:
+        if GETPAR("TD", axis=1) != GETPARSTAT("TD", axis=1):
+            return False
+    return True
 
 
 def pulprog_contains_wvm():
