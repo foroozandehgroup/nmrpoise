@@ -100,11 +100,10 @@ def main():
     opt_result = optimfn(acquire_nmr, x0, xtol, optimargs, plot=False)
 
     # Tell frontend script that the optimisation is done
-    print("done")
     scaleby = "bounds" if optimiser in ["nm", "mds"] else "tols"
     best_values = unscale(opt_result.xbest, routine.lb,
                           routine.ub, routine.tol, scaleby=scaleby)
-    print(" ".join([str(i) for i in best_values]))
+    print("optima: " + " ".join([str(i) for i in best_values]))
 
     # More logging
     toc = datetime.now()
@@ -772,4 +771,7 @@ if __name__ == "__main__":
         # no point in printing the entire traceback. Thus we just print a
         # very short summary line.
         print(f"Backend exception: {type(e).__name__}({repr(e.args)})")
-        raise  # Prints the full traceback to errlog.
+        # Then print it to the errlog.
+        print("======= From backend =======", file=sys.stderr)
+        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=sys.stderr)
+        raise  # This prints the full traceback to errlog.

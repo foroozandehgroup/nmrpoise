@@ -4,6 +4,7 @@ import os
 import re
 import json
 import subprocess
+from datetime import datetime
 from traceback import print_exc
 from collections import namedtuple
 
@@ -67,18 +68,19 @@ def main():
     create_au_prog()
 
     # Construct the path to the folder of the current spectrum.
-    x = CURDATA()
-    p_spectrum = os.path.join(x[3], x[0], x[1], "pdata", x[2])
+    p_spectrum = make_p_spectrum()
 
-    # Run the backend script
+    # Check that the backend script is intact
     if not os.path.isfile(p_backend):
         err_exit("Backend script not found. Please reinstall poptpy.")
 
-    # We need to catch java.lang.Error so that cleanup can be performed
-    # if the script is killed from within TopSpin. See #23.
-    try:
-        backend = None
-        with open(p_opterr, "a") as ferr:
+    # Open the error log and keep it open throughout.
+    # Closing it prematurely before the backend has finished writing to it WILL
+    # lead to race conditions!
+    with open(p_opterr, "a") as ferr:
+        # We need to catch java.lang.Error so that cleanup can be performed
+        # if the script is killed from within TopSpin. See #23.
+        try:
             backend = subprocess.Popen([p_python3, '-u', p_backend],
                                        stdin=subprocess.PIPE,
                                        stdout=subprocess.PIPE,
@@ -89,30 +91,28 @@ def main():
             print(p_spectrum, file=backend.stdin)
             backend.stdin.flush()
 
-            # Enter a loop where: 1) backend script passes values of
-            #                        acquisition params to frontend script
-            #                     2) frontend script runs acquisition
-            #                     3) frontend script passes "done" to backend
-            #                        script to indicate that it's done
-            # The loop is broken when the backend script passes "done" to the
-            # frontend # script instead of a new set of values (in step 1).
+            # Main loop, controlled by the lines printed by the backend.
             while True:
+                # Read in what the backend has to say.
                 line = backend.stdout.readline()
-                # Optimisation converged
-                if line.strip() == "done":
+                # This line indicates that the optimisation has converged.
+                if line.startswith("optima:"):
+                    optima = line.split()[1:]
                     break
-                # New values to evaluate the cost function at.
+                # This line indicates a set of values for which the cost
+                # function should be evaluated, i.e. an experiment should
+                # be ran.
                 elif line.startswith("values:"):
                     # Obtain the values and set them
                     values = line.split()[1:]
                     if len(values) != len(routine.pars):
-                        raise RuntimeError("invalid values passed from "
+                        raise RuntimeError("Invalid values passed from "
                                            "backend: '{}'".format(line))
                     for value, par in zip(values, routine.pars):
                         try:
                             float(value)
                         except ValueError:
-                            raise RuntimeError("invalid values passed from "
+                            raise RuntimeError("Invalid values passed from "
                                                "backend: '{}'".format(line))
                         else:
                             convert_name_and_putpar(par, value)
@@ -128,44 +128,37 @@ def main():
                     # Tell backend script it's done
                     print("done", file=backend.stdin)
                     backend.stdin.flush()
-                # Otherwise it would be an error. The entire main() routine in
-                # the backend is wrapped by a try/except which catches all
-                # exceptions and propagates them to the frontend by printing
-                # the traceback.
-                # We check that the backend is done writing to errlog *before*
-                # exiting the with block, or else we get a nice race condition.
+                # Otherwise it would be an error.
+                # The entire main() routine in the backend is wrapped by a
+                # try/except which catches all exceptions and propagates them
+                # to the frontend by printing the traceback.
                 elif line.startswith("Backend exception: "):
-                    while backend.poll() is None:
-                        SLEEP(0.1)
                     raise RuntimeError(line)
                 else:
-                    while backend.poll() is None:
-                        SLEEP(0.1)
-                    raise RuntimeError("uncaught backend error. Please check "
-                                       "error log for more information.")
-    except RuntimeError as e:
-        # After exiting the with block, ferr should be closed, so we need to
-        # reopen it.
-        with open(p_opterr, "a") as fp:
-            print_exc(file=fp)
-        # Tell the error the immediate cause and exit
-        err_exit("error during acquisition loop:\n" + e.message)
-    # cleanup code
-    except Error:
-        # Kill the backend process if it's still running.
-        if backend is not None:  # means it was created
-            if backend.poll() is None:  # means it's still running
+                    raise RuntimeError("Invalid message from backend: '{}'."
+                                       "Please see error log for more "
+                                       "information.".format(line))
+        except RuntimeError as e:
+            # Print the date/time and exception to ferr.
+            print("======= From frontend =======", file=ferr)
+            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=ferr)
+            print_exc(file=ferr)
+            # Wait for the backend to finish before exiting the with block.
+            backend.communicate()
+            # Tell the error the immediate cause and exit
+            err_exit("Error during acquisition loop:\n" + e.message)
+        # cleanup code
+        except Error:
+            # Kill the backend process if it's still running.
+            if backend.poll() is None:
                 backend.terminate()
-        raise
+            raise
 
-    # If it reaches here, the optimisation should be done
-    # Close error output file, delete it if it is empty
-    ferr.close()
+    # Delete the error log if it's empty
     if os.stat(p_opterr).st_size == 0:
         os.remove(p_opterr)
-    # Read in optimal values, notify user, and set parameters
-    line = backend.stdout.readline()
-    optima = line.split()
+
+    # Process the optimal values found
     s = ""
     x = CURDATA()
     p_optlog = os.path.join(x[3], x[0], x[1], "poptpy.log")
@@ -506,6 +499,15 @@ def process_values(parname, input_string):
     except ValueError:
         err_exit("'{}' was not a valid input for {}. "
                  "Please try again.".format(input_string, parname))
+
+
+def make_p_spectrum():
+    """
+    Constructs the path to the procno folder of the active spectrum.
+    """
+    x = CURDATA()
+    p = os.path.join(x[3], x[0], x[1], "pdata", x[2])
+    return p
 
 
 def pulprog_contains_wvm():
