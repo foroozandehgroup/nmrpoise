@@ -520,9 +520,14 @@ def pybobyqa_interface(cf, x0, xtol, args=(), plot=False):
     scaled_ub = (ub - lb) * 0.03 / tol
     # Run the optimisation.
     pb_sol = pb.solve(cf, x0, args=args,
-                      rhobeg=min(0.3, max(ub) * 0.999), rhoend=0.03,
+                      rhobeg=min(0.3, max(scaled_ub) * 0.499), rhoend=0.03,
                       bounds=(scaled_lb, scaled_ub), objfun_has_noise=True,
                       user_params={'restarts.use_restarts': False})
+    # Catch Py-BOBYQA complaints.
+    if pb_sol.flag in [pb_sol.EXIT_INPUT_ERROR,
+                       pb_sol.EXIT_TR_INCREASE_ERROR,
+                       pb_sol.EXIT_LINALG_ERROR]:
+        raise RuntimeError(pb_sol.msg)
     # We just need to coerce the returned information into our OptResult
     # format, so that the backend sees a unified interface for all optimisers.
     # Note that niter is not applicable to PyBOBYQA.
