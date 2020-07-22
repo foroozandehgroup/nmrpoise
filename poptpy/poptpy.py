@@ -24,12 +24,14 @@ Routine = namedtuple("Routine", "name pars lb ub init tol cf")
 # SETTINGS
 
 # AU programme for acquisition and processing.
-poptpy_au_text = 'ZG\nEFP\nAPBK\nQUIT'
 # For 2D experiments use e.g. 'ZG\nXFB\nXCMD("apk2d")\nABS2'.
-
+poptpy_au_text = 'ZG\nEFP\nAPBK\nQUIT'
 # Optimisation algorithm to use.
 # Choose between "nm", "mds", or "bobyqa". Case-insensitive.
 optimiser = "nm"
+# Create a new expno for each function evaluation if True.
+# If False, all function evaluations are run on the same expno (default).
+separate_expnos = False
 
 
 def main():
@@ -92,6 +94,7 @@ def main():
             backend.stdin.flush()
 
             # Main loop, controlled by the lines printed by the backend.
+            first_expno = True
             while True:
                 # Read in what the backend has to say.
                 line = backend.stdout.readline()
@@ -103,6 +106,13 @@ def main():
                 # function should be evaluated, i.e. an experiment should
                 # be ran.
                 elif line.startswith("values:"):
+                    # Increment expno if it's not the first time.
+                    if separate_expnos:
+                        if not first_expno:
+                            XCMD("iexpno")
+                            RE_IEXPNO()
+                        else:
+                            first_expno = False
                     # Obtain the values and set them
                     values = line.split()[1:]
                     if len(values) != len(routine.pars):
@@ -127,6 +137,7 @@ def main():
                                            "poptpy has been terminated.")
                     # Tell backend script it's done
                     print("done", file=backend.stdin)
+                    print(make_p_spectrum(), file=backend.stdin)
                     backend.stdin.flush()
                 # Otherwise it would be an error.
                 # The entire main() routine in the backend is wrapped by a

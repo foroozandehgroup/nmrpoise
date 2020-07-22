@@ -198,7 +198,9 @@ def acquire_nmr(x, cost_function, routine):
         # Print unscaled values, prompting frontend script to start acquisition
         send_values(unscaled_val)
         # Wait for acquisition to complete, then calculate cost function
-        signal = input()
+        signal = input()      # frontend prints "done" here
+        global p_spectrum
+        p_spectrum = Path(input())  # path to the active spectrum
         if signal == "done":
             cf_val = cost_function()
             # Logging
