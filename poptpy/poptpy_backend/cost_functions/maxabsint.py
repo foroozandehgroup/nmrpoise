@@ -1,4 +1,4 @@
 def cost_function():
-    r = get_real_spectrum()
-    i = get_imag_spectrum()
+    r = get1d_real()
+    i = get1d_imag()
     return -np.sum(np.abs(r + 1j*i))

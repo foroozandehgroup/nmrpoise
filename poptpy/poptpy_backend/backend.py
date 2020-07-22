@@ -363,7 +363,7 @@ def _ppm_to_point(shift, axis=None, p_spec=None):
     return int(x)
 
 
-def get_fid(p_spec=None):
+def get1d_fid(p_spec=None):
     """
     Returns the FID as a (complex) np.ndarray.
     Needs the global variable p_spectrum to be set.
@@ -387,7 +387,76 @@ def get_fid(p_spec=None):
     return fid[0] + (1j * fid[1])
 
 
-def get_real_spectrum(bounds="", epno=None, p_spec=None):
+def _get_1d(spec_fname, bounds="", epno=None, p_spec=None):
+    """
+    Get a 1D spectrum. This function accounts for TopSpin's NC_PROC variable,
+    scaling the spectrum intensity accordingly.
+
+    To get the real spectrum and imaginary spectrum, pass spec_fname="1r" or
+    spec_fname="1i" respectively.
+
+    Note that this function only works for 1D spectra. It does NOT work for 1D
+    projections of 2D spectra. If you want to work with projections, you can
+    use get_2d_spectrum() to get the full 2D spectrum, then manipulate it using
+    numpy functions as appropriate. Examples can be found in the docs.
+
+    The bounds parameter may be specified in the following formats:
+       - between 5 and 8 ppm:   bounds="5..8"
+       - greater than 9.3 ppm:  bounds="9.3.."
+       - less than -2 ppm:      bounds="..-2"
+
+    Arguments:
+        spec_fname (str)      : "1r" for real or "1i" for imaginary.
+        bounds (str)          : String describing the region of interest. See
+                                above for examples. If no bounds are provided,
+                                uses the spectral bounds specified via 'dpl';
+                                if these are not specified, defaults to the
+                                whole spectrum.
+        epno (list)           : [expno, procno] of spectrum of interest.
+                                Defaults to the spectrum being optimised. Other
+                                expnos/procnos are calculated relative to the
+                                spectrum being optimised.
+        p_spec (pathlib.Path) : Path to the spectrum being optimised.
+
+    Returns:
+        (np.ndarray) Array containing the spectrum or the desired section.
+    """
+    # Check whether user has specified epno
+    if epno is not None:
+        if len(epno) == 2:
+            p_spec = p_spec or p_spectrum
+            p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
+        else:
+            raise ValueError("Please provide a valid [expno, procno] "
+                             "combination.")
+
+    p_spec = p_spec or p_spectrum
+    p_specdata = p_spec / spec_fname
+    spec = np.fromfile(p_specdata, dtype=np.int32)
+    nc_proc = int(getpar("NC_proc", p_spec))
+    spec = spec * (2 ** nc_proc)
+
+    if bounds == "":
+        if spec_f1p is None and spec_f2p is None:  # DPL not used
+            return spec
+        else:
+            left, right = spec_f1p, spec_f2p
+    else:
+        right, left = _parse_bounds_string(bounds)
+
+    # Get default bounds
+    si = int(getpar("SI", p_spec))
+    left_point, right_point = 0, si - 1
+    # Then replace them if necessary
+    if left is not None:
+        left_point = _ppm_to_point(left, p_spec=p_spec)
+    if right is not None:
+        right_point = _ppm_to_point(right, p_spec=p_spec)
+
+    return spec[left_point:right_point + 1]
+
+
+def get1d_real(bounds="", epno=None, p_spec=None):
     """
     Get the real spectrum. This function accounts for TopSpin's NC_PROC
     variable, scaling the spectrum intensity accordingly.
@@ -417,42 +486,10 @@ def get_real_spectrum(bounds="", epno=None, p_spec=None):
     Returns:
         (np.ndarray) Array containing the spectrum or the desired section.
     """
-    # Check whether user has specified epno
-    if epno is not None:
-        if len(epno) == 2:
-            p_spec = p_spec or p_spectrum
-            p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
-        else:
-            raise ValueError("Please provide a valid [expno, procno] "
-                             "combination.")
-
-    p_spec = p_spec or p_spectrum
-    p_1r = p_spec / "1r"
-    real_spec = np.fromfile(p_1r, dtype=np.int32)
-    nc_proc = int(getpar("NC_proc", p_spec))
-    real_spec = real_spec * (2 ** nc_proc)
-
-    if bounds == "":
-        if spec_f1p is None and spec_f2p is None:  # DPL not used
-            return real_spec
-        else:
-            left, right = spec_f1p, spec_f2p
-    else:
-        right, left = _parse_bounds_string(bounds)
-
-    # Get default bounds
-    si = int(getpar("SI", p_spec))
-    left_point, right_point = 0, si - 1
-    # Then replace them if necessary
-    if left is not None:
-        left_point = _ppm_to_point(left, p_spec=p_spec)
-    if right is not None:
-        right_point = _ppm_to_point(right, p_spec=p_spec)
-
-    return real_spec[left_point:right_point + 1]
+    return _get_1d(spec_fname="1r", bounds=bounds, epno=epno, p_spec=p_spec)
 
 
-def get_imag_spectrum(bounds="", epno=None, p_spec=None):
+def get1d_imag(bounds="", epno=None, p_spec=None):
     """
     Get the imaginary spectrum. This function accounts for TopSpin's NC_PROC
     variable, scaling the spectrum intensity accordingly.
@@ -482,45 +519,15 @@ def get_imag_spectrum(bounds="", epno=None, p_spec=None):
     Returns:
         (np.ndarray) Array containing the spectrum or the desired section.
     """
-    # Check whether user has specified epno
-    if epno is not None:
-        if len(epno) == 2:
-            p_spec = p_spec or p_spectrum
-            p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
-        else:
-            raise ValueError("Please provide a valid [expno, procno] "
-                             "combination.")
-
-    p_spec = p_spec or p_spectrum
-    p_1i = p_spec / "1i"
-    imag_spec = np.fromfile(p_1i, dtype=np.int32)
-    nc_proc = int(getpar("NC_proc", p_spec))
-    imag_spec = imag_spec * (2 ** nc_proc)
-
-    if bounds == "":
-        if spec_f1p is None and spec_f2p is None:  # DPL not used
-            return imag_spec
-        else:
-            left, right = spec_f1p, spec_f2p
-    else:
-        right, left = _parse_bounds_string(bounds)
-
-    # Get default bounds
-    si = int(getpar("SI", p_spec))
-    left_point, right_point = 0, si - 1
-    # Then replace them if necessary
-    if left is not None:
-        left_point = _ppm_to_point(left, p_spec=p_spec)
-    if right is not None:
-        right_point = _ppm_to_point(right, p_spec=p_spec)
-
-    return imag_spec[left_point:right_point + 1]
+    return _get_1d(spec_fname="1i", bounds=bounds, epno=epno, p_spec=p_spec)
 
 
-def get_2d_spectrum(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
+def _get_2d(spec_fname, f1_bounds="", f2_bounds="", epno=None, p_spec=None):
     """
-    Get the doubly real part of a 2D spectrum. This function takes into account
-    the NC_proc value in TopSpin's processing parameters.
+    Get a 2D spectrum. This function takes into account the NC_proc value in
+    TopSpin's processing parameters.
+
+    spec_fname should be "2rr", "2ri", "2ir", or "2ii".
 
     The f1_bounds and f2_bounds parameters may be specified in the following
     formats:
@@ -529,6 +536,8 @@ def get_2d_spectrum(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
        - less than -2 ppm:      bounds="..-2"
 
     Arguments:
+        spec_fname (str)      : String indicating which processed data file to
+                                read in. Can be "2rr", "2ri", "2ir", or "2ii".
         f1_bounds (str)       : String indicating f1 region of interest.
         f2_bounds (str)       : String indicating f2 region of interest.
         epno (list)           : [expno, procno] of spectrum of interest.
@@ -550,7 +559,7 @@ def get_2d_spectrum(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
                              "combination.")
 
     p_spec = p_spec or p_spectrum
-    p_rr = p_spec / "2rr"
+    p_specdata = p_spec / "2rr"
 
     # Check data type (TopSpin 3 int vs TopSpin 4 float)
     dtypp = getpar("dtypp", p_spec)
@@ -560,7 +569,7 @@ def get_2d_spectrum(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
     else:
         raise NotImplementedError("get_2d_spectrum(): "
                                   "float data not yet accepted")
-    sp = np.fromfile(p_rr, dtype=np.dtype(dt))
+    sp = np.fromfile(p_specdata, dtype=np.dtype(dt))
     # Format according to xdim. See TopSpin "data format" manual.
     # See also http://docs.nmrfx.org/viewer/files/datasets.
     # Get si and xdim
@@ -601,6 +610,61 @@ def get_2d_spectrum(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
         if f2_upper is not None else 0
     return sp[f1_upper_point:f1_lower_point + 1,
               f2_upper_point:f2_lower_point + 1]
+
+
+def get2d_rr(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
+    """
+    Get the doubly real part of the 2D spectrum. This function takes into
+    account the NC_proc value in TopSpin's processing parameters.
+
+    The f1_bounds and f2_bounds parameters may be specified in the following
+    formats:
+       - between 5 and 8 ppm:   bounds="5..8"
+       - greater than 9.3 ppm:  bounds="9.3.."
+       - less than -2 ppm:      bounds="..-2"
+
+    Arguments:
+        f1_bounds (str)       : String indicating f1 region of interest.
+        f2_bounds (str)       : String indicating f2 region of interest.
+        epno (list)           : [expno, procno] of spectrum of interest.
+                                Defaults to the spectrum being optimised. Other
+                                expnos/procnos are calculated relative to the
+                                spectrum being optimised.
+        p_spec (pathlib.Path) : Path to the spectrum being optimised.
+
+    Returns:
+        (np.ndarray) 2D array containing the spectrum or the desired section.
+    """
+    return _get_2d(spec_fname="2rr",
+                   f1_bounds=f1_bounds, f2_bounds=f2_bounds,
+                   epno=epno, p_spec=p_spec)
+
+
+def get2d_ri(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
+    """
+    Same as get2d_rr, except that it reads the '2ri' file.
+    """
+    return _get_2d(spec_fname="2ri",
+                   f1_bounds=f1_bounds, f2_bounds=f2_bounds,
+                   epno=epno, p_spec=p_spec)
+
+
+def get2d_ir(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
+    """
+    Same as get2d_rr, except that it reads the '2ir' file.
+    """
+    return _get_2d(spec_fname="2ir",
+                   f1_bounds=f1_bounds, f2_bounds=f2_bounds,
+                   epno=epno, p_spec=p_spec)
+
+
+def get2d_ii(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
+    """
+    Same as get2d_rr, except that it reads the '2ii' file.
+    """
+    return _get_2d(spec_fname="2ii",
+                   f1_bounds=f1_bounds, f2_bounds=f2_bounds,
+                   epno=epno, p_spec=p_spec)
 
 
 def _get_acqu_par(par, p_acqus):

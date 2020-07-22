@@ -1,2 +1,2 @@
 def cost_function():
-    return -np.sum(get_real_spectrum())
+    return -np.sum(get1d_real())

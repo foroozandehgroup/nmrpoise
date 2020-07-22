@@ -123,9 +123,9 @@ def test_get_routine_cf():
                                   "spectrum and a target spectrum.")
 
 
-def test_get_real_spectrum():
+def test_get1d_real():
     p_spec = makep(1, 1)
-    real = be.get_real_spectrum(p_spec=p_spec)
+    real = be.get1d_real(p_spec=p_spec)
     npff = np.fromfile(p_spec / "1r", dtype=np.int32)
     assert be.getpar("NC_proc", p_spec=p_spec) == -8
     assert np.array_equal(real, npff * (2 ** -8))
@@ -135,24 +135,24 @@ def test_get_real_spectrum():
     lpoint = be._ppm_to_point(left, p_spec=p_spec)
     rpoint = be._ppm_to_point(right, p_spec=p_spec)
     lpoint, rpoint = sorted([lpoint, rpoint])  # if left < right
-    subarray = be.get_real_spectrum(bounds="4..6", p_spec=p_spec)
+    subarray = be.get1d_real(bounds="4..6", p_spec=p_spec)
     assert np.array_equal(subarray, npff[lpoint:rpoint + 1] * (2 ** -8))
 
     left, right = 6, None
     lpoint = be._ppm_to_point(left, p_spec=p_spec)
     si = int(be.getpar("si", p_spec=p_spec))
-    subarray = be.get_real_spectrum(bounds="..6", p_spec=p_spec)
+    subarray = be.get1d_real(bounds="..6", p_spec=p_spec)
     assert np.array_equal(subarray, npff[lpoint:si] * (2 ** -8))
 
     left, right = None, 6
     rpoint = be._ppm_to_point(right, p_spec=p_spec)
-    subarray = be.get_real_spectrum(bounds="6..", p_spec=p_spec)
+    subarray = be.get1d_real(bounds="6..", p_spec=p_spec)
     assert np.array_equal(subarray, npff[0:rpoint + 1] * (2 ** -8))
 
 
-def test_get_imag_spectrum():
+def test_get1d_imag():
     p_spec = makep(1, 1)
-    imag = be.get_imag_spectrum(p_spec=p_spec)
+    imag = be.get1d_imag(p_spec=p_spec)
     npff = np.fromfile(p_spec / "1i", dtype=np.int32)
     assert be.getpar("NC_proc", p_spec=p_spec) == -8
     assert np.array_equal(imag, npff * (2 ** -8))
@@ -162,24 +162,24 @@ def test_get_imag_spectrum():
     lpoint = be._ppm_to_point(left, p_spec=p_spec)
     rpoint = be._ppm_to_point(right, p_spec=p_spec)
     lpoint, rpoint = sorted([lpoint, rpoint])  # if left < right
-    subarray = be.get_imag_spectrum(bounds="4..6", p_spec=p_spec)
+    subarray = be.get1d_imag(bounds="4..6", p_spec=p_spec)
     assert np.array_equal(subarray, npff[lpoint:rpoint + 1] * (2 ** -8))
 
     left, right = 6, None
     lpoint = be._ppm_to_point(left, p_spec=p_spec)
     si = int(be.getpar("si", p_spec=p_spec))
-    subarray = be.get_imag_spectrum(bounds="..6", p_spec=p_spec)
+    subarray = be.get1d_imag(bounds="..6", p_spec=p_spec)
     assert np.array_equal(subarray, npff[lpoint:si] * (2 ** -8))
 
     left, right = None, 6
     rpoint = be._ppm_to_point(right, p_spec=p_spec)
-    subarray = be.get_imag_spectrum(bounds="6..", p_spec=p_spec)
+    subarray = be.get1d_imag(bounds="6..", p_spec=p_spec)
     assert np.array_equal(subarray, npff[0:rpoint + 1] * (2 ** -8))
 
 
-def test_get_fid():
+def test_get1d_fid():
     p_spec = makep(1, 1)
-    fid = be.get_fid(p_spec)
+    fid = be.get1d_fid(p_spec)
 
     npff = np.fromfile(p_spec.parents[1] / "fid", dtype=np.int32)
 
@@ -187,12 +187,12 @@ def test_get_fid():
     assert np.array_equal(np.imag(fid), npff[1::2])
 
 
-def test_get_2d_spectrum():
+def test_get2d_rr():
     p_spec = makep(101, 1)
-    spec = be.get_2d_spectrum(p_spec=p_spec)
+    spec = be.get2d_rr(p_spec=p_spec)
     assert spec.shape == (1024, 1024)
 
-    spec = be.get_2d_spectrum(f1_bounds="", f2_bounds="6..8", p_spec=p_spec)
+    spec = be.get2d_rr(f1_bounds="", f2_bounds="6..8", p_spec=p_spec)
     assert spec.shape == (1024, 205)
 
 
