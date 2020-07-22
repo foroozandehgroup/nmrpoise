@@ -71,9 +71,13 @@ def main():
         print("=" * 40, file=log)
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=log)
         fmt = "{:25s} - {}"
+        print(fmt.format("Routine name", routine.name), file=log)
         print(fmt.format("Optimisation parameters", routine.pars), file=log)
         print(fmt.format("Cost function", routine.cf), file=log)
         print(fmt.format("Initial values", routine.init), file=log)
+        print(fmt.format("Lower bounds", routine.lb), file=log)
+        print(fmt.format("Upper bounds", routine.ub), file=log)
+        print(fmt.format("Tolerances", routine.tol), file=log)
         print(fmt.format("Optimisation algorithm", optimiser), file=log)
         print("", file=log)
         fmt = "{:^10s}  " * (npars + 1)
