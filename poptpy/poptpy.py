@@ -20,8 +20,15 @@ p_opterr = os.path.join(p_poptpy, "poptpy_err.log")
 p_python3 = "/usr/local/bin/python3"
 Routine = namedtuple("Routine", "name pars lb ub init tol cf")
 
-# Settings
-optimiser = "nm"   # "nm", "mds", or "bobyqa". Case-insensitive.
+# SETTINGS
+
+# AU programme for acquisition and processing.
+poptpy_au_text = 'ZG\nEFP\nAPBK\nQUIT'
+# For 2D experiments use e.g. 'ZG\nXFB\nXCMD("apk2d")\nABS2'.
+
+# Optimisation algorithm to use.
+# Choose between "nm", "mds", or "bobyqa". Case-insensitive.
+optimiser = "nm"
 
 
 def main():
@@ -530,10 +537,6 @@ def create_au_prog():
     Creates an AU programme for acquisition and processing in TopSpin's
     default directory, if it doesn't already exist.
     """
-    # poptpy_au_text = "ZG\nEFP\nAPBK\nQUIT"  # Change this if desired
-    poptpy_au_text = ("RPROCNO(1)\nZG\nXFB\nXCMD(\"apk2d\")\n" +
-                      "ABS2\nF2PROJP(125,825,999)\n" +
-                      "RPROCNO(999)\nVIEWDATA_SAMEWIN\nABS\nQUIT")
     p_acqau = os.path.join(tshome, "exp/stan/nmr/au/src/user/poptpy_au")
     f = open(p_acqau, "w")
     f.write(poptpy_au_text)
