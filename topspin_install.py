@@ -29,12 +29,13 @@ def main():
     # Replace the old file with the new file.
     copy_file(str(poptpy_py_out), str(poptpy_py))
 
-    # Find TopSpin installation path.
-    ts_path = get_topspin_path()
-    ts_backend_path = ts_path / "poptpy_backend"
-    # Copy files to TopSpin path.
-    copy_file(str(poptpy_py), str(ts_path))
-    copy_tree(str(poptpy_backend), str(ts_backend_path))
+    # Find TopSpin installation path(s).
+    ts_paths = get_topspin_path()
+    for ts_path in ts_paths:
+        ts_backend_path = ts_path / "poptpy_backend"
+        # Copy files to TopSpin path.
+        copy_file(str(poptpy_py), str(ts_path))
+        copy_tree(str(poptpy_backend), str(ts_backend_path))
 
 
 def get_topspin_path():
@@ -45,8 +46,10 @@ def get_topspin_path():
     Otherwise, tries to find the path to the most recent TopSpin directory.
     Searches under /opt on Unix/Linux systems, or under C:\\Bruker on Windows.
 
-    Returns the Path object pointing to /exp/stan/nmr/py/user.
-    Raises RuntimeError if it's not found.
+    Returns a list of Path objects pointing to /exp/stan/nmr/py/user for each
+    TopSpin directory found.
+
+    Raises RuntimeError if none are found.
     """
     invalid_envvar_error = ("TopSpin installation directory was specified as "
                             "the environment variable TSDIR, but was not a "
@@ -66,6 +69,7 @@ def get_topspin_path():
         py_user = ts / "py" / "user"
         if not ts.is_dir() and py_user.is_dir():
             raise RuntimeError(invalid_envvar_error)
+        ts_paths = [py_user]
     else:
         if unix:
             glob_query = "/opt/topspin*/exp/stan/nmr"
@@ -76,15 +80,15 @@ def get_topspin_path():
         if len(dirs) == 0:              # No TopSpin folders found
             raise RuntimeError(tsdir_notfound_error)
         else:
-            if len(dirs) > 1:
-                print("Multiple TopSpin directories found. "
-                      "Choosing the most recent version.\n")
-            ts = Path(sorted(dirs)[-1])
-            py_user = ts / "py" / "user"
-            if not py_user.is_dir():
+            # Convert to pathlib.Path
+            dirs = [Path(dir) / "py" / "user" for dir in dirs]
+            # Filter out invalid paths
+            ts_paths = [dir for dir in dirs if dir.is_dir()]
+            # Error out if no valid ones were found
+            if ts_paths == []:
                 raise RuntimeError(tsdir_notfound_error)
 
-    return py_user
+    return ts_paths
 
 
 if __name__ == "__main__":
