@@ -134,7 +134,7 @@ class OptResult:
         return str(self.__dict__)
 
 
-def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
+def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley"):
     """
     Nelder-Mead optimiser, as described in Section 8.1 of Kelley, "Iterative
     Methods for Optimization".
@@ -151,11 +151,6 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
         args: A tuple of arguments to pass to the cost function.
         x0:   List containing initial point for optimisation.
         xtol: List containing tolerances for each parameter.
-        plot: Bool. If true then this plots the cost function value against
-              function evaluation. NOTE: This makes the optimisation run a lot
-              more slowly (~ 3 orders of magnitude!!). If this is coupled to
-              NMR acquisition, though, this isn't an issue, since we go from
-              ~ ms to ~ s.
         simplex_method: Method for generation of initial simplex.
 
     Returns:
@@ -233,26 +228,11 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
     # Sort simplex
     sim.sort()
 
-    # Plotting initialisation.
-    if plot:
-        import matplotlib.pyplot as plt
-        plot_iters, plot_fvals = [], []
-
     # Main loop.
     try:
         while not converged(sim, xtol):
             niter += 1
             sim.sort()  # for good measure
-
-            # Plotting
-            if plot:
-                plot_iters.append(niter)
-                plot_fvals.append(sim.f[0])
-                plt.cla()
-                plt.xlabel("Iteration number")
-                plt.ylabel("Cost function")
-                plt.plot(plot_iters, plot_fvals)
-                plt.pause(0.0001)
 
             # Check number of iterations
             if niter >= maxiter:
@@ -337,8 +317,7 @@ def nelder_mead(cf, x0, xtol, args=(), plot=False, simplex_method="spendley"):
                      message=message)
 
 
-def multid_search(cf, x0, xtol, args=(), plot=False,
-                  simplex_method="spendley"):
+def multid_search(cf, x0, xtol, args=(), simplex_method="spendley"):
     """
     Multidimensional search optimiser, as described in Secion 8.2 of Kelley,
     "Iterative Methods for Optimization".
@@ -351,11 +330,6 @@ def multid_search(cf, x0, xtol, args=(), plot=False,
         args: A tuple of arguments to pass to the cost function.
         x0:   List containing initial point for optimisation.
         xtol: List containing tolerances for each parameter.
-        plot: Bool. If true then this plots the cost function value against
-              function evaluation. NOTE: This makes the optimisation run a lot
-              more slowly (~ 3 orders of magnitude!!). If this is coupled to
-              NMR acquisition, though, this isn't an issue, since we go from
-              ~ ms to ~ s.
         simplex_method: Method for generation of initial simplex.
 
     Returns:
@@ -425,26 +399,11 @@ def multid_search(cf, x0, xtol, args=(), plot=False,
     # Sort simplex
     sim.sort()
 
-    # Plotting initialisation.
-    if plot:
-        import matplotlib.pyplot as plt
-        plot_iters, plot_fvals = [], []
-
     # Main loop.
     try:
         while not converged(sim, xtol):
             niter += 1
             sim.sort()  # for good measure
-
-            # Plotting
-            if plot:
-                plot_iters.append(niter)
-                plot_fvals.append(sim.f[0])
-                plt.cla()
-                plt.xlabel("Iteration number")
-                plt.ylabel("Cost function")
-                plt.plot(plot_iters[-100:], plot_fvals[-100:])
-                plt.pause(0.0001)
 
             # Check number of iterations and function evaluations
             if niter >= maxiter:
@@ -500,7 +459,7 @@ def multid_search(cf, x0, xtol, args=(), plot=False,
                      message=message)
 
 
-def pybobyqa_interface(cf, x0, xtol, args=(), plot=False):
+def pybobyqa_interface(cf, x0, xtol, args=()):
     # This should be optional, i.e. we shouldn't force people to install it.
     try:
         import pybobyqa as pb

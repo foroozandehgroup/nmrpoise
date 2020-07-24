@@ -97,7 +97,7 @@ def main():
     # Set up optimisation arguments
     optimargs = (cost_function, routine)
     # Carry out the optimisation
-    opt_result = optimfn(acquire_nmr, x0, xtol, optimargs, plot=False)
+    opt_result = optimfn(acquire_nmr, x0, xtol, optimargs)
 
     # Tell frontend script that the optimisation is done
     scaleby = "bounds" if optimiser in ["nm", "mds"] else "tols"
