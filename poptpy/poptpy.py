@@ -24,7 +24,7 @@ Routine = namedtuple("Routine", "name pars lb ub init tol cf")
 # SETTINGS
 
 # AU programme for acquisition and processing.
-# For 2D experiments use e.g. 'ZG\nXFB\nXCMD("apk2d")\nABS2'.
+# For 2D experiments use e.g. 'ZG\nXFB\nXCMD("apk2d")\nABS2\nQUIT'.
 poptpy_au_text = 'ZG\nEFP\nAPBK\nQUIT'
 # Optimisation algorithm to use.
 # Choose between "nm", "mds", or "bobyqa". Case-insensitive.
