@@ -111,7 +111,7 @@ def main():
     with open(p_optlog, "a") as log:
         print("", file=log)
         fmt = "{:27s} - {}"
-        print(fmt.format("Best values found", best_values), file=log)
+        print(fmt.format("Best values found", best_values.tolist()), file=log)
         print(fmt.format("Cost function at minimum", opt_result.fbest),
               file=log)
         print(fmt.format("Number of fevals", acquire_nmr.calls), file=log)
