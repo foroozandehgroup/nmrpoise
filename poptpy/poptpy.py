@@ -263,13 +263,14 @@ def get_routine_id():
 
     if saved_routines != []:  # Saved routines were found...
         x = SELECT(title="poptpy",
-                   message="Do you want to use a saved routine?",
-                   buttons=["Yes", "No"])
+                   message=("Do you want to use a saved routine, or create a "
+                            "new routine?"),
+                   buttons=["Saved routine", "New routine"])
 
         if x in [0, cst.ENTER]:  # user pressed Yes or Enter
-            s = ", ".join(saved_routines)
+            s = "\n".join(saved_routines)
             y = INPUT_DIALOG(title="poptpy: available routines",
-                             header="Available routines: " + s,
+                             header="Available routines:\n\n" + s,
                              items=["Routine:"])
 
             if y is None:  # user closed the dialog
@@ -278,9 +279,7 @@ def get_routine_id():
                 return y[0]
             else:  # user wrote something, but it wasn't correct
                 if y[0] != "":
-                    MSG("The saved routine {} was not found. "
-                        "Starting a new routine...".format(y[0]))
-                return None
+                    err_exit("The routine '{}' was not found.".format(y[0]))
         elif x == 1:  # user pressed No
             return None
         else:  # user did something else, like Escape or close button
