@@ -4,6 +4,7 @@ import os
 import re
 import json
 import subprocess
+import argparse
 from datetime import datetime
 from traceback import print_exc
 from collections import namedtuple
@@ -11,6 +12,9 @@ from collections import namedtuple
 from de.bruker.nmr.mfw.root.UtilPath import getTopspinHome
 from de.bruker.nmr.prsc.dbxml.ParfileLocator import getParfileDirs
 
+# AU programme for acquisition and processing.
+# For 2D experiments use e.g. 'ZG\nXFB\nXCMD("apk2d")\nABS2\nQUIT'.
+poptpy_au_text = 'ZG\nEFP\nAPBK\nQUIT'
 
 tshome = getTopspinHome()  # use tshome to avoid installer overwriting
 p_poptpy = os.path.join(tshome, "exp/stan/nmr/py/user/poptpy_backend")
@@ -21,22 +25,16 @@ p_opterr = os.path.join(p_poptpy, "poptpy_err.log")
 p_python3 = "/usr/local/bin/python3"
 Routine = namedtuple("Routine", "name pars lb ub init tol cf")
 
-# SETTINGS
 
-# AU programme for acquisition and processing.
-# For 2D experiments use e.g. 'ZG\nXFB\nXCMD("apk2d")\nABS2\nQUIT'.
-poptpy_au_text = 'ZG\nEFP\nAPBK\nQUIT'
-# Optimisation algorithm to use.
-# Choose between "nm", "mds", or "bobyqa". Case-insensitive.
-optimiser = "nm"
-# Create a new expno for each function evaluation if True.
-# If False, all function evaluations are run on the same expno (default).
-separate_expnos = False
-
-
-def main():
+def main(args):
     """
     Main routine.
+
+    Arguments:
+        args (argparse.Namespace): Namespace object returned by
+                                   parser.parse_args().
+
+    Returns: None.
     """
     # Make sure user has opened a dataset
     if CURDATA() is None:
@@ -54,7 +52,17 @@ def main():
             os.makedirs(folder)
 
     # Select optimisation routine
-    routine_id = get_routine_id()
+    saved_routines = list_files(p_routines)
+    # If routine was specified on command-line
+    if args.routine is not None:
+        if args.routine in saved_routines:
+            routine_id = args.routine
+        else:
+            err_exit("The routine '{}' was not found. Use 'poptpy --list' to "
+                     "see all available routines.".format(args.routine))
+    # If not, prompt the user
+    else:
+        routine_id = get_routine_id()
 
     # Create or read the Routine object
     if routine_id is None:  # New routine was requested
@@ -75,12 +83,16 @@ def main():
     # Create the AU programme for acquisition
     create_au_prog()
 
-    # Construct the path to the folder of the current spectrum.
-    p_spectrum = make_p_spectrum()
-
     # Check that the backend script is intact
     if not os.path.isfile(p_backend):
         err_exit("Backend script not found. Please reinstall poptpy.")
+
+    # Check args.algorithm to make sure it's sensible
+    if args.algorithm not in ["nm", "mds", "bobyqa"]:
+        # Have to use ERRMSG because MSG() is modal
+        ERRMSG("Optimisation algorithm '{}' not found; "
+               "using Nelder-Mead instead".format(args.algorithm))
+        args.algorithm = "nm"
 
     # Open the error log and keep it open throughout.
     # Closing it prematurely before the backend has finished writing to it WILL
@@ -94,7 +106,7 @@ def main():
                                        stdout=subprocess.PIPE,
                                        stderr=ferr)
             # Pass key information to the backend script
-            print(optimiser, file=backend.stdin)
+            print(args.algorithm, file=backend.stdin)
             print(routine_id, file=backend.stdin)
             print(p_spectrum, file=backend.stdin)
             backend.stdin.flush()
@@ -113,10 +125,13 @@ def main():
                 # be ran.
                 elif line.startswith("values:"):
                     # Increment expno if it's not the first time.
-                    if separate_expnos:
+                    if args.separate:
                         if not first_expno:
                             XCMD("iexpno")
+                            RE(current_dataset)
                             RE_IEXPNO()
+                            current_dataset = CURDATA()
+                            XCMD("browse_update_tree")
                         else:
                             first_expno = False
                     # Obtain the values and set them
@@ -177,12 +192,12 @@ def main():
 
     # Process the optimal values found
     s = ""
-    x = CURDATA()
-    p_optlog = os.path.join(x[3], x[0], x[1], "poptpy.log")
     for par, optimum in zip(routine.pars, optima):
         s = s + "Optimal value for {}: {}\n".format(par, optimum)
-        convert_name_and_putpar(par, optimum)
-    s = s + "These values have been set in the current experiment.\n"
+        if not args.separate:
+            convert_name_and_putpar(par, optimum)
+    if not args.separate:
+        s = s + "These values have been set in the current experiment.\n"
     s = s + "Detailed information can be found at: {}".format(p_optlog)
     MSG(s)
     EXIT()
@@ -247,13 +262,6 @@ def get_routine_id():
     saved_routines = list_files(p_routines)
 
     if saved_routines != []:  # Saved routines were found...
-        # Check for existing routine passed as argument
-        if len(sys.argv) > 1:
-            if sys.argv[1] in saved_routines:
-                return sys.argv[1]
-            else:
-                MSG("The saved routine {} was not found.".format(sys.argv[1]))
-
         x = SELECT(title="poptpy",
                    message="Do you want to use a saved routine?",
                    buttons=["Yes", "No"])
@@ -579,4 +587,49 @@ def create_au_prog():
 
 
 if __name__ == "__main__":
-    main()
+    # Parse arguments. For documentation see help_message below.
+    parser = argparse.ArgumentParser(prog="poptpy", add_help=False)
+    parser.add_argument("routine", nargs="?")
+    parser.add_argument("-h", "--help", action="store_true",)
+    parser.add_argument("-l", "--list", action="store_true",)
+    parser.add_argument("-s", "--separate", action="store_true")
+    parser.add_argument("-a", "--algorithm", default="nm")
+    args = parser.parse_args()
+
+    help_message = """
+usage: poptpy [-h] [-l] [-s] [-a ALGORITHM] [routine]
+
+Python script for optimisation of acquisition parameters in TopSpin.
+Full documentation can be found at https://poptpy.readthedocs.io.
+
+positional arguments:
+
+    routine
+        The name of the routine to use.
+
+optional arguments:
+
+    -h, --help
+        Show this help message and exit
+
+    -l, --list
+        List all available routines and exit
+
+    -s, --separate
+        Use separate expnos for each function evaluation
+
+    -a ALGORITHM, --algorithm ALGORITHM
+        Optimisation algorithm to use
+        [choices: 'nm' (default) / 'mds' / 'bobyqa']
+"""
+
+    if args.help:
+        VIEWTEXT(title="poptpy help", text=help_message)
+        EXIT()
+    elif args.list:
+        saved_routines = list_files(p_routines)
+        VIEWTEXT(title="Available poptpy routines",
+                 text="\n".join(saved_routines))
+        EXIT()
+    else:
+        main(args)
