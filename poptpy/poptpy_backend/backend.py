@@ -139,13 +139,12 @@ def get_routine_cf(routine_id, p_routine_dir=None, p_cf_dir=None):
     """
     # Load the routine.
     p_routine_dir = p_routine_dir or (p_poptpy / "routines")
-    with open(p_routine_dir / routine_id, "rb") as f:
+    with open(p_routine_dir / (routine_id + ".json"), "rb") as f:
         routine = Routine(**json.load(f))
 
     # Load the cost function
     p_cf_dir = p_cf_dir or (p_poptpy / "cost_functions")
-    cf_name = routine.cf
-    p_cf_file = p_cf_dir / (cf_name + ".py")
+    p_cf_file = p_cf_dir / (routine.cf + ".py")
     ld = {}
     exec(open(p_cf_file).read(), globals(), ld)
     # in p_cf, the cost function is defined as cost_function().

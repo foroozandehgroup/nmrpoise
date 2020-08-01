@@ -65,7 +65,7 @@ def main(args):
             os.makedirs(folder)
 
     # Select optimisation routine
-    saved_routines = list_files(p_routines)
+    saved_routines = list_files(p_routines, ext=".json")
     # If routine was specified on command-line
     if args.routine is not None:
         if args.routine in saved_routines:
@@ -80,11 +80,11 @@ def main(args):
     # Create or read the Routine object
     if routine_id is None:  # New routine was requested
         routine = Routine(*get_new_routine_parameters())
-        with open(os.path.join(p_routines, routine.name), "wb") as f:
+        with open(os.path.join(p_routines, routine.name + ".json"), "wb") as f:
             json.dump(routine._asdict(), f)
         routine_id = routine.name
     else:  # Saved routine was requested
-        with open(os.path.join(p_routines, routine_id), "rb") as f:
+        with open(os.path.join(p_routines, routine_id + ".json"), "rb") as f:
             routine = Routine(**json.load(f))
 
     # Check that the Routine object is valid
@@ -278,7 +278,7 @@ def get_routine_id():
         string containing routine name if a saved routine is chosen.
     """
     # Check for existing saved routines
-    saved_routines = list_files(p_routines)
+    saved_routines = list_files(p_routines, ext=".json")
 
     if saved_routines != []:  # Saved routines were found...
         x = SELECT(title="poptpy",
@@ -645,7 +645,7 @@ optional arguments:
         VIEWTEXT(title="poptpy help", text=help_message)
         EXIT()
     elif args.list:
-        saved_routines = list_files(p_routines)
+        saved_routines = list_files(p_routines, ext=".json")
         VIEWTEXT(title="Available poptpy routines",
                  text="\n".join(saved_routines))
         EXIT()
