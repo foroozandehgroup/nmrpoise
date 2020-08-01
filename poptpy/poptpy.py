@@ -39,6 +39,19 @@ def main(args):
     # Make sure user has opened a dataset
     if CURDATA() is None:
         err_exit("Please select a dataset!")
+    # Keep track of the currently active dataset. We want to make sure that
+    # it is _the_ active dataset before the AU programme starts.
+    else:
+        current_dataset = CURDATA()
+
+    # Construct the path to the folder of the current spectrum.
+    p_spectrum = make_p_spectrum()
+    # Generate the path to the log file. We have to do it here in case separate
+    # expnos are requested.
+    p_optlog = os.path.normpath(os.path.join(current_dataset[3],
+                                             current_dataset[0],
+                                             current_dataset[1],
+                                             "poptpy.log"))
 
     # Issue a warning if dataset is > 2D
     if GETACQUDIM() > 2:
@@ -134,6 +147,8 @@ def main(args):
                             XCMD("browse_update_tree")
                         else:
                             first_expno = False
+                    # Make sure we're at the correct dataset.
+                    RE(current_dataset)
                     # Obtain the values and set them
                     values = line.split()[1:]
                     if len(values) != len(routine.pars):
@@ -150,6 +165,8 @@ def main(args):
                     # Generate WaveMaker shapes if necessary
                     if pulprog_contains_wvm():
                         XCMD("wvm -q")
+                    # Make sure we're at the correct dataset (again).
+                    RE(current_dataset)
                     # Run acquisition and processing
                     XCMD("xau poptpy_au")
                     # Check whether acquisition is complete
@@ -190,7 +207,9 @@ def main(args):
     if os.stat(p_opterr).st_size == 0:
         os.remove(p_opterr)
 
-    # Process the optimal values found
+    # Process the optimal values found, make sure that the values are stored in
+    # the right dataset!
+    RE(current_dataset)
     s = ""
     for par, optimum in zip(routine.pars, optima):
         s = s + "Optimal value for {}: {}\n".format(par, optimum)
