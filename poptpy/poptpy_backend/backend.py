@@ -185,9 +185,14 @@ def acquire_nmr(x, cost_function, routine):
                            routine.tol, scaleby=scaleby)
 
     with open(p_optlog, "a") as log:
-        # Enforce constraints on optimisation
-        if np.any(unscaled_val < routine.lb) or \
-                np.any(unscaled_val > routine.ub):
+        # Enforce constraints on optimisation.
+        # This doesn't need to be done by BOBYQA, because we pass the lb and ub
+        # parameters, which automatically stops it from sampling outside the
+        # bounds. If you *do* enforce the constraints on BOBYQA, this can lead
+        # to bad errors, as due to floating-point inaccuracy sometimes it tries
+        # to sample a point that is ___just___ outside of the bounds (see #39).
+        if optimiser in ["nm", "mds"] and (np.any(unscaled_val < routine.lb) or
+                                           np.any(unscaled_val > routine.ub)):
             cf_val = np.inf
             # Logging
             fmt = "{:^10.4f}  " * (len(x) + 1)
