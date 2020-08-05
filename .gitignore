@@ -7,6 +7,6 @@ dist/
 docs/_build/
 docs/_static/
 docs/_templates/
-ts_poptpy.egg-info/
+poptpy.egg-info/
 .tox
 .coverage

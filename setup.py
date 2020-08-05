@@ -23,8 +23,8 @@ with open("README.md", "r") as fp:
 
 
 setup(
-    name="ts-poptpy",
-    version="0.1.7",
+    name="poptpy",
+    version="0.1.8",
     author="Jonathan Yong",
     author_email="yongrenjie@gmail.com",
     description="NMR parameter optimisation in TopSpin",
@@ -32,6 +32,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/yongrenjie/poptpy",
     include_package_data=True,
+    packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
