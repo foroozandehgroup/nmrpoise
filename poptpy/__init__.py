@@ -70,6 +70,9 @@ def _parse_poptpy_log(fname, logtype="new"):
             # Parse lines
             elif line.startswith("Routine name"):
                 current_run["routine"] = line.split("-", maxsplit=1)[1].strip()
+            elif line.startswith("Optimisation parameters"):
+                p = line.split("-", maxsplit=1)[1].strip().replace("'", '"')
+                current_run["param"] = json.loads(p)
             elif line.startswith("Initial values"):
                 current_run["init"] = parse_list_params(line)
             elif line.startswith("Lower bounds"):
@@ -115,9 +118,10 @@ def _parse_poptpy_log(fname, logtype="new"):
         data["routine"] = [run["routine"] for run in all_runs]
     data["initial"] = [run["init"] for run in all_runs]
     if logtype == "new":
-        data["lbs"] = [run["lb"] for run in all_runs]
-        data["ubs"] = [run["ub"] for run in all_runs]
-        data["tols"] = [run["tol"] for run in all_runs]
+        data["param"] = [run["param"] for run in all_runs]
+        data["lb"] = [run["lb"] for run in all_runs]
+        data["ub"] = [run["ub"] for run in all_runs]
+        data["tol"] = [run["tol"] for run in all_runs]
     data["algorithm"] = [run["algo"] for run in all_runs]
     data["costfn"] = [run["cf"] for run in all_runs]
     data["optimum"] = [run["best"] for run in all_runs]
