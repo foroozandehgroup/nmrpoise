@@ -6,6 +6,6 @@ dist/
 docs/_build/
 docs/_static/
 docs/_templates/
-poise.egg-info/
+nmrpoise.egg-info/
 .tox
 .coverage
