@@ -14,14 +14,14 @@ from de.bruker.nmr.prsc.dbxml.ParfileLocator import getParfileDirs
 
 # AU programme for acquisition and processing.
 # For 2D experiments use e.g. 'ZG\nXFB\nXCMD("apk2d")\nABS2\nQUIT'.
-poptpy_au_text = 'ZG\nEFP\nAPBK\nQUIT'
+poise_au_text = 'ZG\nEFP\nAPBK\nQUIT'
 
 tshome = getTopspinHome()  # use tshome to avoid installer overwriting
-p_poptpy = os.path.join(tshome, "exp/stan/nmr/py/user/poptpy_backend")
-p_backend = os.path.join(p_poptpy, "backend.py")
-p_routines = os.path.join(p_poptpy, "routines")
-p_costfunctions = os.path.join(p_poptpy, "cost_functions")
-p_opterr = os.path.join(p_poptpy, "poptpy_err.log")
+p_poise = os.path.join(tshome, "exp/stan/nmr/py/user/poise_backend")
+p_backend = os.path.join(p_poise, "backend.py")
+p_routines = os.path.join(p_poise, "routines")
+p_costfunctions = os.path.join(p_poise, "cost_functions")
+p_opterr = os.path.join(p_poise, "poise_err.log")
 p_python3 = "/usr/local/bin/python3"
 Routine = namedtuple("Routine", "name pars lb ub init tol cf")
 
@@ -51,16 +51,16 @@ def main(args):
     p_optlog = os.path.normpath(os.path.join(current_dataset[3],
                                              current_dataset[0],
                                              current_dataset[1],
-                                             "poptpy.log"))
+                                             "poise.log"))
 
     # Issue a warning if dataset is > 2D
     if GETACQUDIM() > 2:
-        MSG("Warning: poptpy is only designed for 1D and 2D data.\n"
+        MSG("Warning: poise is only designed for 1D and 2D data.\n"
             "If you are sure you want to use it on this {}D dataset, press "
             "OK to dismiss this warning.".format(GETACQUDIM()))
 
     # Make folders if they don't exist
-    for folder in [p_poptpy, p_routines, p_costfunctions]:
+    for folder in [p_poise, p_routines, p_costfunctions]:
         if not os.path.isdir(folder):
             os.makedirs(folder)
 
@@ -71,7 +71,7 @@ def main(args):
         if args.routine in saved_routines:
             routine_id = args.routine
         else:
-            err_exit("The routine '{}' was not found. Use 'poptpy --list' to "
+            err_exit("The routine '{}' was not found. Use 'poise --list' to "
                      "see all available routines.".format(args.routine))
     # If not, prompt the user
     else:
@@ -98,7 +98,7 @@ def main(args):
 
     # Check that the backend script is intact
     if not os.path.isfile(p_backend):
-        err_exit("Backend script not found. Please reinstall poptpy.")
+        err_exit("Backend script not found. Please reinstall poise.")
 
     # Check args.algorithm to make sure it's sensible
     if args.algorithm not in ["nm", "mds", "bobyqa"]:
@@ -168,11 +168,11 @@ def main(args):
                     # Make sure we're at the correct dataset (again).
                     RE(current_dataset)
                     # Run acquisition and processing
-                    XCMD("xau poptpy_au")
+                    XCMD("xau poise_au")
                     # Check whether acquisition is complete
                     if not acqu_done():
                         raise RuntimeError("Acquisition stopped prematurely. "
-                                           "poptpy has been terminated.")
+                                           "poise has been terminated.")
                     # Tell backend script it's done
                     print("done", file=backend.stdin)
                     print(make_p_spectrum(), file=backend.stdin)
@@ -240,7 +240,7 @@ def err_exit(error):
 
     Returns: None.
     """
-    ERRMSG(title="poptpy", message=error)
+    ERRMSG(title="poise", message=error)
     EXIT()
 
 
@@ -281,14 +281,14 @@ def get_routine_id():
     saved_routines = list_files(p_routines, ext=".json")
 
     if saved_routines != []:  # Saved routines were found...
-        x = SELECT(title="poptpy",
+        x = SELECT(title="poise",
                    message=("Do you want to use a saved routine, or create a "
                             "new routine?"),
                    buttons=["Saved routine", "New routine"])
 
         if x in [0, cst.ENTER]:  # user pressed Yes or Enter
             s = "\n".join(saved_routines)
-            y = INPUT_DIALOG(title="poptpy: available routines",
+            y = INPUT_DIALOG(title="poise: available routines",
                              header="Available routines:\n\n" + s,
                              items=["Routine:"])
 
@@ -324,7 +324,7 @@ def get_new_routine_parameters():
          - cf            : string containing name of cost function
     """
     # Prompt for routine name.
-    name = INPUT_DIALOG(title="poptpy: choose a name...",
+    name = INPUT_DIALOG(title="poise: choose a name...",
                         header="Please choose a name to save this routine as:",
                         items=["Name:"])
     if name is None or name[0].strip() == "":
@@ -332,7 +332,7 @@ def get_new_routine_parameters():
     name = name[0].replace(".py", "").strip()
 
     # Prompt for parameters to be optimised.
-    opt_pars = INPUT_DIALOG(title="poptpy: choose parameters...",
+    opt_pars = INPUT_DIALOG(title="poise: choose parameters...",
                             header=("Please select experimental parameters "
                                     "to be optimised (separated by commas or "
                                     "spaces):"),
@@ -349,10 +349,10 @@ def get_new_routine_parameters():
     inits = []
     tols = []
     for i in opt_pars:
-        settings = INPUT_DIALOG(title="poptpy: settings for {}".format(i),
-                                header="Please choose the minimum value, "
-                                       "maximum value, initial value, and "
-                                       "tolerance for {}:".format(i),
+        settings = INPUT_DIALOG(title="poise: settings for {}".format(i),
+                                header=("Please choose the minimum value, "
+                                        "maximum value, initial value, and "
+                                        "tolerance for {}:".format(i)),
                                 items=["Minimum:", "Maximum:",
                                        "Initial value:", "Tolerance:"])
         if settings is None:
@@ -388,11 +388,11 @@ def get_new_routine_parameters():
 
     if saved_cfs == []:
         err_exit("No cost functions have been defined!\n"
-                 "Please reinstall poptpy to get a default set, or define "
+                 "Please reinstall poise to get a default set, or define "
                  "your own cost function based on the documentation.")
     else:
         s = ", ".join(saved_cfs)
-        x = INPUT_DIALOG(title="poptpy: choose a cost function...",
+        x = INPUT_DIALOG(title="poise: choose a cost function...",
                          header="Available cost functions: " + s,
                          items=["Cost function:"])
         if x is None:  # user closed the dialog
@@ -419,7 +419,7 @@ def check_routine(routine):
         routine.init, routine.tol, routine.cf
     except AttributeError:
         err_exit("The routine file is invalid.\n"
-                 "Please delete it and recreate it from within poptpy.")
+                 "Please delete it and recreate it from within poise.")
 
 
 def check_python3path():
@@ -435,7 +435,7 @@ def check_python3path():
         subprocess.check_call([p_python3, "--version"])
     except subprocess.CalledProcessError:
         err_exit("The python3 executable was not found.\n"
-                 "Please specify p_python3 in poptpy.py.")
+                 "Please specify p_python3 in poise.py.")
 
 
 def convert_name_and_getpar(name):
@@ -503,7 +503,6 @@ def convert_name_and_putpar(name, val):
         val = float(val)
         PUTPAR(ts_name, str(val))
     except ValueError:
-        raise
         err_exit("The value {} for parameter {} "
                  "was invalid.".format(val, name))
 
@@ -556,7 +555,7 @@ def make_p_spectrum():
 def acqu_done():
     """
     Checks whether the current acquisition has been completed and returns
-    True/False accordingly. Useful for stopping poptpy if acquisition is
+    True/False accordingly. Useful for stopping poise if acquisition is
     prematurely terminated (e.g. by 'stop').
     """
     # Check NS
@@ -598,15 +597,15 @@ def create_au_prog():
     Creates an AU programme for acquisition and processing in TopSpin's
     default directory, if it doesn't already exist.
     """
-    p_acqau = os.path.join(tshome, "exp/stan/nmr/au/src/user/poptpy_au")
+    p_acqau = os.path.join(tshome, "exp/stan/nmr/au/src/user/poise_au")
     f = open(p_acqau, "w")
-    f.write(poptpy_au_text)
+    f.write(poise_au_text)
     f.close()
 
 
 if __name__ == "__main__":
     # Parse arguments. For documentation see help_message below.
-    parser = argparse.ArgumentParser(prog="poptpy", add_help=False)
+    parser = argparse.ArgumentParser(prog="poise", add_help=False)
     parser.add_argument("routine", nargs="?")
     parser.add_argument("-h", "--help", action="store_true",)
     parser.add_argument("-l", "--list", action="store_true",)
@@ -615,10 +614,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     help_message = """
-usage: poptpy [-h] [-l] [-s] [-a ALGORITHM] [routine]
+usage: poise [-h] [-l] [-s] [-a ALGORITHM] [routine]
 
 Python script for optimisation of acquisition parameters in TopSpin.
-Full documentation can be found at https://poptpy.readthedocs.io.
+Full documentation can be found at https://poise.readthedocs.io.
 
 positional arguments:
 
@@ -639,14 +638,14 @@ optional arguments:
     -a ALGORITHM, --algorithm ALGORITHM
         Optimisation algorithm to use
         [choices: 'nm' (default) / 'mds' / 'bobyqa']
-"""
+    """
 
     if args.help:
-        VIEWTEXT(title="poptpy help", text=help_message)
+        VIEWTEXT(title="poise help", text=help_message)
         EXIT()
     elif args.list:
         saved_routines = list_files(p_routines, ext=".json")
-        VIEWTEXT(title="Available poptpy routines",
+        VIEWTEXT(title="Available poise routines",
                  text="\n".join(saved_routines))
         EXIT()
     else:

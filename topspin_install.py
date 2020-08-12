@@ -9,17 +9,17 @@ from glob import glob
 
 def main():
     """
-    Attempts to install poptpy to TopSpin directory.
+    Attempts to install poise to TopSpin directory.
     """
-    # Set path to Python executable in poptpy.py
-    poptpy_py = dirname / "poptpy/poptpy.py"
-    poptpy_backend = dirname / "poptpy/poptpy_backend"
-    poptpy_py_out = dirname / "poptpy/poptpy.py.out"
-    # Iterate over lines in poptpy.py and print them to poptpy.py.out
+    # Set path to Python executable in poise.py
+    poise_py = dirname / "nmrpoise" / "poise.py"
+    poise_backend = dirname / "nmrpoise" / "poise_backend"
+    poise_py_out = dirname / "nmrpoise" / "poise.py.out"
+    # Iterate over lines in poise.py and print them to poise.py.out
     # Essentially this is sed -i behaviour.
     # open() only takes Path objects in >= 3.6
-    with open(str(poptpy_py), "r") as infile, \
-            open(str(poptpy_py_out), "w") as outfile:
+    with open(str(poise_py), "r") as infile, \
+            open(str(poise_py_out), "w") as outfile:
         for line in infile:
             if line.startswith("p_python3 = "):
                 line = f"p_python3 = r\"{Path(sys.executable)}\""
@@ -27,15 +27,16 @@ def main():
             # includes one for us.
             print(line.rstrip(), file=outfile)
     # Replace the old file with the new file.
-    copy_file(str(poptpy_py_out), str(poptpy_py))
+    copy_file(str(poise_py_out), str(poise_py), verbose=1)
 
     # Find TopSpin installation path(s).
     ts_paths = get_topspin_path()
     for ts_path in ts_paths:
-        ts_backend_path = ts_path / "poptpy_backend"
+        ts_backend_path = ts_path / "poise_backend"
         # Copy files to TopSpin path.
-        copy_file(str(poptpy_py), str(ts_path))
-        copy_tree(str(poptpy_backend), str(ts_backend_path))
+        copy_file(str(poise_py), str(ts_path), verbose=1)
+        copy_tree(str(poise_backend), str(ts_backend_path), verbose=1)
+    print("topspin_install.py: completed")
 
 
 def get_topspin_path():
@@ -60,7 +61,7 @@ def get_topspin_path():
                             "Please set it using the TSDIR environment "
                             "variable:\n\n"
                             "\tTSDIR=/opt/topspinX.Y.Z/exp/stan/nmr pip "
-                            "install ts-poptpy    # Unix/Linux\n\n"
+                            "install nmrpoise    # Unix/Linux\n\n"
                             "or\n\n"
                             "\t$env:TSDIR = \"C:\\Bruker\\TopSpinX.Y.Z\\"
                             "exp\\stan\\nmr\"\n")
@@ -88,12 +89,12 @@ def get_topspin_path():
             if ts_paths == []:
                 raise RuntimeError(tsdir_notfound_error)
 
+    print("topspin_install.py: found TopSpin paths", ts_paths)
     return ts_paths
 
 
 if __name__ == "__main__":
     dirname = Path(__file__).parent.resolve()
-    poptpy_dirname = dirname / "poptpy"
 
     osname = platform.system()
     unix = osname in ["Darwin", "Linux"]

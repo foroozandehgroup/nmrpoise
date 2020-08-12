@@ -1,0 +1,32 @@
+Metadata-Version: 2.1
+Name: nmrpoise
+Version: 0.1.8
+Summary: NMR parameter optimisation in TopSpin
+Home-page: https://github.com/yongrenjie/nmrpoise
+Author: Jonathan Yong
+Author-email: yongrenjie@gmail.com
+License: UNKNOWN
+Description: # poise
+        
+        [![Documentation Status](https://readthedocs.org/projects/poise/badge/?version=latest)](https://poise.readthedocs.io/en/latest/?badge=latest)
+        [![Travis CI Build Status](https://travis-ci.com/yongrenjie/poise.svg?branch=master)](https://travis-ci.com/github/yongrenjie/poise)
+        
+        A series of Python scripts for the numerical optimisation of NMR parameters, running in Bruker's TopSpin software.
+        
+        Documentation is hosted at https://poise.readthedocs.io/.
+        
+        
+        ## Installation
+        
+        poise can be installed using ``pip`` (please see [the documentation](https://poise.readthedocs.io/en/latest/install/) for other options):
+        
+            pip install nmrpoise
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown

@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'poptpy'
+project = 'poise'
 copyright = '2020, Jonathan Yong'
 author = 'Jonathan Yong'
 
@@ -29,7 +29,11 @@ author = 'Jonathan Yong'
 # ones.
 extensions = [
     "sphinx.ext.intersphinx"
+    "sphinx.ext.autodoc"
+    "numpydoc"
 ]
+
+default_role = "any"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

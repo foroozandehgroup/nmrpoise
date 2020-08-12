@@ -23,14 +23,14 @@ with open("README.md", "r") as fp:
 
 
 setup(
-    name="poptpy",
+    name="nmrpoise",
     version="0.1.8",
     author="Jonathan Yong",
     author_email="yongrenjie@gmail.com",
     description="NMR parameter optimisation in TopSpin",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yongrenjie/poptpy",
+    url="https://github.com/yongrenjie/nmrpoise",
     include_package_data=True,
     packages=find_packages(exclude=["tests"]),
     classifiers=[

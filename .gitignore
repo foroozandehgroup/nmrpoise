@@ -1,12 +1,11 @@
 *.swp
 __pycache__
 .DS_Store
-venv-poptpy
 build/
 dist/
 docs/_build/
 docs/_static/
 docs/_templates/
-poptpy.egg-info/
+poise.egg-info/
 .tox
 .coverage

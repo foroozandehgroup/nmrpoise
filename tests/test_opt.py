@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
-from poptpy.poptpy_backend.poptimise import (nelder_mead,
+from nmrpoise.poise_backend.optpoise import (nelder_mead,
                                              multid_search,
                                              pybobyqa_interface)
-from poptpy.poptpy_backend.backend import scale, unscale
+from nmrpoise.poise_backend.backend import scale, unscale
 
 
 def rosenbrock(x, arg1=None, arg2=None):

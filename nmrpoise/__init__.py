@@ -4,12 +4,12 @@ import re
 import pandas as pd
 
 
-def _parse_poptpy_log(fname, logtype="new"):
+def _parse_poise_log(fname, logtype="new"):
     """
-    Parse a poptpy.log file.
+    Parse a poise.log file.
 
     Arguments:
-        fname (str or pathlib.Path) : Path to poptpy.log file, or the folder
+        fname (str or pathlib.Path) : Path to poise.log file, or the folder
                                       containing it (this would be the TopSpin
                                       EXPNO folder).
         logtype (str)               : "old" or "new". Old log files don't
@@ -130,9 +130,9 @@ def _parse_poptpy_log(fname, logtype="new"):
     return pd.DataFrame(data=data)
 
 
-def parse_poptpy_log(fname):
+def parse_poise_log(fname):
     """
     Interface to the private function, because nobody should really have to use
     the 'logtype' parameter except me.
     """
-    return _parse_poptpy_log(fname=fname, logtype="new")
+    return _parse_poise_log(fname=fname, logtype="new")

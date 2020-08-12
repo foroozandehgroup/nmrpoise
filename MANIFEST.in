@@ -1,6 +1,6 @@
 include topspin_install.py
-include poptpy/*
-include poptpy/poptpy_backend/*
-include poptpy/poptpy_backend/cost_functions/*
-include poptpy/poptpy_backend/routines/*
+include nmrpoise/*
+include nmrpoise/poise_backend/*
+include nmrpoise/poise_backend/cost_functions/*
+include nmrpoise/poise_backend/routines/*
 include tests/*

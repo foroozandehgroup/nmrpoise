@@ -3,8 +3,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-import poptpy.poptpy_backend.backend as be
-from poptpy.poptpy_backend.backend import Routine
+import nmrpoise.poise_backend.backend as be
+from nmrpoise.poise_backend.backend import Routine
 
 
 def makep(expno, procno):
@@ -108,8 +108,8 @@ def test_scaleby_tols():
 def test_get_routine_cf():
     routine_id = "test_routine"   # serialised by TS 4.0.8, macOS 10.15.5
     p_routine_dir = Path(__file__).parent / "test_data"
-    p_cf_dir = (Path(__file__).parents[1] / "poptpy" /
-                "poptpy_backend" / "cost_functions")
+    p_cf_dir = (Path(__file__).parents[1] / "nmrpoise" /
+                "poise_backend" / "cost_functions")
 
     routine, cf = be.get_routine_cf(routine_id, p_routine_dir, p_cf_dir)
     assert routine.name == "test_routine"

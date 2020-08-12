@@ -11,17 +11,17 @@ import numpy as np
 # Enable relative imports when invoked directly as __main__ by TopSpin.
 # cf. PEP 366 and https://stackoverflow.com/a/54490918
 if __name__ == "__main__" and __package__ is None:
-    __package__ = "poptpy_backend"
+    __package__ = "poise_backend"
     sys.path.insert(1, str(Path(__file__).parents[1].resolve()))
     __import__(__package__)
 
-from .poptimise import nelder_mead, multid_search, pybobyqa_interface
+from .optpoise import nelder_mead, multid_search, pybobyqa_interface
 
-optimiser = None  # Set this in frontend script ('edpy poptpy' in TopSpin)
+optimiser = None
 routine_id = None
 p_spectrum = None
 p_optlog = None
-p_poptpy = Path(__file__).parent.resolve()
+p_poise = Path(__file__).parent.resolve()
 tic = datetime.now()
 spec_f1p = None
 spec_f2p = None
@@ -47,7 +47,7 @@ def main():
 
     # Check that the optimiser is set to a legitimate value.
     global optimiser
-    # Choose the optimisation function. poptimise implements a PyBOBYQA
+    # Choose the optimisation function. optpoise implements a PyBOBYQA
     # interface so that the returned result has the same attributes as our
     # other optimisers.
     optimfndict = {"nm": nelder_mead,
@@ -129,21 +129,21 @@ def get_routine_cf(routine_id, p_routine_dir=None, p_cf_dir=None):
         routine_id (str)            : Name of the routine being used.
         p_routine_dir (pathlib.Path): Path to the folder containing the
                                       routines. Defaults to the "routines"
-                                      directory in p_poptpy.
+                                      directory in p_poise.
         p_cf_dir (pathlib.Path)     : Path to the folder containing the
                                       cost functions. Defaults to the
-                                      "cost_functions" directory in p_poptpy.
+                                      "cost_functions" directory in p_poise.
 
     Returns:
         Tuple of (Routine, function).
     """
     # Load the routine.
-    p_routine_dir = p_routine_dir or (p_poptpy / "routines")
+    p_routine_dir = p_routine_dir or (p_poise / "routines")
     with open(p_routine_dir / (routine_id + ".json"), "rb") as f:
         routine = Routine(**json.load(f))
 
     # Load the cost function
-    p_cf_dir = p_cf_dir or (p_poptpy / "cost_functions")
+    p_cf_dir = p_cf_dir or (p_poise / "cost_functions")
     p_cf_file = p_cf_dir / (routine.cf + ".py")
     ld = {}
     exec(open(p_cf_file).read(), globals(), ld)
@@ -833,7 +833,7 @@ if __name__ == "__main__":
         optimiser = input()
         routine_id = input()
         p_spectrum = Path(input())
-        p_optlog = p_spectrum.parents[1] / "poptpy.log"
+        p_optlog = p_spectrum.parents[1] / "poise.log"
         # Run main routine.
         main()
     except Exception as e:
