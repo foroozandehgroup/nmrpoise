@@ -21,13 +21,16 @@ class noTopSpinInstall(install):
 with open("README.md", "r") as fp:
     long_description = fp.read()
 
+# Read the version number in as __version__
+exec(open('nmrpoise/_version.py').read())
 
 setup(
     name="nmrpoise",
-    version="0.1.8",
+    version=__version__,
     author="Jonathan Yong",
     author_email="yongrenjie@gmail.com",
-    description="NMR parameter optimisation in TopSpin",
+    description=("Parameter Optimisation by Iterative Spectral Evaluation, "
+                 "a TopSpin-compatible NMR package"),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yongrenjie/nmrpoise",
