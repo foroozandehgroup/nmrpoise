@@ -218,7 +218,8 @@ def main(args):
     if not args.separate:
         s = s + "These values have been set in the current experiment.\n"
     s = s + "Detailed information can be found at: {}".format(p_optlog)
-    MSG(s)
+    if not args.quiet:
+        MSG(s)
     EXIT()
 
 
@@ -611,6 +612,7 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--list", action="store_true",)
     parser.add_argument("-s", "--separate", action="store_true")
     parser.add_argument("-a", "--algorithm", default="nm")
+    parser.add_argument("-q", "--quiet", action="store_true")
     args = parser.parse_args()
 
     help_message = """
@@ -633,11 +635,15 @@ optional arguments:
         List all available routines and exit
 
     -s, --separate
-        Use separate expnos for each function evaluation
+        Use separate expnos for each function evaluation (default: off)
 
     -a ALGORITHM, --algorithm ALGORITHM
         Optimisation algorithm to use
         [choices: 'nm' (default) / 'mds' / 'bobyqa']
+
+    -q, --quiet
+        Don't display a message at the end of the optimisation (default: off)
+        This flag is necessary if POISE is to be run under automation.
     """
 
     if args.help:
