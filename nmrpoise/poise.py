@@ -603,9 +603,17 @@ def create_au_prog():
     default directory, if it doesn't already exist.
     """
     p_acqau = os.path.join(tshome, "exp/stan/nmr/au/src/user/poise_au")
-    f = open(p_acqau, "w")
-    f.write(poise_au_text)
-    f.close()
+    make_au_prog = True
+    # If the AU programme exists and is the same, then turn off the
+    # make_au_prog flag.
+    if os.path.isfile(p_acqau):
+        with open(p_acqau, "r") as f:
+            current_au_text = f.read()
+        if poise_au_text.strip() == current_au_text.strip():
+            make_au_prog = False
+    if make_au_prog:
+        with open(p_acqau, "w") as f:
+            f.write(poise_au_text)
 
 
 if __name__ == "__main__":
