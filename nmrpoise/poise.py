@@ -16,7 +16,7 @@ from de.bruker.nmr.prsc.dbxml.ParfileLocator import getParfileDirs
 # For 2D experiments use e.g. 'ZG\nXFB\nXCMD("apk2d")\nABS2\nQUIT'.
 poise_au_text = 'ZG\nEFP\nAPBK\nQUIT'
 
-tshome = getTopspinHome()  # use tshome to avoid installer overwriting
+tshome = getTopspinHome()
 p_poise = os.path.join(tshome, "exp/stan/nmr/py/user/poise_backend")
 p_backend = os.path.join(p_poise, "backend.py")
 p_routines = os.path.join(p_poise, "routines")
@@ -30,24 +30,27 @@ def main(args):
     """
     Main routine.
 
-    Arguments:
-        args (argparse.Namespace): Namespace object returned by
-                                   parser.parse_args().
+    Parameters
+    ---------
+    args (argparse.Namespace)
+        Namespace object returned by parser.parse_args().
 
-    Returns: None.
+    Returns
+    -------
+    None
     """
     # Make sure user has opened a dataset
     if CURDATA() is None:
         err_exit("Please select a dataset!")
     # Keep track of the currently active dataset. We want to make sure that
-    # it is _the_ active dataset before the AU programme starts.
-    else:
-        current_dataset = CURDATA()
+    # it is _the_ active dataset every time the AU programme starts, or else we
+    # risk running `zg` on a different dataset --> overwriting other data!!
+    current_dataset = CURDATA()
 
     # Construct the path to the folder of the current spectrum.
     p_spectrum = make_p_spectrum()
-    # Generate the path to the log file. We have to do it here in case separate
-    # expnos are requested.
+    # Generate the path to the log file. The log file belongs to the folder
+    # containing the first expno.
     p_optlog = os.path.normpath(os.path.join(current_dataset[3],
                                              current_dataset[0],
                                              current_dataset[1],
@@ -59,31 +62,40 @@ def main(args):
             "If you are sure you want to use it on this {}D dataset, press "
             "OK to dismiss this warning.".format(GETACQUDIM()))
 
-    # Make folders if they don't exist
+    # Check that the folders are valid
     for folder in [p_poise, p_routines, p_costfunctions]:
         if not os.path.isdir(folder):
             os.makedirs(folder)
+    # Check that cost functions folder actually has some cost functions
+    _cfs = list_files(p_costfunctions, ext=".py")
+    if _cfs == []:
+        err_exit("No cost functions were found. Please define a cost function "
+                 ", or reinstall poise to obtain the defaults.")
 
-    # Select optimisation routine
+    # Select optimisation routine.
     saved_routines = list_files(p_routines, ext=".json")
-    # If routine was specified on command-line
+    # If routine was specified on command-line, check that there actually is a
+    # routine with that name.
     if args.routine is not None:
         if args.routine in saved_routines:
             routine_id = args.routine
         else:
             err_exit("The routine '{}' was not found. Use 'poise --list' to "
                      "see all available routines.".format(args.routine))
-    # If not, prompt the user
+    # If the routine wasn't specified on command-line, prompt the user for one
     else:
         routine_id = get_routine_id()
 
-    # Create or read the Routine object
-    if routine_id is None:  # New routine was requested
-        routine = Routine(*get_new_routine_parameters())
+    # If get_routine_id() returns None, then a new routine was requested.
+    if routine_id is None:
+        # Get the Routine object.
+        routine = get_new_routine()
+        # Store the routine for future usage
         with open(os.path.join(p_routines, routine.name + ".json"), "wb") as f:
             json.dump(routine._asdict(), f)
         routine_id = routine.name
-    else:  # Saved routine was requested
+    # Otherwise, load a saved routine.
+    else:
         with open(os.path.join(p_routines, routine_id + ".json"), "rb") as f:
             routine = Routine(**json.load(f))
 
@@ -100,7 +112,7 @@ def main(args):
     if not os.path.isfile(p_backend):
         err_exit("Backend script not found. Please reinstall poise.")
 
-    # Check args.algorithm to make sure it's sensible
+    # Make sure that args.algorithm is a valid algorithm.
     if args.algorithm not in ["nm", "mds", "bobyqa"]:
         # Have to use ERRMSG because MSG() is modal
         ERRMSG("Optimisation algorithm '{}' not found; "
@@ -111,8 +123,9 @@ def main(args):
     # Closing it prematurely before the backend has finished writing to it WILL
     # lead to race conditions!
     with open(p_opterr, "a") as ferr:
-        # We need to catch java.lang.Error so that cleanup can be performed
-        # if the script is killed from within TopSpin. See #23.
+        # We need to catch java.lang.Error throughout the main loop so that
+        # cleanup can be performed if the script is killed from within TopSpin.
+        # See #23.
         try:
             backend = subprocess.Popen([p_python3, '-u', p_backend],
                                        stdin=subprocess.PIPE,
@@ -193,10 +206,12 @@ def main(args):
             print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=ferr)
             print_exc(file=ferr)
             # Wait for the backend to finish before exiting the with block.
+            # Otherwise we might close ferr before the backend is done, which
+            # causes an ugly error.
             backend.communicate()
-            # Tell the error the immediate cause and exit
+            # Notify the user and quit.
             err_exit("Error during acquisition loop:\n" + e.message)
-        # cleanup code
+        # Cleanup code if the frontend is killed in TopSpin.
         except Error:
             # Kill the backend process if it's still running.
             if backend.poll() is None:
@@ -204,11 +219,13 @@ def main(args):
             raise
 
     # Delete the error log if it's empty
-    if os.stat(p_opterr).st_size == 0:
+    with open(p_opterr, "r") as ferr:
+        delete = True if ferr.read().strip() == "" else False
+    if delete:
         os.remove(p_opterr)
 
-    # Process the optimal values found, make sure that the values are stored in
-    # the right dataset!
+    # Store the optima in the (final) dataset, and show a message to the user
+    # if not in quiet mode.
     RE(current_dataset)
     s = ""
     for par, optimum in zip(routine.pars, optima):
@@ -230,16 +247,27 @@ class cst:
     # TopSpin's internal codes for keypresses
     ENTER = -10
     ESCAPE = -27
+    # List-type parameters. These parameters are accessed in the TopSpin
+    # command line using "cnst1" (for example), but TopSpin's GETPAR() and
+    # PUTPAR() Python functions need a space between the name and number, i.e.
+    # "CNST 1".
+    params_with_space = ["CNST", "D", "P", "PLW", "PLDB", "PCPD",
+                         "GPX", "GPY", "GPZ", "SPW", "SPDB", "SPOFFS",
+                         "SPOAL", "L", "IN", "INP", "PHCOR"]
 
 
 def err_exit(error):
     """
     Shows an error message in TopSpin, then quits the Python script.
 
-    Arguments:
-        error (string): Error message to be displayed.
+    Parameters
+    ----------
+    error (str)
+        Error message to be displayed.
 
-    Returns: None.
+    Returns
+    -------
+    None
     """
     ERRMSG(title="poise", message=error)
     EXIT()
@@ -247,14 +275,22 @@ def err_exit(error):
 
 def list_files(path, ext=""):
     """
-    Lists all files found in a directory, if it exists.
+    Lists all files with a given extension found in a directory, if the
+    directory exists.
 
-    Arguments:
-        path (string) : Directory to be searched in.
-        ext (string)  : Extension of files to be searched for.
+    Parameters
+    ---------
+    path : str
+        Directory to be searched in.
+    ext : str, optional
+        Extension of files to be searched for. Should include the dot, i.e. to
+        search for Python files, use ext=".py".
 
-    Returns:
-        List containing filenames.
+    Returns
+    -------
+    fnames : list
+        A list of the filenames as strings. Filenames include the extension (if
+        given) but are not prefixed by the directory.
     """
     if os.path.isdir(path):
         if ext == "":
@@ -270,59 +306,72 @@ def list_files(path, ext=""):
 
 def get_routine_id():
     """
-    Interactively prompts the user to choose a routine.
+    Interactively prompts the user to choose a routine, using dialog boxes in
+    TopSpin.
 
-    Arguments: None.
+    Parameters
+    ---------
+    None
 
-    Returns:
-        None if a new routine is desired.
-        string containing routine name if a saved routine is chosen.
+    Returns
+    -------
+    routine_id : str or None
+        If a saved routine is chosen, the routine name is returned as a string
+        (the corresponding routine .json file should be found as
+        <routine_name>.json in .../py/user/poise_backend/routines).
+
+        Returns None if the user requests a new routine.
     """
     # Check for existing saved routines
     saved_routines = list_files(p_routines, ext=".json")
 
-    if saved_routines != []:  # Saved routines were found...
+    # Return immediately if there are no saved routines
+    if saved_routines == []:
+        return None
+    # Otherwise, show the user a dialog box.
+    else:
         x = SELECT(title="poise",
                    message=("Do you want to use a saved routine, or create a "
                             "new routine?"),
                    buttons=["Saved routine", "New routine"])
 
-        if x in [0, cst.ENTER]:  # user pressed Yes or Enter
+        # User pressed 'Saved routine', or Enter
+        if x in [0, cst.ENTER]:
             s = "\n".join(saved_routines)
+            # Prompt the user to choose one
             y = INPUT_DIALOG(title="poise: available routines",
                              header="Available routines:\n\n" + s,
                              items=["Routine:"])
-
-            if y is None:  # user closed the dialog
+            if y is None:  # User closed the dialog
                 EXIT()
-            elif y[0] in saved_routines:
+            elif y[0] in saved_routines:  # User gave a correct routine name
                 return y[0]
-            else:  # user wrote something, but it wasn't correct
+            else:  # User wrote something, but it wasn't correct
                 if y[0] != "":
                     err_exit("The routine '{}' was not found.".format(y[0]))
-        elif x == 1:  # user pressed No
+        # User pressed 'New routine'.
+        elif x == 1:
             return None
-        else:  # user did something else, like Escape or close button
+        # User did something else, like Escape or close button.
+        else:
             EXIT()
-    else:  # Saved routines were not found
-        return None
 
 
-def get_new_routine_parameters():
+def get_new_routine():
     """
-    Prompts user for all the details needed for an optimisation.
+    Prompts the user for all the details required to make a new routine, using
+    TopSpin dialog boxes.
 
-    Arguments: None.
+    Doesn't serialise the routine!
 
-    Returns:
-        A list of objects, consisting of (in order):
-         - name          : string containing name of routine
-         - pars          : list of experimental parameters to be optimised
-         - lb            : list of lower bounds
-         - ub            : list of upper bounds
-         - init          : list of initial values
-         - tol           : list of tolerances
-         - cf            : string containing name of cost function
+    Parameters
+    ---------
+    None
+
+    Returns
+    -------
+    Routine
+        The Routine object created from the given parameters.
     """
     # Prompt for routine name.
     name = INPUT_DIALOG(title="poise: choose a name...",
@@ -403,21 +452,25 @@ def get_new_routine_parameters():
         else:
             err_exit("Cost function {} was not found. Exiting...".format(x[0]))
 
-    return [name, opt_pars, lbs, ubs, inits, tols, cf]
+    return Routine(name, opt_pars, lbs, ubs, inits, tols, cf)
 
 
 def check_routine(routine):
     """
     Checks that a Routine object is valid. Exits the programme if it isn't.
 
-    Arguments:
-        routine (Routine): the routine to be checked.
+    Parameters
+    ----------
+    routine : Routine
+        The Routine object to be checked.
 
-    Returns: None.
+    Returns
+    -------
+    None
     """
     try:
-        routine.name, routine.pars, routine.lb, routine.ub
-        routine.init, routine.tol, routine.cf
+        (routine.name, routine.pars, routine.lb, routine.ub,
+         routine.init, routine.tol, routine.cf)
     except AttributeError:
         err_exit("The routine file is invalid.\n"
                  "Please delete it and recreate it from within poise.")
@@ -428,9 +481,13 @@ def check_python3path():
     Checks that the global variable p_python3 is set to a valid python3
     executable. Exits the programme if it isn't.
 
-    Arguments: None.
+    Parameters
+    ----------
+    None
 
-    Returns: None.
+    Returns
+    -------
+    None
     """
     try:
         subprocess.check_call([p_python3, "--version"])
@@ -439,33 +496,56 @@ def check_python3path():
                  "Please specify p_python3 in poise.py.")
 
 
-def convert_name_and_getpar(name):
+def convert_name(name):
     """
-    Obtains the value of an acquisition parameter. The parameter name is
-    first converted into a format suitable for TopSpin's GETPAR() function.
+    Converts the name of a parameter from the command-line accessible version
+    (e.g. "cnst1") to the version that is suitable for the TopSpin GETPAR() and
+    PUTPAR() functions (e.g. "CNST 1").
 
-    Arguments:
-        name (str): input name, like "cnst2" or "pldb1".
+    Parameters
+    ----------
+    name : str
+        Name of the parameter.
 
-    Returns:
-        float: value of the input parameter.
+    Returns
+    -------
+    ts_name : str
+        Name of the parameter that can be used with GETPAR() and PUTPAR().
     """
     # GETPAR() accepts: CNST 1, P 1, D 1, PLW 1, PLdB 1 (note small d), GPZ 1
     #                   SPW 1, SPdB 1, SPOFFS 1, SPOAL 1,
     #               but O1, O1P, SFO1 (note no space)
-    params_with_space = ["CNST", "D", "P", "PLW", "PLDB", "PCPD",
-                         "GPX", "GPY", "GPZ", "SPW", "SPDB", "SPOFFS",
-                         "SPOAL", "L", "IN", "INP", "PHCOR"]
     ts_name = name.upper()
     ts_namel = ts_name.rstrip("1234567890")   # the word
-    ts_namer = ts_name[len(ts_namel):]           # the number
+    ts_namer = ts_name[len(ts_namel):]        # the number
     # Add a space if needed
-    if ts_namel in params_with_space:
+    if ts_namel in cst.params_with_space:
         ts_name = ts_namel + " " + ts_namer
     # Convert DB back to dB
     ts_name = ts_name.replace("PLDB", "PLdB").replace("SPDB", "SPdB")
-    # Get the value and check that it's a float
-    val = GETPAR(ts_name)
+    return ts_name
+
+
+def convert_name_and_getpar(name):
+    """
+    Obtains the value of an acquisition parameter. The parameter name is
+    first converted into a format suitable for TopSpin's GETPAR() function.
+    Returns the value as a float. Exits with an error if the value can't be
+    converted to a float.
+
+    Parameters
+    ----------
+    name : str
+        Name of the parameter to be looked up, e.g. "cnst1" or "d10".
+
+    Returns
+    -------
+    val : float
+        Value of the input parameter.
+    """
+    # Get the value.
+    val = GETPAR(convert_name(name))
+    # Check that it's a float.
     try:
         val = float(val)
         return val
@@ -476,33 +556,24 @@ def convert_name_and_getpar(name):
 
 def convert_name_and_putpar(name, val):
     """
-    Stores the value of an acquisition parameter. The parameter name is
-    first converted into a format suitable for TopSpin's PUTPAR() function.
+    Obtains the value of an acquisition parameter. The parameter name is
+    first converted into a format suitable for TopSpin's GETPAR() function.
+    Exits with an error if the value isn't a float.
 
-    Arguments:
-        name (str): input name, like "cnst2" or "pldb1".
-        val (int or float): value to be set.
+    Parameters
+    ----------
+    name : str
+        Name of the parameter to be looked up, e.g. "cnst1" or "d10".
+    val : float
+        The value to be set.
 
-    Returns: None.
+    Returns
+    -------
+    None
     """
-    # PUTPAR() accepts: CNST 1, P 1, D 1, PLW 1, PLdB 1 (note small d), GPZ 1
-    #                   SPW 1, SPdB 1, SPOFFS 1, SPOAL 1,
-    #               but O1, O1P, SFO1 (note no space)
-    params_with_space = ["CNST", "D", "P", "PLW", "PLDB", "PCPD",
-                         "GPX", "GPY", "GPZ", "SPW", "SPDB", "SPOFFS",
-                         "SPOAL", "L", "IN", "INP", "PHCOR"]
-    ts_name = name.upper()
-    ts_namel = ts_name.rstrip("1234567890")   # the word
-    ts_namer = ts_name[len(ts_namel):]           # the number
-    # Add a space if needed
-    if ts_namel in params_with_space:
-        ts_name = ts_namel + " " + ts_namer
-    # Convert DB back to dB
-    ts_name = ts_name.replace("PLDB", "PLdB").replace("SPDB", "SPdB")
-    # Convert the value to a float
     try:
         val = float(val)
-        PUTPAR(ts_name, str(val))
+        PUTPAR(convert_name(name), str(val))
     except ValueError:
         err_exit("The value {} for parameter {} "
                  "was invalid.".format(val, name))
@@ -511,18 +582,24 @@ def convert_name_and_putpar(name, val):
 def process_values(parname, input_string):
     """
     Does some processing on user input to allow familiar hacks, like
-    entering 2m for a duration or 2k for 2048. Unfortunately for pulses
-    2m = 2000 and for delays 2m = 0.002, so we also need to parse the
-    parameter name.
+    entering 2m for a duration or 2k for 2048.
 
-    Arguments:
-        parname (str): String containing the parameter name.
-        input_string (str): The string entered by the user into the dialog box.
+    Parameters
+    ----------
+    parname : str
+        String containing the parameter name (either "p1" or "P 1" works).
+    input_string : str
+        The string entered by the user into the dialog box.
 
-    Returns:
-        float: The processed value, as a float.
+    Returns
+    -------
+    float
+        The processed value, as a float.
     """
-    pulse = 1e6 if parname.upper().rstrip("1234567890") == "P" else 1
+    # We need to determine whether the parameter is a pulse (for which the
+    # default units are us), or a delay (for which the default units are
+    # seconds).
+    pulse = 1e6 if parname.upper().rstrip("1234567890").strip() == "P" else 1
     try:
         if input_string.endswith("k"):
             f = int(input_string[:-1])  # int only, can't have "2.5k"
@@ -547,6 +624,15 @@ def process_values(parname, input_string):
 def make_p_spectrum():
     """
     Constructs the path to the procno folder of the active spectrum.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    str
+        The absolute path to the procno folder.
     """
     x = CURDATA()
     p = os.path.join(x[3], x[0], x[1], "pdata", x[2])
@@ -555,9 +641,17 @@ def make_p_spectrum():
 
 def acqu_done():
     """
-    Checks whether the current acquisition has been completed and returns
-    True/False accordingly. Useful for stopping poise if acquisition is
-    prematurely terminated (e.g. by 'stop').
+    Checks whether the spectrum was completely acquired. Useful for stopping
+    poise if acquisition is prematurely terminated (e.g. by ``stop``).
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    bool
+        True if the acquisition was successfully completed. False otherwise.
     """
     # Check NS
     if GETPAR("NS") != GETPARSTAT("NS"):
@@ -575,9 +669,18 @@ def acqu_done():
 
 def pulprog_contains_wvm():
     """
-    Checks if the currently active pulse programme uses WaveMaker pulses.
+    Parses the text of the current pulse programme to see whether WaveMaker
+    directives are used.
 
-    Returns: True if it does, False if it doesn't.
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    bool
+        True if the pulse programme does contain WaveMaker directives. False
+        otherwise.
     """
     ppname = GETPAR("PULPROG")
 
@@ -599,8 +702,16 @@ def pulprog_contains_wvm():
 
 def create_au_prog():
     """
-    Creates an AU programme for acquisition and processing in TopSpin's
-    default directory, if it doesn't already exist.
+    Creates the acquisition & processing AU programme in TopSpin's default
+    directory if it is different from the previously existing one.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
     """
     p_acqau = os.path.join(tshome, "exp/stan/nmr/au/src/user/poise_au")
     make_au_prog = True
@@ -617,7 +728,7 @@ def create_au_prog():
 
 
 if __name__ == "__main__":
-    # Parse arguments. For documentation see help_message below.
+    # Parse arguments.
     parser = argparse.ArgumentParser(prog="poise", add_help=False)
     parser.add_argument("routine", nargs="?")
     parser.add_argument("-h", "--help", action="store_true",)
@@ -627,6 +738,13 @@ if __name__ == "__main__":
     parser.add_argument("-q", "--quiet", action="store_true")
     args = parser.parse_args()
 
+    # argparse's standard help message can only be printed; it can't be
+    # redirected elsewhere, as far as I know. In TopSpin, the Python script's
+    # stdout is sent to the terminal which opens it. However, that's a really
+    # user-unfriendly place for messages to go to (and on MacOS the terminal
+    # does not even exist). To get around that, we disable argparse's help
+    # functionality, construct the help message manually, and show it in a
+    # TopSpin window.
     help_message = """
 usage: poise [-h] [-l] [-s] [-a ALGORITHM] [routine]
 
