@@ -562,10 +562,14 @@ def acqu_done():
     # Check NS
     if GETPAR("NS") != GETPARSTAT("NS"):
         return False
+    # Check TD (see #25)
+    if GETPAR("TD") != GETPARSTAT("TD"):
+        return False
     # Check indirect dimension TD for 2Ds
     if GETACQUDIM() > 1:
         if GETPAR("TD", axis=1) != GETPARSTAT("TD", axis=1):
             return False
+    # OK, looks like the acquisition did complete
     return True
 
 
