@@ -12,17 +12,13 @@ from collections import namedtuple
 from de.bruker.nmr.mfw.root.UtilPath import getTopspinHome
 from de.bruker.nmr.prsc.dbxml.ParfileLocator import getParfileDirs
 
-# AU programme for acquisition and processing.
-# For 2D experiments use e.g. 'ZG\nXFB\nXCMD("apk2d")\nABS2\nQUIT'.
-poise_au_text = 'ZG\nEFP\nAPBK\nQUIT'
-
 tshome = getTopspinHome()
 p_poise = os.path.join(tshome, "exp/stan/nmr/py/user/poise_backend")
 p_backend = os.path.join(p_poise, "backend.py")
 p_routines = os.path.join(p_poise, "routines")
 p_costfunctions = os.path.join(p_poise, "cost_functions")
 p_python3 = r"/usr/local/bin/python"
-Routine = namedtuple("Routine", "name pars lb ub init tol cf")
+Routine = namedtuple("Routine", "name pars lb ub init tol cf au")
 
 
 def main(args):
@@ -112,9 +108,6 @@ def main(args):
     # Make sure that Python 3 executable can be found
     check_python3path()
 
-    # Create the AU programme for acquisition
-    create_au_prog()
-
     # Check that the backend script is intact
     if not os.path.isfile(p_backend):
         err_exit("Backend script not found. Please reinstall poise.")
@@ -189,7 +182,7 @@ def main(args):
                 # Make sure we're at the correct dataset (again).
                 RE(current_dataset)
                 # Run acquisition and processing
-                XCMD("xau poise_au")
+                XCMD("xau {}".format(routine.au))
                 # Check whether acquisition is complete
                 if not acqu_done():
                     raise RuntimeError("Acquisition stopped prematurely. "
@@ -449,17 +442,18 @@ def get_new_routine():
                  "your own cost function based on the documentation.")
     else:
         s = ", ".join(saved_cfs)
-        x = INPUT_DIALOG(title="poise: choose a cost function...",
+        x = INPUT_DIALOG(title=("poise: choose a cost function and "
+                                "AU programme..."),
                          header="Available cost functions: " + s,
-                         items=["Cost function:"])
+                         items=["Cost function:", "AU programme:"])
         if x is None:  # user closed the dialog
             EXIT()
         elif x[0] in saved_cfs:
-            cf = x[0]
+            cf, au = x[0], x[1]
         else:
             err_exit("Cost function {} was not found. Exiting...".format(x[0]))
 
-    return Routine(name, opt_pars, lbs, ubs, inits, tols, cf)
+    return Routine(name, opt_pars, lbs, ubs, inits, tols, cf, au)
 
 
 def check_routine(routine):
@@ -477,7 +471,7 @@ def check_routine(routine):
     """
     try:
         (routine.name, routine.pars, routine.lb, routine.ub,
-         routine.init, routine.tol, routine.cf)
+         routine.init, routine.tol, routine.cf, routine.au)
     except AttributeError:
         err_exit("The routine file is invalid.\n"
                  "Please delete it and recreate it from within poise.")
@@ -725,33 +719,6 @@ def pulprog_contains_wvm():
             if re.search(wvm_rgx, line):
                 return True
     return False
-
-
-def create_au_prog():
-    """
-    Creates the acquisition & processing AU programme in TopSpin's default
-    directory if it is different from the previously existing one.
-
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    None
-    """
-    p_acqau = os.path.join(tshome, "exp/stan/nmr/au/src/user/poise_au")
-    make_au_prog = True
-    # If the AU programme exists and is the same, then turn off the
-    # make_au_prog flag.
-    if os.path.isfile(p_acqau):
-        with open(p_acqau, "r") as f:
-            current_au_text = f.read()
-        if poise_au_text.strip() == current_au_text.strip():
-            make_au_prog = False
-    if make_au_prog:
-        with open(p_acqau, "w") as f:
-            f.write(poise_au_text)
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ p_poise = Path(__file__).parent.resolve()
 tic = datetime.now()
 spec_f1p = None
 spec_f2p = None
-Routine = namedtuple("Routine", "name pars lb ub init tol cf")
+Routine = namedtuple("Routine", "name pars lb ub init tol cf au")
 
 
 def deco_count(fn):
@@ -74,6 +74,7 @@ def main():
         print(fmt.format("Routine name", routine.name), file=log)
         print(fmt.format("Optimisation parameters", routine.pars), file=log)
         print(fmt.format("Cost function", routine.cf), file=log)
+        print(fmt.format("AU programme", routine.au), file=log)
         print(fmt.format("Initial values", routine.init), file=log)
         print(fmt.format("Lower bounds", routine.lb), file=log)
         print(fmt.format("Upper bounds", routine.ub), file=log)

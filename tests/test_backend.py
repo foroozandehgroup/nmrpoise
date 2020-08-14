@@ -106,21 +106,20 @@ def test_scaleby_tols():
 
 
 def test_get_routine_cf():
-    routine_id = "test_routine"   # serialised by TS 4.0.8, macOS 10.15.5
+    routine_id = "p1cal"   # serialised on AV600
     p_routine_dir = Path(__file__).parent / "test_data"
     p_cf_dir = (Path(__file__).parents[1] / "nmrpoise" /
                 "poise_backend" / "cost_functions")
 
     routine, cf = be.get_routine_cf(routine_id, p_routine_dir, p_cf_dir)
-    assert routine.name == "test_routine"
-    assert routine.pars == ["p1", "cnst20"]
-    assert routine.lb == [10, 0.2]
-    assert routine.ub == [20, 0.4]
-    assert routine.init == [15, 0.3]
-    assert routine.tol == [0.2, 0.00015]
-    assert routine.cf == "specdiff"
-    assert cf.__doc__.strip() == ("Obtains the distance between the current "
-                                  "spectrum and a target spectrum.")
+    assert routine.name == "p1cal"
+    assert routine.pars == ["p1"]
+    assert routine.lb == [40]
+    assert routine.ub == [56]
+    assert routine.init == [48]
+    assert routine.tol == [0.2]
+    assert routine.cf == "minabsint"
+    assert routine.au == "poise_1d"
 
 
 def test_get1d_real():
