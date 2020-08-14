@@ -21,7 +21,6 @@ p_poise = os.path.join(tshome, "exp/stan/nmr/py/user/poise_backend")
 p_backend = os.path.join(p_poise, "backend.py")
 p_routines = os.path.join(p_poise, "routines")
 p_costfunctions = os.path.join(p_poise, "cost_functions")
-p_opterr = os.path.join(p_poise, "poise_err.log")
 p_python3 = r"/usr/local/bin/python"
 Routine = namedtuple("Routine", "name pars lb ub init tol cf")
 
@@ -127,118 +126,97 @@ def main(args):
                "using Nelder-Mead instead".format(args.algorithm))
         args.algorithm = "nm"
 
-    # Open the error log and keep it open throughout.
-    # Closing it prematurely before the backend has finished writing to it WILL
-    # lead to race conditions!
-    with open(p_opterr, "a") as ferr:
-        # We need to catch java.lang.Error throughout the main loop so that
-        # cleanup can be performed if the script is killed from within TopSpin.
-        # See #23.
-        try:
-            backend = subprocess.Popen([p_python3, '-u', p_backend],
-                                       stdin=subprocess.PIPE,
-                                       stdout=subprocess.PIPE,
-                                       stderr=ferr)
-            # Pass key information to the backend script
-            print(args.algorithm, file=backend.stdin)
-            print(routine_id, file=backend.stdin)
-            print(p_spectrum, file=backend.stdin)
-            backend.stdin.flush()
+    # We need to catch java.lang.Error throughout the main loop so that cleanup
+    # can be performed if the script is killed from within TopSpin.  See #23.
+    try:
+        backend = subprocess.Popen([p_python3, '-u', p_backend],
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE)
+        # Pass key information to the backend script
+        print(args.algorithm, file=backend.stdin)
+        print(routine_id, file=backend.stdin)
+        print(p_spectrum, file=backend.stdin)
+        backend.stdin.flush()
 
-            # Main loop, controlled by the lines printed by the backend.
-            first_expno = True
-            while True:
-                # Read in what the backend has to say.
-                line = backend.stdout.readline()
-                # This line indicates that the optimisation has converged.
-                if line.startswith("optima:"):
-                    optima = line.split()[1:]
-                    break
-                # This line indicates a set of values for which the cost
-                # function should be evaluated, i.e. an experiment should
-                # be ran.
-                elif line.startswith("values:"):
-                    # Increment expno if it's not the first time.
-                    if args.separate:
-                        if not first_expno:
-                            # Before doing anything, check first whether a
-                            # dataset already exists, so that we don't
-                            # overwrite anything...!
-                            if next_expno_exists():
-                                raise RuntimeError("Existing dataset found at "
-                                                   "next expno! poise has "
-                                                   "been terminated.")
-                            else:
-                                XCMD("iexpno")
-                                RE(current_dataset)
-                                RE_IEXPNO()
-                                current_dataset = CURDATA()
-                                XCMD("browse_update_tree")
+        # Main loop, controlled by the lines printed by the backend.
+        first_expno = True
+        while True:
+            # Read in what the backend has to say.
+            line = backend.stdout.readline()
+            # This line indicates that the optimisation has converged.
+            if line.startswith("optima:"):
+                optima = line.split()[1:]
+                break
+            # This line indicates a set of values for which the cost function
+            # should be evaluated, i.e. an experiment should be ran.
+            elif line.startswith("values:"):
+                # Increment expno if it's not the first time.
+                if args.separate:
+                    if not first_expno:
+                        # Before doing anything, check first whether a dataset
+                        # already exists, so that we don't overwrite
+                        # anything...!
+                        if next_expno_exists():
+                            raise RuntimeError("Existing dataset found at "
+                                               "next expno! poise has been "
+                                               "terminated.")
                         else:
-                            first_expno = False
-                    # Make sure we're at the correct dataset.
-                    RE(current_dataset)
-                    # Obtain the values and set them
-                    values = line.split()[1:]
-                    if len(values) != len(routine.pars):
+                            XCMD("iexpno")
+                            RE(current_dataset)
+                            RE_IEXPNO()
+                            current_dataset = CURDATA()
+                            XCMD("browse_update_tree")
+                    else:
+                        first_expno = False
+                # Make sure we're at the correct dataset.
+                RE(current_dataset)
+                # Obtain the values and set them
+                values = line.split()[1:]
+                if len(values) != len(routine.pars):
+                    raise RuntimeError("Invalid values passed from backend: "
+                                       "'{}'".format(line))
+                for value, par in zip(values, routine.pars):
+                    try:
+                        float(value)
+                    except ValueError:
                         raise RuntimeError("Invalid values passed from "
                                            "backend: '{}'".format(line))
-                    for value, par in zip(values, routine.pars):
-                        try:
-                            float(value)
-                        except ValueError:
-                            raise RuntimeError("Invalid values passed from "
-                                               "backend: '{}'".format(line))
-                        else:
-                            convert_name_and_putpar(par, value)
-                    # Generate WaveMaker shapes if necessary
-                    if pulprog_contains_wvm():
-                        XCMD("wvm -q")
-                    # Make sure we're at the correct dataset (again).
-                    RE(current_dataset)
-                    # Run acquisition and processing
-                    XCMD("xau poise_au")
-                    # Check whether acquisition is complete
-                    if not acqu_done():
-                        raise RuntimeError("Acquisition stopped prematurely. "
-                                           "poise has been terminated.")
-                    # Tell backend script it's done
-                    print("done", file=backend.stdin)
-                    print(make_p_spectrum(), file=backend.stdin)
-                    backend.stdin.flush()
-                # Otherwise it would be an error.
-                # The entire main() routine in the backend is wrapped by a
-                # try/except which catches all exceptions and propagates them
-                # to the frontend by printing the traceback.
-                elif line.startswith("Backend exception: "):
-                    raise RuntimeError(line)
-                else:
-                    raise RuntimeError("Invalid message from backend: '{}'."
-                                       "Please see error log for more "
-                                       "information.".format(line))
-        except RuntimeError as e:
-            # Print the date/time and exception to ferr.
-            print("======= From frontend =======", file=ferr)
-            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=ferr)
-            print_exc(file=ferr)
-            # Wait for the backend to finish before exiting the with block.
-            # Otherwise we might close ferr before the backend is done, which
-            # causes an ugly error.
-            backend.communicate()
-            # Notify the user and quit.
-            err_exit("Error during acquisition loop:\n" + e.message)
-        # Cleanup code if the frontend is killed in TopSpin.
-        except Error:
-            # Kill the backend process if it's still running.
-            if backend.poll() is None:
-                backend.terminate()
-            raise
-
-    # Delete the error log if it's empty
-    with open(p_opterr, "r") as ferr:
-        delete = True if ferr.read().strip() == "" else False
-    if delete:
-        os.remove(p_opterr)
+                    else:
+                        convert_name_and_putpar(par, value)
+                # Generate WaveMaker shapes if necessary
+                if pulprog_contains_wvm():
+                    XCMD("wvm -q")
+                # Make sure we're at the correct dataset (again).
+                RE(current_dataset)
+                # Run acquisition and processing
+                XCMD("xau poise_au")
+                # Check whether acquisition is complete
+                if not acqu_done():
+                    raise RuntimeError("Acquisition stopped prematurely. "
+                                       "poise has been terminated.")
+                # Tell backend script it's done
+                print("done", file=backend.stdin)
+                print(make_p_spectrum(), file=backend.stdin)
+                backend.stdin.flush()
+            # Otherwise it would be an error.
+            # The entire main() routine in the backend is wrapped by a
+            # try/except which catches all exceptions and propagates them to
+            # the frontend by printing the traceback.
+            elif line.startswith("Backend exception: "):
+                raise RuntimeError(line)
+            else:
+                raise RuntimeError("Invalid message from backend: '{}'."
+                                   "Please see error log for more "
+                                   "information.".format(line))
+    except RuntimeError as e:
+        # Notify the user and quit.
+        err_exit("Error during acquisition loop:\n" + e.message, log=True)
+    # Cleanup code if the frontend is killed in TopSpin.
+    except Error as e:
+        # Kill the backend process if it's still running.
+        if backend.poll() is None:
+            backend.terminate()
+        err_exit("Error:\n" + e.message, log=True)
 
     # Store the optima in the (final) dataset, and show a message to the user
     # if not in quiet mode.
@@ -272,20 +250,33 @@ class cst:
                          "SPOAL", "L", "IN", "INP", "PHCOR"]
 
 
-def err_exit(error):
+def err_exit(error, log=False):
     """
-    Shows an error message in TopSpin, then quits the Python script.
+    Shows an error message in TopSpin, optionally logs it to the frontend error
+    log, then quits the Python script.
 
     Parameters
     ----------
-    error (str)
+    error : str
         Error message to be displayed.
+    log : bool, optional
+        Whether to log the message to the frontend error log.
 
     Returns
     -------
     None
     """
     ERRMSG(title="poise", message=error)
+    if log:
+        current_dataset = CURDATA()
+        p_front_err = os.path.normpath(os.path.join(current_dataset[3],
+                                                    current_dataset[0],
+                                                    current_dataset[1],
+                                                    "poise_err_frontend.log"))
+        with open(p_front_err, "a") as ferr:
+            ferr.write("======= From frontend =======\n")
+            ferr.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
+            ferr.write(error + "\n\n")
     EXIT()
 
 

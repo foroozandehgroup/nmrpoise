@@ -834,6 +834,7 @@ if __name__ == "__main__":
         routine_id = input()
         p_spectrum = Path(input())
         p_optlog = p_spectrum.parents[1] / "poise.log"
+        p_errlog = p_spectrum.parents[1] / "poise_err_backend.log"
         # Run main routine.
         main()
     except Exception as e:
@@ -842,6 +843,8 @@ if __name__ == "__main__":
         # very short summary line.
         print(f"Backend exception: {type(e).__name__}({repr(e.args)})")
         # Then print it to the errlog.
-        print("======= From backend =======", file=sys.stderr)
-        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=sys.stderr)
-        raise  # This prints the full traceback to errlog.
+        with open(p_errlog, "a") as ferr:
+            print("======= From backend =======", file=ferr)
+            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=ferr)
+            print_exc(file=ferr)
+            print("\n\n", file=ferr)
