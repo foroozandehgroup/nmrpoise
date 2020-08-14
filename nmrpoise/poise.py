@@ -153,11 +153,19 @@ def main(args):
                     # Increment expno if it's not the first time.
                     if args.separate:
                         if not first_expno:
-                            XCMD("iexpno")
-                            RE(current_dataset)
-                            RE_IEXPNO()
-                            current_dataset = CURDATA()
-                            XCMD("browse_update_tree")
+                            # Before doing anything, check first whether a
+                            # dataset already exists, so that we don't
+                            # overwrite anything...!
+                            if next_expno_exists():
+                                raise RuntimeError("Existing dataset found at "
+                                                   "next expno! poise has "
+                                                   "been terminated.")
+                            else:
+                                XCMD("iexpno")
+                                RE(current_dataset)
+                                RE_IEXPNO()
+                                current_dataset = CURDATA()
+                                XCMD("browse_update_tree")
                         else:
                             first_expno = False
                     # Make sure we're at the correct dataset.
@@ -637,6 +645,26 @@ def make_p_spectrum():
     x = CURDATA()
     p = os.path.join(x[3], x[0], x[1], "pdata", x[2])
     return p
+
+
+def next_expno_exists():
+    """
+    Checks whether the expno folder with expno 1 greater than the current
+    experiment exists.
+
+    Parameters
+    ---------
+    None
+
+    Returns
+    -------
+    bool
+        True if it does. False if not.
+    """
+    x = CURDATA()
+    next_expno = str(int(x[1]) + 1)
+    p = os.path.join(x[3], x[0], next_expno)
+    return os.path.isdir(p)
 
 
 def acqu_done():
