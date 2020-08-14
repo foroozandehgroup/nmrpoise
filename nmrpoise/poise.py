@@ -72,7 +72,15 @@ def main(args):
         err_exit("No cost functions were found. Please define a cost function "
                  ", or reinstall poise to obtain the defaults.")
 
-    # Select optimisation routine.
+    # Check for the setup flag. If it's present, get a new routine, serialise
+    # it, then quit.
+    if args.setup:
+        routine = get_new_routine()
+        with open(os.path.join(p_routines, routine.name + ".json"), "wb") as f:
+            json.dump(routine._asdict(), f)
+        EXIT()
+
+    # Otherwise, we can proceed with selecting an optimisation routine.
     saved_routines = list_files(p_routines, ext=".json")
     # If routine was specified on command-line, check that there actually is a
     # routine with that name.
@@ -764,6 +772,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--separate", action="store_true")
     parser.add_argument("-a", "--algorithm", default="nm")
     parser.add_argument("-q", "--quiet", action="store_true")
+    parser.add_argument("--setup", action="store_true")
     args = parser.parse_args()
 
     # argparse's standard help message can only be printed; it can't be
@@ -774,7 +783,7 @@ if __name__ == "__main__":
     # functionality, construct the help message manually, and show it in a
     # TopSpin window.
     help_message = """
-usage: poise [-h] [-l] [-s] [-a ALGORITHM] [routine]
+usage: poise [-h] [-l] [-s] [-a ALGORITHM] [--setup] [routine]
 
 Python script for optimisation of acquisition parameters in TopSpin.
 Full documentation can be found at https://poise.readthedocs.io.
@@ -802,6 +811,9 @@ optional arguments:
     -q, --quiet
         Don't display a message at the end of the optimisation (default: off)
         This flag is necessary if POISE is to be run under automation.
+
+    --setup
+        Create a new routine only. Don't run the optimisation.
     """
 
     if args.help:
