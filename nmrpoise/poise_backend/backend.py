@@ -1,7 +1,6 @@
 import sys
 import json
 from traceback import print_exc
-from functools import wraps
 from datetime import datetime
 from pathlib import Path
 from collections import namedtuple
@@ -15,7 +14,7 @@ if __name__ == "__main__" and __package__ is None:
     sys.path.insert(1, str(Path(__file__).parents[1].resolve()))
     __import__(__package__)
 
-from .optpoise import (scale, unscale,
+from .optpoise import (scale, unscale, deco_count,
                        nelder_mead, multid_search, pybobyqa_interface)
 
 optimiser = None
@@ -27,16 +26,6 @@ tic = datetime.now()
 spec_f1p = None
 spec_f2p = None
 Routine = namedtuple("Routine", "name pars lb ub init tol cf au")
-
-
-def deco_count(fn):
-    """Function counter decorator."""
-    @wraps(fn)
-    def counter(*args, **kwargs):
-        counter.calls += 1
-        return fn(*args, **kwargs)
-    counter.calls = 0
-    return counter
 
 
 def main():
@@ -127,19 +116,31 @@ def main():
 def get_routine_cf(routine_id, p_routine_dir=None, p_cf_dir=None):
     """
     First finds the routine file and instantiates a Routine. Then finds the
-    associated cost function script and exec's it.
+    associated cost function script and exec's it, which defines
+    cost_function().
 
-    Arguments:
-        routine_id (str)            : Name of the routine being used.
-        p_routine_dir (pathlib.Path): Path to the folder containing the
-                                      routines. Defaults to the "routines"
-                                      directory in p_poise.
-        p_cf_dir (pathlib.Path)     : Path to the folder containing the
-                                      cost functions. Defaults to the
-                                      "cost_functions" directory in p_poise.
+    Parameters
+    ----------
+    routine_id : str
+        Name of the routine being used.
 
-    Returns:
-        Tuple of (Routine, function).
+    Returns
+    -------
+    Routine
+        The Routine object requested.
+    function
+        The cost function object associated with the routine.
+
+    Other Parameters
+    ----------------
+    p_routine_dir : pathlib.Path, optional
+        Path to the folder containing the routines. Defaults to the
+        poise_backend/routines directory. This parameter only exists for
+        unit test purposes and should not otherwise be used.
+    p_cf_dir : pathlib.Path, optional
+        Path to the folder containing the cost functions. Defaults to the
+        poise_backend/cost_functions directory. This parameter only exists for
+        unit test purposes and should not otherwise be used.
     """
     # Load the routine.
     p_routine_dir = p_routine_dir or (p_poise / "routines")
@@ -167,76 +168,128 @@ def get_routine_cf(routine_id, p_routine_dir=None, p_cf_dir=None):
 @deco_count
 def acquire_nmr(x, cost_function, routine):
     """
-    Evaluation of cost function for optimisation.
-    Sends a signal to the frontend script to run an NMR acquisition using the
-    scaled parameter values contained in x. Then, waits for the spectrum to be
-    acquired and processed; and then calculates the cost function associated
-    with the spectrum.
-    If any of the values in x are out-of-bounds, this simply returns np.inf as
-    the cost function.
+    This is the function which is actually passed to the optimisation function
+    as the "cost function", and is responsible for triggering acquisition in
+    the frontend.
 
-    Arguments:
-        x (ndarray of floats): values to be used in evaluation of cost
-                               function, scaled to be between 0 and 1.
-        optimargs (tuple)    : contains various parameters needed for other
-                               tasks, like communication with frontend.
+    Briefly, this function does the following:
 
-    Returns:
-        float : value of the cost function.
+     - Returns np.inf immediately if the values are outside the given bounds.
+     - Otherwise, prints the values to stdout using send_values(), which
+       triggers acquisition by the frontend.
+     - Waits for the frontend to pass the message "done" back, indicating that
+       the spectrum has been acquired and processed.
+     - Calculates the cost function using the user-defined cost_function().
+     - Performs logging throughout.
+
+    Parameters
+    ----------
+    x : ndarray
+        Scaled values to be used for spectrum acquisition and cost function
+        evaluation.
+    cost_function : function
+        User-defined cost function object.
+    routine : Routine
+        The active optimisation routine.
+
+    Returns
+    -------
+    cf_val : float
+        Value of the cost function.
     """
-    scaleby = "tols"
     unscaled_val = unscale(x, routine.lb, routine.ub,
-                           routine.tol, scaleby=scaleby)
+                           routine.tol, scaleby="tols")
+    # Format string for logging.
+    fstr = "{:^10.4f}  " * (len(x) + 1)
 
     with open(p_optlog, "a") as log:
         # Enforce constraints on optimisation.
-        # This doesn't need to be done by BOBYQA, because we pass the lb and ub
-        # parameters, which automatically stops it from sampling outside the
-        # bounds. If you *do* enforce the constraints on BOBYQA, this can lead
+        # This doesn't need to be done for BOBYQA, because we pass the `bounds`
+        # parameter, which automatically stops it from sampling outside the
+        # bounds. If we *do* enforce the constraints on BOBYQA, this can lead
         # to bad errors, as due to floating-point inaccuracy sometimes it tries
         # to sample a point that is ___just___ outside of the bounds (see #39).
+        # Instead, we should just let it evaluate the point as usual.
         if optimiser in ["nm", "mds"] and (np.any(unscaled_val < routine.lb) or
                                            np.any(unscaled_val > routine.ub)):
+            # Set the value of the cost function to infinity.
             cf_val = np.inf
-            # Logging
-            fmt = "{:^10.4f}  " * (len(x) + 1)
-            print(fmt.format(*unscaled_val, cf_val), file=log)
+            # Log that.
+            print(fstr.format(*unscaled_val, cf_val), file=log)
+            # Return immediately.
             return cf_val
 
         # Print unscaled values, prompting frontend script to start acquisition
         send_values(unscaled_val)
         # Wait for acquisition to complete, then calculate cost function
-        signal = input()      # frontend prints "done" here
+        signal = input()  # frontend prints "done" here
+        # Set p_spectrum according to which spectrum the frontend evaluated.
+        # This is important when using the separate_expnos option.
         global p_spectrum
-        p_spectrum = Path(input())  # path to the active spectrum
+        p_spectrum = Path(input())  # frontend prints path to active spectrum
+        # Evaluate the cost function, log, and return.
         if signal == "done":
             cf_val = cost_function()
-            # Logging
-            fmt = "{:^10.4f}  " * (len(x) + 1)
-            print(fmt.format(*unscaled_val, cf_val), file=log)
+            fstr = "{:^10.4f}  " * (len(x) + 1)
+            print(fstr.format(*unscaled_val, cf_val), file=log)
             return cf_val
         else:
+            # This really shouldn't happen.
             raise ValueError(f"Invalid signal passed from frontend: {signal}")
 
 
 @deco_count
 def send_values(unscaled_val):
-    """Print a list of unscaled values, which prompts frontend script to
+    """
+    Prints a list of unscaled values, which prompts frontend script to
     start acquisition.
+
+    Parameters
+    ----------
+    unscaled_val : ndarray
+        Unscaled values to be evaluated.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
     This needs to be a separate function so that we can decorate it.
+    acquire_nmr() measures the number of function evaluations, but since some
+    of those can be out-of-bounds evaluations which return infinity, this is
+    what represents the actual number of NMR spectra acquired, which is
+    actually more important.
     """
     print("values: " + " ".join([str(i) for i in unscaled_val]))
 
 
-# ----------------------------------------
-# Helper functions used in cost functions.
-# ----------------------------------------
+###############################################################################
+# Helper functions used in cost functions -- below                            #
+# ---------------------------------------                                     #
+#                                                                             #
+# Unfortunately, these need to be in backend.py instead of being imported     #
+# from a different module, because many of them rely on the global variable   #
+# p_spectrum to work. Please don't judge me, it's really the simplest way. I  #
+# think.                                                                      #
+###############################################################################
 
 
 def _parse_bounds_string(b):
     """
-    Parses the bounds strings "xf..yf", returning (xf, yf) as a tuple. If
-    either xf or yf are not specified, returns None in their place.
+    Parses the bounds string "lower..upper" to get the lower and upper bounds.
+
+    Parameters
+    ----------
+    b : str
+        The bounds string "lower..upper".
+
+    Returns
+    -------
+    lower : float or None
+        Lower bound. None if not specified.
+    upper : float or None
+        Upper bound. None if not specified.
     """
     try:
         if b == "":
@@ -257,26 +310,32 @@ def _parse_bounds_string(b):
 def _ppm_to_point(shift, axis=None, p_spec=None):
     """
     Round a specific chemical shift to the nearest point in the spectrum.
-    Note that this only works for 1D spectra!
 
     For unknown reasons, this does not correlate perfectly to the "index" that
     is displayed in TopSpin. However, the difference between the indices
     calculated here and the index in TopSpin is on the order of 1e-4 to 1e-3
     ppm. (More precisely, it's ca. 0.25 * SW / SI.)
 
-    Arguments:
-        shift (float)         : desired chemical shift.
-        axis (int)            : axis along which to calculate this. For 1D
-                                spectra this should be left as None. For 2D
-                                spectra, axis=0 and axis=1 correspond to the
-                                f1 and f2 dimensions respectively.
-        p_spec (pathlib.Path) : Path to the folder of the desired spectrum.
-                                Defaults to the spectrum being optimised, i.e.
-                                the global variable p_spectrum.
+    Parameters
+    ----------
+    shift : float
+        Desired chemical shift.
+    axis : int, optional
+        Axis along which to calculate this. For 1D spectra this should be left
+        as None. For 2D spectra, axis=0 and axis=1 correspond to the f1 and f2
+        dimensions respectively.
 
-    Returns:
-        (int): the desired point. None if the chemical shift lies outside the
-               spectral window.
+    Returns
+    -------
+    int or None
+        The desired point. None if the chemical shift lies outside the spectral
+        window.
+
+    Notes
+    -----
+    The p_spec parameter is only used in unit tests and should not actually be
+    passed in a cost function. Under normal circumstances this will default to
+    the FID or spectrum being measured.
     """
     p_spec = p_spec or p_spectrum
     si = getpar("SI", p_spec)
@@ -304,17 +363,30 @@ def _ppm_to_point(shift, axis=None, p_spec=None):
 
 def get1d_fid(p_spec=None):
     """
-    Returns the FID as a (complex) np.ndarray.
-    Needs the global variable p_spectrum to be set.
+    Returns the FID as a |ndarray|.
 
-    Note that this does *not* deal with the "group delay" at the beginning
-    of the FID.
+    Note that this does *not* modify the "group delay" at the beginning of the
+    FID.
 
-    Arguments:
-        p_spec (pathlib.Path) : Path to the spectrum being optimised.
+    Also, Bruker spectrometers record real and imaginary points in a sequential
+    fashion. Therefore, each imaginary point in the ndarray is actually
+    measured ``DW`` *after* the corresponding real point. When Fourier
+    transforming, this can be accounted for by using fftshift().
 
-    Returns:
-        (np.ndarray) Array containing the FID.
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    ndarray
+        Complex-valued array containing the FID.
+
+    Notes
+    -----
+    The p_spec parameter is only used in unit tests and should not actually be
+    passed in a cost function. Under normal circumstances this will default to
+    the FID or spectrum being measured.
     """
     p_spec = p_spec or p_spectrum
     p_fid = p_spec.parents[1] / "fid"
@@ -344,21 +416,31 @@ def _get_1d(spec_fname, bounds="", epno=None, p_spec=None):
        - greater than 9.3 ppm:  bounds="9.3.."
        - less than -2 ppm:      bounds="..-2"
 
-    Arguments:
-        spec_fname (str)      : "1r" for real or "1i" for imaginary.
-        bounds (str)          : String describing the region of interest. See
-                                above for examples. If no bounds are provided,
-                                uses the spectral bounds specified via 'dpl';
-                                if these are not specified, defaults to the
-                                whole spectrum.
-        epno (list)           : [expno, procno] of spectrum of interest.
-                                Defaults to the spectrum being optimised. Other
-                                expnos/procnos are calculated relative to the
-                                spectrum being optimised.
-        p_spec (pathlib.Path) : Path to the spectrum being optimised.
+    Parameters
+    ----------
+    spec_fname : str
+        File name of the spectrum; "1r" for real or "1i" for imaginary.
+    bounds : str, optional
+        String describing the region of interest. See above for examples. If no
+        bounds are provided, uses the ``F1P`` and ``F2P`` processing
+        parameters, which can be specified via ``dpl``. If these are not
+        specified, defaults to the whole spectrum.
+    epno : tuple of int, optional
+        (expno, procno) of spectrum of interest. Defaults to the spectrum
+        being evaluated. As of now, there is no way to read in a spectrum in a
+        folder with a different name (please let us know if this is a useful
+        feature that should be implemented).
 
-    Returns:
-        (np.ndarray) Array containing the spectrum or the desired section.
+    Returns
+    -------
+    ndarray
+        Array containing the spectrum or the desired section of it (if bounds
+        were specified).
+
+    Notes
+    -----
+    The p_spec parameter is only used in unit tests and should not actually be
+    passed in a cost function.
     """
     # Check whether user has specified epno
     if epno is not None:
@@ -397,66 +479,14 @@ def _get_1d(spec_fname, bounds="", epno=None, p_spec=None):
 
 def get1d_real(bounds="", epno=None, p_spec=None):
     """
-    Get the real spectrum. This function accounts for TopSpin's NC_PROC
-    variable, scaling the spectrum intensity accordingly.
-
-    Note that this function only works for 1D spectra. It does NOT work for 1D
-    projections of 2D spectra. If you want to work with projections, you can
-    use get_2d_spectrum() to get the full 2D spectrum, then manipulate it using
-    numpy functions as appropriate. Examples can be found in the docs.
-
-    The bounds parameter may be specified in the following formats:
-       - between 5 and 8 ppm:   bounds="5..8"
-       - greater than 9.3 ppm:  bounds="9.3.."
-       - less than -2 ppm:      bounds="..-2"
-
-    Arguments:
-        bounds (str)          : String describing the region of interest. See
-                                above for examples. If no bounds are provided,
-                                uses the spectral bounds specified via 'dpl';
-                                if these are not specified, defaults to the
-                                whole spectrum.
-        epno (list)           : [expno, procno] of spectrum of interest.
-                                Defaults to the spectrum being optimised. Other
-                                expnos/procnos are calculated relative to the
-                                spectrum being optimised.
-        p_spec (pathlib.Path) : Path to the spectrum being optimised.
-
-    Returns:
-        (np.ndarray) Array containing the spectrum or the desired section.
+    To be rewritten when tuple bounds are accepted [copy it over from _get_1d].
     """
     return _get_1d(spec_fname="1r", bounds=bounds, epno=epno, p_spec=p_spec)
 
 
 def get1d_imag(bounds="", epno=None, p_spec=None):
     """
-    Get the imaginary spectrum. This function accounts for TopSpin's NC_PROC
-    variable, scaling the spectrum intensity accordingly.
-
-    Note that this function only works for 1D spectra. It does NOT work for 1D
-    projections of 2D spectra. If you want to work with projections, you can
-    use get_2d_spectrum() to get the full 2D spectrum, then manipulate it using
-    numpy functions as appropriate. Examples can be found in the docs.
-
-    The bounds parameter may be specified in the following formats:
-       - between 5 and 8 ppm:   bounds="5..8"
-       - greater than 9.3 ppm:  bounds="9.3.."
-       - less than -2 ppm:      bounds="..-2"
-
-    Arguments:
-        bounds (str)          : String describing the region of interest. See
-                                above for examples. If no bounds are provided,
-                                uses the spectral bounds specified via 'dpl';
-                                if these are not specified, defaults to the
-                                whole spectrum.
-        epno (list)           : [expno, procno] of spectrum of interest.
-                                Defaults to the spectrum being optimised. Other
-                                expnos/procnos are calculated relative to the
-                                spectrum being optimised.
-        p_spec (pathlib.Path) : Path to the spectrum being optimised.
-
-    Returns:
-        (np.ndarray) Array containing the spectrum or the desired section.
+    To be rewritten when tuple bounds are accepted [copy it over from _get_1d].
     """
     return _get_1d(spec_fname="1i", bounds=bounds, epno=epno, p_spec=p_spec)
 
@@ -466,27 +496,43 @@ def _get_2d(spec_fname, f1_bounds="", f2_bounds="", epno=None, p_spec=None):
     Get a 2D spectrum. This function takes into account the NC_proc value in
     TopSpin's processing parameters.
 
-    spec_fname should be "2rr", "2ri", "2ir", or "2ii".
-
     The f1_bounds and f2_bounds parameters may be specified in the following
     formats:
        - between 5 and 8 ppm:   bounds="5..8"
        - greater than 9.3 ppm:  bounds="9.3.."
        - less than -2 ppm:      bounds="..-2"
 
-    Arguments:
-        spec_fname (str)      : String indicating which processed data file to
-                                read in. Can be "2rr", "2ri", "2ir", or "2ii".
-        f1_bounds (str)       : String indicating f1 region of interest.
-        f2_bounds (str)       : String indicating f2 region of interest.
-        epno (list)           : [expno, procno] of spectrum of interest.
-                                Defaults to the spectrum being optimised. Other
-                                expnos/procnos are calculated relative to the
-                                spectrum being optimised.
-        p_spec (pathlib.Path) : Path to the spectrum being optimised.
+    Parameters
+    ----------
+    spec_fname : str
+        Filename of the spectrum of interest. Can be "2rr", "2ri", "2ir", or
+        "2ii", corresponding to the four hypercomplex quadrants.
+    f1_bounds : str, optional
+        String describing the indirect-dimension region of interest. See above
+        for examples. If no bounds are provided, uses the ``1 F1P`` and ``1
+        F2P`` processing parameters, which can be specified via ``dpl``. If
+        these are not specified, defaults to the whole spectrum.
+    f2_bounds : str, optional
+        String describing the direct-dimension region of interest. See above
+        for examples. If no bounds are provided, uses the ``2 F1P`` and ``2
+        F2P`` processing parameters, which can be specified via ``dpl``. If
+        these are not specified, defaults to the whole spectrum.
+    epno : tuple of int, optional
+        (expno, procno) of spectrum of interest. Defaults to the spectrum
+        being evaluated. As of now, there is no way to read in a spectrum in a
+        folder with a different name (please let us know if this is a useful
+        feature that should be implemented).
 
-    Returns:
-        (np.ndarray) 2D array containing the spectrum or the desired section.
+    Returns
+    -------
+    ndarray
+        2D array containing the spectrum or the desired section of it (if
+        *f1_bounds* or *f2_bounds* were specified).
+
+    Notes
+    -----
+    The p_spec parameter is only used in unit tests and should not actually be
+    passed in a cost function.
     """
     # Check whether user has specified epno
     if epno is not None:
@@ -553,26 +599,7 @@ def _get_2d(spec_fname, f1_bounds="", f2_bounds="", epno=None, p_spec=None):
 
 def get2d_rr(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
     """
-    Get the doubly real part of the 2D spectrum. This function takes into
-    account the NC_proc value in TopSpin's processing parameters.
-
-    The f1_bounds and f2_bounds parameters may be specified in the following
-    formats:
-       - between 5 and 8 ppm:   bounds="5..8"
-       - greater than 9.3 ppm:  bounds="9.3.."
-       - less than -2 ppm:      bounds="..-2"
-
-    Arguments:
-        f1_bounds (str)       : String indicating f1 region of interest.
-        f2_bounds (str)       : String indicating f2 region of interest.
-        epno (list)           : [expno, procno] of spectrum of interest.
-                                Defaults to the spectrum being optimised. Other
-                                expnos/procnos are calculated relative to the
-                                spectrum being optimised.
-        p_spec (pathlib.Path) : Path to the spectrum being optimised.
-
-    Returns:
-        (np.ndarray) 2D array containing the spectrum or the desired section.
+    To be rewritten when tuple bounds are accepted [copy it over from _get_2d].
     """
     return _get_2d(spec_fname="2rr",
                    f1_bounds=f1_bounds, f2_bounds=f2_bounds,
@@ -613,16 +640,20 @@ def _get_acqu_par(par, p_acqus):
     Note that pulse powers in dB (PLdB / SPdB) cannot be obtained using this
     function, as they are not stored in the acqus file.
 
-    Arguments:
-        par (str)              : Name of the acquisition parameter.
-        p_acqus (pathlib.Path) : Path to the status acquisition file (this is
-                                 'acqus' for 1D spectra and direct dimension of
-                                 2D spectra, or 'acqu2s' for indirect dimension
-                                 of 2D spectra).
+    Parameters
+    ----------
+    par : str
+        Name of the acquisition parameter.
+    p_acqus : pathlib.Path
+        Path to the status acquisition file (this is 'acqus' for 1D spectra and
+        direct dimension of 2D spectra, or 'acqu2s' for indirect dimension of
+        2D spectra).
 
-    Returns:
-        (float) Value of the acquisition parameter. None if the value is not a
-                number, or if the parameter doesn't exist.
+    Returns
+    -------
+    float or None
+        Value of the acquisition parameter. None if the value is not a number,
+        or if the parameter doesn't exist.
     """
     # Capitalise and remove any spaces from par
     par = par.upper()
@@ -676,16 +707,20 @@ def _get_proc_par(par, p_procs):
     """
     Obtains the value of a processing parameter.
 
-    Arguments:
-        par (str)              : Name of the processing parameter.
-        p_procs (pathlib.Path) : Path to the status processing file (this is
-                                 'procs' for 1D spectra and direct dimension of
-                                 2D spectra, or 'proc2s' for indirect dimension
-                                 of 2D spectra).
+    Parameters
+    ----------
+    par : str
+        Name of the processing parameter.
+    p_procs : pathlib.Path
+        Path to the status processing file (this is 'procs' for 1D spectra and
+        direct dimension of 2D spectra, or 'proc2s' for indirect dimension of
+        2D spectra).
 
-    Returns:
-        (float) value of the processing parameter. None if the value is not a
-                number, or if the parameter doesn't exist.
+    Returns
+    -------
+    float or None
+        Value of the processing parameter. None if the value is not a number,
+        or if the parameter doesn't exist.
     """
     # Capitalise and remove any spaces from par
     par = par.upper()
@@ -708,23 +743,29 @@ def _get_proc_par(par, p_procs):
 
 def getpar(par, p_spec=None):
     """
-    Obtains the value of an (acquisition or processing) parameter.
-    Tries to search for an acquisition parameter first, then processing.
+    Obtains the value of an (acquisition or processing) parameter. Works for
+    both 1D and 2D spectra (see return type below).
 
-    Works on both 1D and 2D spectra. For parameters that are applicable to
-    both dimensions of 2D spectra, getpar() returns a np.ndarray consisting of
-    (f1_value, f2_value). Otherwise (for 1D spectra, or for 2D parameters which
-    only apply to the direct dimension), getpar() returns a float.
+    Parameters
+    ----------
+    par : str
+        Name of the parameter.
 
-    Arguments:
-        par (str)             : Name of the parameter.
-        p_spec (pathlib.Path) : Path to the folder of the desired spectrum.
-                                Defaults to the spectrum being optimised, i.e.
-                                the global variable p_spectrum.
+    Returns
+    -------
+    float or ndarray
+        Value(s) of the requested parameter. None if the given parameter was
+        not found.
 
-    Returns:
-        (float or np.ndarray) Value(s) of the requested parameter. None if the
-            given parameter was not found.
+        For parameters that exist for both dimensions of 2D spectra, getpar()
+        returns an ndarray consisting of (f1_value, f2_value).  Otherwise (for
+        1D spectra, or for 2D parameters which only apply to the direct
+        dimension), getpar() returns a float.
+
+    Notes
+    -----
+    The p_spec parameter is only used in unit tests and should not actually be
+    passed in a cost function.
     """
     p_spec = p_spec or p_spectrum
 

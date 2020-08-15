@@ -6,26 +6,38 @@ import pybobyqa as pb
 
 def scale(val, lb, ub, tol, scaleby="bounds"):
     """
+    Scales a set of values so that the optimisation behaves better.
+
     For scaleby="bounds", scales a set of values such that the lower and upper
-    bounds for all variables are 0 and 1 respectively).
+    bounds for all variables are 0 and 1 respectively). We used to use this.
+    As of the current version it's no longer being used.
 
     For scaleby="tols", scales a set of values such that the tolerances for all
     variables are 0.03.
 
-    Returns None if any of the values are outside the bounds.
+    Parameters
+    ----------
+    val : ndarray or list
+        The unscaled values.
+    lb : ndarray or list
+        The unscaled lower bounds.
+    ub : ndarray or list
+        The unscaled upper bounds.
+    tol : ndarray or list
+        The unscaled tolerances.
+    scaleby : str from {"bounds", "tols"}
+        Method to scale by.
 
-    Arguments:
-        val: list/array of float - the values to be scaled
-        lb : list/array of float - the lower bounds
-        ub : list/array of float - the upper bounds
-        tol: list/array of float - the tolerances
-        scaleby: string - Method to scale by. Either "bounds" or "tols".
-
-    Returns:
-        scaled_val: np.ndarray of float - the scaled values
-        scaled_lb : np.ndarray of float - the scaled lower bounds
-        scaled_ub : np.ndarray of float - the scaled upper bounds
-        scaled_tol: np.ndarray of float - the scaled tolerances
+    Returns
+    -------
+    scaled_val : ndarray
+        The scaled values.
+    scaled_lb : ndarray
+        The scaled lower bounds.
+    scaled_ub : ndarray
+        The scaled upper bounds.
+    scaled_tol : ndarray
+        The scaled tolerances.
     """
     if scaleby not in ["bounds", "tols"]:
         raise ValueError(f"Invalid argument scaleby={scaleby} given.")
@@ -52,15 +64,23 @@ def unscale(scaled_val, orig_lb, orig_ub, orig_tol, scaleby="bounds"):
     """
     Unscales a set of scaled values to their original values.
 
-    Arguments:
-        scaled_val: list/array of float - the values to be unscaled
-        orig_lb   : list/array of float - the original lower bounds
-        orig_ub   : list/array of float - the original upper bounds
-        orig_tol  : list/array of float - the original tolerances
-        scaleby   : string - Method to scale by. Either "bounds" or "tols".
+    Parameters
+    ----------
+    scaled_val : ndarray or list
+        The scaled values.
+    orig_lb : ndarray or list
+        The *unscaled* lower bounds.
+    orig_ub : ndarray or list
+        The *unscaled* upper bounds.
+    orig_tol : ndarray or list
+        The *unscaled* tolerances.
+    scaleby : str from {"bounds", "tols"}
+        Method to scale by.
 
-    Returns:
-        np.ndarray of float - the unscaled values
+    Returns
+    -------
+    ndarray
+        The unscaled values.
     """
     if scaleby not in ["bounds", "tols"]:
         raise ValueError(f"Invalid argument scaleby={scaleby} given.")
@@ -82,16 +102,23 @@ class Simplex():
         """
         Initialises a Simplex object.
 
-        Arguments:
-            x0     : Initial guess.
-            method : Method for construction of initial simplex. Options:
-                      - "spendley" : Regular simplex of Spendley et al. (1962)
-                                     DOI 10.1080/00401706.1962.10490033.
-                                     Default, because it works well.
-                      - "axis"     : Simplex extended along each axis by a
-                                     fixed length from x0.
-                      - "random"   : Every point is randomly generated in [0,1]
-            length : A measure of the size of the initial simplex.
+        Parameters
+        ----------
+        x0: ndarray
+            Initial guess.
+        method : str, optional
+            Method for construction of initial simplex. Options are:
+                - "spendley" : Regular simplex of Spendley et al. (1962) (DOI
+                               10.1080/00401706.1962.10490033). This is the
+                               default, because it works well.
+                - "axis"     : Simplex extended along each axis by a fixed
+                               length from x0.
+                - "random"   : Every point is randomly generated in [0,1].
+                               Don't recommend using this.
+        length : float, optional
+            A measure of the size of the initial simplex. Defaults to 0.15,
+            because that's 5 times the tolerances after the problem is scaled
+            by tols.
         """
         self.x0 = np.ravel(np.asfarray(x0))
         self.N = np.size(self.x0)
@@ -134,8 +161,8 @@ class Simplex():
 
     def sort(self):
         """
-        Sorts the simplex and associated function values in ascending order
-        of the cost function, i.e. sim.x[0] contains the current best point,
+        Sorts the simplex and associated function values in ascending order of
+        the cost function, i.e. sim.x[0] contains the current best point,
         sim.x[N] contains the current worst point.
         """
         indices = np.argsort(self.f)
@@ -144,7 +171,8 @@ class Simplex():
 
     def xbar(self):
         """
-        Calculates the centroid. Assumes the function is already sorted.
+        Calculates the centroid. Assumes the function values are already
+        sorted.
         """
         return np.average(self.x[0:self.N], axis=0)
 
@@ -164,8 +192,8 @@ class Simplex():
 
     def shrink(self):
         """
-        Performs shrink step (Step 3(f) in Algorithm 8.1.1, Kelley).
-        Doesn't evaluate cost functions!
+        Performs shrink step (Step 3(f) in Algorithm 8.1.1, Kelley). Doesn't
+        evaluate cost functions, only replaces the points!
         """
         for i in range(1, self.N + 1):
             self.x[i] = self.x[0] - (self.x[i] - self.x[0])/2
@@ -180,10 +208,12 @@ class MaxItersReached(Exception):
     pass
 
 
-# Function counter decorator. We should probably keep this here and not in
-# backend, so that we can reuse code (because of the input() calls to set
-# global variables, backend cannot be imported).
 def deco_count(fn):
+    """
+    Decorator which counts the number of times a function has been called.
+
+    The number can be accessed with ``fn.calls``.
+    """
     @wraps(fn)
     def counter(*args, **kwargs):
         counter.calls += 1
@@ -211,34 +241,48 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
     Nelder-Mead optimiser, as described in Section 8.1 of Kelley, "Iterative
     Methods for Optimization".
 
-    Inputs to this function should already be scaled to have lower and upper
-    bounds of 0 and 1.
+    Parameters
+    ----------
+    cf : function
+        The cost function. For POISE, this means acquire_nmr(), not the
+        user-defined cost function. However in general, this can be any cost
+        function.
+    x0 : ndarray or list
+        Initial point for optimisation.
+    xtol : ndarray or list
+        Tolerances for each optimisation dimension.
+    args : tuple, optional
+        A tuple of arguments to pass to the cost function.
+    simplex_method : str, optional
+        Method for generation of initial simplex.
+    scaled_lb : ndarray, optional
+        Scaled lower bounds for the optimisation.
+    scaled_ub : ndarray, optional
+        Scaled upper bounds for the optimisation. This is used to place an
+        upper bound on the simplex size.
 
+    Returns
+    -------
+    OptResult
+        Object which contains the following attributes:
+            xbest (ndarray)   : Optimal values for the optimisation.
+            fbest (float)     : Cost function at the optimum.
+            niter (int)       : Number of iterations.
+            nfev (int)        : Number of function evaluations. Note that in
+                                the specific context of NMR optimisation, this
+                                is in general not equal to the number of
+                                experiments acquired.
+            simplex (ndarray) : (N+1, N)-sized matrix of the final simplex.
+            fvals (ndarray)   : List of corresponding cost functions at each
+                                point of the simplex.
+            message (str)     : Message indicating reason for termination.
+
+    Notes
+    -----
     The scipy implementation has a few tricks which are useful in making the
-    actual computation run faster. However, here we have opted for readability
-    since speed is limited by the acquisition time of the NMR experiment.
-
-    Arguments:
-        cf:   The cost function.
-        args: A tuple of arguments to pass to the cost function.
-        x0:   List containing initial point for optimisation.
-        xtol: List containing tolerances for each parameter.
-        simplex_method: Method for generation of initial simplex.
-
-    Returns:
-        OptResult object 'o' which contains the following attributes:
-
-        o.xbest (ndarray)   : Optimal values for the optimisation.
-        o.fbest (float)     : Cost function at the optimum.
-        o.niter (int)       : Number of iterations.
-        o.nfev (int)        : Number of function evaluations. Note that in the
-                              specific context of NMR optimisation, this is in
-                              general not equal to the number of experiments
-                              acquired.
-        o.simplex (ndarray) : (N+1, N)-sized matrix of the final simplex.
-        o.fvals (ndarray)   : List of corresponding cost functions at each
-                              point of the simplex.
-        o.message (str)     : Message indicating reason for termination.
+    actual computation run faster. However, here we have ignored these in
+    favour of readability, since the speed of the optimisation is largely
+    limited by the acquisition time of the NMR experiment.
     """
 
     # Convert x0 to vector
@@ -400,30 +444,41 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
     Multidimensional search optimiser, as described in Secion 8.2 of Kelley,
     "Iterative Methods for Optimization".
 
-    Inputs to this function should already be scaled to have lower and upper
-    bounds of 0 and 1.
+    Parameters
+    ----------
+    cf : function
+        The cost function. For POISE, this means acquire_nmr(), not the
+        user-defined cost function. However in general, this can be any cost
+        function.
+    x0 : ndarray or list
+        Initial point for optimisation.
+    xtol : ndarray or list
+        Tolerances for each optimisation dimension.
+    args : tuple, optional
+        A tuple of arguments to pass to the cost function.
+    simplex_method : str, optional
+        Method for generation of initial simplex.
+    scaled_lb : ndarray, optional
+        Scaled lower bounds for the optimisation.
+    scaled_ub : ndarray, optional
+        Scaled upper bounds for the optimisation. This is used to place an
+        upper bound on the simplex size.
 
-    Arguments:
-        cf:   The cost function.
-        args: A tuple of arguments to pass to the cost function.
-        x0:   List containing initial point for optimisation.
-        xtol: List containing tolerances for each parameter.
-        simplex_method: Method for generation of initial simplex.
-
-    Returns:
-        OptResult object 'o' which contains the following attributes:
-
-        o.xbest (ndarray)   : Optimal values for the optimisation.
-        o.fbest (float)     : Cost function at the optimum.
-        o.niter (int)       : Number of iterations.
-        o.nfev (int)        : Number of function evaluations. Note that in the
-                              specific context of NMR optimisation, this is in
-                              general not equal to the number of experiments
-                              acquired.
-        o.simplex (ndarray) : (N+1, N)-sized matrix of the final simplex.
-        o.fvals (ndarray)   : List of corresponding cost functions at each
-                              point of the simplex.
-        o.message (str)     : Message indicating reason for termination.
+    Returns
+    -------
+    OptResult
+        Object which contains the following attributes:
+            xbest (ndarray)   : Optimal values for the optimisation.
+            fbest (float)     : Cost function at the optimum.
+            niter (int)       : Number of iterations.
+            nfev (int)        : Number of function evaluations. Note that in
+                                the specific context of NMR optimisation, this
+                                is in general not equal to the number of
+                                experiments acquired.
+            simplex (ndarray) : (N+1, N)-sized matrix of the final simplex.
+            fvals (ndarray)   : List of corresponding cost functions at each
+                                point of the simplex.
+            message (str)     : Message indicating reason for termination.
     """
     # Convert x0 to vector
     x0 = np.asfarray(x0).flatten()
@@ -544,6 +599,46 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
 
 def pybobyqa_interface(cf, x0, xtol, args=(),
                        scaled_lb=None, scaled_ub=None):
+    """
+    Interface to pybobyqa.solve() which takes similar arguments to the other
+    two optimisation functions and returns an OptResult object.
+
+    Parameters
+    ----------
+    cf : function
+        The cost function. For POISE, this means acquire_nmr(), not the
+        user-defined cost function. However in general, this can be any cost
+        function.
+    x0 : ndarray or list
+        Initial point for optimisation.
+    xtol : ndarray or list
+        Tolerances for each optimisation dimension.
+    args : tuple, optional
+        A tuple of arguments to pass to the cost function.
+    simplex_method : str, optional
+        Method for generation of initial simplex.
+    scaled_lb : ndarray, optional
+        Scaled lower bounds for the optimisation.
+    scaled_ub : ndarray, optional
+        Scaled upper bounds for the optimisation. This is used to place an
+        upper bound on the simplex size.
+
+    Returns
+    -------
+    OptResult
+        Object which contains the following attributes:
+            xbest (ndarray)   : Optimal values for the optimisation.
+            fbest (float)     : Cost function at the optimum.
+            niter (int)       : Number of iterations. solve() does not actually
+                                provide this information directly, so this
+                                value is simply set to zero. (It is indirectly
+                                available if diagnostic info is requested.)
+            nfev (int)        : Number of function evaluations. Note that in
+                                the specific context of NMR optimisation, this
+                                is in general not equal to the number of
+                                experiments acquired.
+            message (str)     : Message indicating reason for termination.
+    """
     x0 = np.asfarray(x0).flatten()
     # Run the optimisation, using PyBOBYQA's bounds keyword arguments.
     if scaled_lb is None and scaled_ub is None:
