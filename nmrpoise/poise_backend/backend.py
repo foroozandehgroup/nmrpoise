@@ -275,14 +275,15 @@ def send_values(unscaled_val):
 ###############################################################################
 
 
-def _parse_bounds_string(b):
+def _parse_bounds(b):
     """
-    Parses the bounds string "lower..upper" to get the lower and upper bounds.
+    Parses the bounds string "lower..upper", or the bounds tuple (lower,
+    upper), to get the lower and upper bounds.
 
     Parameters
     ----------
-    b : str
-        The bounds string "lower..upper".
+    b : str or tuple
+        The bounds string "lower..upper", or the tuple (lower, upper).
 
     Returns
     -------
@@ -292,18 +293,26 @@ def _parse_bounds_string(b):
         Upper bound. None if not specified.
     """
     try:
-        if b == "":
-            return None, None
-        elif b.startswith(".."):   # "..5" -> (None, 5)
-            return None, float(b[2:])
-        elif b.endswith(".."):   # "3.." -> (3, None)
-            return float(b[:-2]), None
-        elif ".." in b:
-            x, y = b.split("..")
-            return float(x), float(y)
-        else:
-            raise ValueError
-    except ValueError:
+        if isinstance(b, str):
+            if b == "":
+                return None, None
+            elif b.startswith(".."):   # "..5" -> (None, 5)
+                return None, float(b[2:])
+            elif b.endswith(".."):   # "3.." -> (3, None)
+                return float(b[:-2]), None
+            elif ".." in b:
+                x, y = b.split("..")
+                return float(x), float(y)
+            else:
+                raise ValueError
+        else:  # not a string, hopefully a tuple
+            if len(b) != 2:
+                raise ValueError
+            # ValueError if b[0] isn't numeric
+            lower = float(b[0]) if b[0] is not None else None
+            upper = float(b[1]) if b[1] is not None else None
+            return lower, upper
+    except (ValueError, TypeError):
         raise ValueError(f"Invalid value {b} provided for bounds.")
 
 
@@ -463,7 +472,7 @@ def _get_1d(spec_fname, bounds="", epno=None, p_spec=None):
         else:
             left, right = spec_f1p, spec_f2p
     else:
-        right, left = _parse_bounds_string(bounds)
+        right, left = _parse_bounds(bounds)
 
     # Get default bounds
     si = int(getpar("SI", p_spec))
@@ -582,8 +591,8 @@ def _get_2d(spec_fname, f1_bounds="", f2_bounds="", epno=None, p_spec=None):
     if f2_bounds == "":
         if spec_f1p is not None and spec_f2p is not None:  # DPL was used
             f2_bounds = f"{spec_f2p[1]}..{spec_f1p[1]}"
-    f1_lower, f1_upper = _parse_bounds_string(f1_bounds)
-    f2_lower, f2_upper = _parse_bounds_string(f2_bounds)
+    f1_lower, f1_upper = _parse_bounds(f1_bounds)
+    f2_lower, f2_upper = _parse_bounds(f2_bounds)
     # Convert ppm to points
     f1_lower_point = _ppm_to_point(f1_lower, axis=0, p_spec=p_spec) \
         if f1_lower is not None else si[0] - 1

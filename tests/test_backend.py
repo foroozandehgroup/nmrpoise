@@ -136,16 +136,22 @@ def test_get1d_real():
     lpoint, rpoint = sorted([lpoint, rpoint])  # if left < right
     subarray = be.get1d_real(bounds="4..6", p_spec=p_spec)
     assert np.array_equal(subarray, npff[lpoint:rpoint + 1] * (2 ** -8))
+    subarray = be.get1d_real(bounds=(4, 6), p_spec=p_spec)
+    assert np.array_equal(subarray, npff[lpoint:rpoint + 1] * (2 ** -8))
 
     left, right = 6, None
     lpoint = be._ppm_to_point(left, p_spec=p_spec)
     si = int(be.getpar("si", p_spec=p_spec))
     subarray = be.get1d_real(bounds="..6", p_spec=p_spec)
     assert np.array_equal(subarray, npff[lpoint:si] * (2 ** -8))
+    subarray = be.get1d_real(bounds=(None, 6), p_spec=p_spec)
+    assert np.array_equal(subarray, npff[lpoint:si] * (2 ** -8))
 
     left, right = None, 6
     rpoint = be._ppm_to_point(right, p_spec=p_spec)
     subarray = be.get1d_real(bounds="6..", p_spec=p_spec)
+    assert np.array_equal(subarray, npff[0:rpoint + 1] * (2 ** -8))
+    subarray = be.get1d_real(bounds=(6, None), p_spec=p_spec)
     assert np.array_equal(subarray, npff[0:rpoint + 1] * (2 ** -8))
 
 
@@ -192,6 +198,9 @@ def test_get2d_rr():
     assert spec.shape == (1024, 1024)
 
     spec = be.get2d_rr(f1_bounds="", f2_bounds="6..8", p_spec=p_spec)
+    assert spec.shape == (1024, 205)
+
+    spec = be.get2d_rr(f1_bounds="", f2_bounds=(6, 8), p_spec=p_spec)
     assert spec.shape == (1024, 205)
 
 
