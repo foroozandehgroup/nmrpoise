@@ -45,13 +45,13 @@ def test_topspin_installation(tmpdir):
     # Copy package to a temporary directory
     tmpdir = Path(tmpdir)
     tmpdir_poise = tmpdir / "nmrpoise"
-    ts_install_script = pkg_toplevel_dir / "topspin_install.py"
     poise_folder = pkg_toplevel_dir / "nmrpoise"
+    ts_install_script = poise_folder / "topspin_install.py"
     copy_file(str(ts_install_script), str(tmpdir))
     copy_tree(str(poise_folder), str(tmpdir_poise))
 
     # Run the installation script in the temporary directory
-    new_ts_install_script = tmpdir / "topspin_install.py"
+    new_ts_install_script = tmpdir_poise / "topspin_install.py"
     subprocess.run(["python3", str(new_ts_install_script)])
 
     # Check whether the files were installed to TopSpin correctly

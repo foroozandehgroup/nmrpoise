@@ -1,6 +1,6 @@
-include topspin_install.py
+include README.md
+include LICENSE.txt
+include requirements.txt
+include tox.ini
 include nmrpoise/*
-include nmrpoise/poise_backend/*
-include nmrpoise/poise_backend/cost_functions/*
-include nmrpoise/poise_backend/routines/*
 include tests/*

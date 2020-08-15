@@ -8,7 +8,7 @@ from setuptools.command.install import install
 class TopSpinInstall(install):
     def run(self):
         p = Path(__file__).parent.resolve()
-        p_install = p / "topspin_install.py"
+        p_install = p / "nmrpoise" / "topspin_install.py"
         subprocess.run([sys.executable, str(p_install)], check=True)
         super().run()
 
@@ -50,5 +50,10 @@ setup(
                       ],
     cmdclass={"install": TopSpinInstall,
               "notopspin": noTopSpinInstall,
-    }
+    },
+    entry_points={
+        "console_scripts": [
+            "poise_tsinstall = nmrpoise.topspin_install:main",
+        ]
+    },
 )
