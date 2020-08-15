@@ -46,10 +46,10 @@ def test_NM_accuracy():
     for method, nexpt in nm_simplex_methods_nexpts.items():
         optResult = nelder_mead(cf=quadratic, x0=x0, xtol=xtol,
                                 simplex_method=method)
-        if not np.allclose(optResult.xbest, np.zeros(len(x0)), atol=1e-2):
+        if not np.allclose(optResult.xbest, np.zeros(len(x0)), atol=2e-2):
             optResult = nelder_mead(cf=quadratic, x0=x0, xtol=xtol,
                                     simplex_method=method)
-        assert np.allclose(optResult.xbest, np.zeros(len(x0)), atol=1e-2)
+        assert np.allclose(optResult.xbest, np.zeros(len(x0)), atol=2e-2)
 
 
 def test_NM_iters():
@@ -84,7 +84,7 @@ def test_MDS_accuracy():
     for method, nexpt in mds_simplex_methods_nexpts.items():
         optResult = multid_search(cf=quadratic, x0=x0, xtol=xtol,
                                   simplex_method=method)
-        assert np.allclose(optResult.xbest, np.zeros(len(x0)), atol=1e-2)
+        assert np.allclose(optResult.xbest, np.zeros(len(x0)), atol=2e-2)
 
 
 def test_MDS_iters():

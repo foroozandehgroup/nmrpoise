@@ -1,13 +1,84 @@
 from functools import wraps
 
 import numpy as np
+import pybobyqa as pb
+
+
+def scale(val, lb, ub, tol, scaleby="bounds"):
+    """
+    For scaleby="bounds", scales a set of values such that the lower and upper
+    bounds for all variables are 0 and 1 respectively).
+
+    For scaleby="tols", scales a set of values such that the tolerances for all
+    variables are 0.03.
+
+    Returns None if any of the values are outside the bounds.
+
+    Arguments:
+        val: list/array of float - the values to be scaled
+        lb : list/array of float - the lower bounds
+        ub : list/array of float - the upper bounds
+        tol: list/array of float - the tolerances
+        scaleby: string - Method to scale by. Either "bounds" or "tols".
+
+    Returns:
+        scaled_val: np.ndarray of float - the scaled values
+        scaled_lb : np.ndarray of float - the scaled lower bounds
+        scaled_ub : np.ndarray of float - the scaled upper bounds
+        scaled_tol: np.ndarray of float - the scaled tolerances
+    """
+    if scaleby not in ["bounds", "tols"]:
+        raise ValueError(f"Invalid argument scaleby={scaleby} given.")
+    # Convert to ndarray
+    val, lb, ub, tol = (np.array(i) for i in (val, lb, ub, tol))
+    # Check if any are outside bounds
+    if np.any(val < lb) or np.any(val > ub):
+        return None
+    # Scale them
+    if scaleby == "bounds":
+        scaled_val = (val - lb)/(ub - lb)
+        scaled_lb = (lb - lb)/(ub - lb)  # all 0's
+        scaled_ub = (ub - lb)/(ub - lb)  # all 1's
+        scaled_tol = tol/(ub - lb)
+    elif scaleby == "tols":
+        scaled_val = (val - lb) * 0.03 / tol
+        scaled_lb = (lb - lb) * 0.03 / tol   # all 0's
+        scaled_ub = (ub - lb) * 0.03 / tol
+        scaled_tol = tol * 0.03 / tol        # all 0.03's
+    return scaled_val, scaled_lb, scaled_ub, scaled_tol
+
+
+def unscale(scaled_val, orig_lb, orig_ub, orig_tol, scaleby="bounds"):
+    """
+    Unscales a set of scaled values to their original values.
+
+    Arguments:
+        scaled_val: list/array of float - the values to be unscaled
+        orig_lb   : list/array of float - the original lower bounds
+        orig_ub   : list/array of float - the original upper bounds
+        orig_tol  : list/array of float - the original tolerances
+        scaleby   : string - Method to scale by. Either "bounds" or "tols".
+
+    Returns:
+        np.ndarray of float - the unscaled values
+    """
+    if scaleby not in ["bounds", "tols"]:
+        raise ValueError(f"Invalid argument scaleby={scaleby} given.")
+    scaled_val, orig_lb, orig_ub, orig_tol = (np.array(i) for i in (scaled_val,
+                                                                    orig_lb,
+                                                                    orig_ub,
+                                                                    orig_tol))
+    if scaleby == "bounds":
+        return orig_lb + (scaled_val * (orig_ub - orig_lb))
+    elif scaleby == "tols":
+        return (scaled_val * orig_tol / 0.03) + orig_lb
 
 
 class Simplex():
     """
     Simplex class.
     """
-    def __init__(self, x0, method="spendley", length=0.3):
+    def __init__(self, x0, method="spendley", length=0.15):
         """
         Initialises a Simplex object.
 
@@ -134,7 +205,8 @@ class OptResult:
         return str(self.__dict__)
 
 
-def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley"):
+def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
+                scaled_lb=None, scaled_ub=None):
     """
     Nelder-Mead optimiser, as described in Section 8.1 of Kelley, "Iterative
     Methods for Optimization".
@@ -183,11 +255,16 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley"):
     # Check length of xtol
     if len(x0) != len(xtol):
         raise ValueError("Nelder-Mead: x0 and xtol have incompatible lengths")
-    # Calculate geometric mean of xtol and make sure that it's sensible
-    xtol_gm = np.prod(xtol) ** (1 / np.size(xtol))
 
+    # If scaled_lb and scaled_ub are given, then we need to make sure that the
+    # simplex length is not larger than the smallest ub.
+    if scaled_ub is not None:
+        min_ub = np.amin(scaled_ub)
+        length = min(min_ub, 0.15)
+    else:
+        length = 0.15
     # Create and initialise simplex object.
-    sim = Simplex(x0, method=simplex_method, length=min(10 * xtol_gm, 0.999))
+    sim = Simplex(x0, method=simplex_method, length=length)
     # Number of iterations. Function evaluations are stored as cf.calls.
     niter = 0
 
@@ -317,7 +394,8 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley"):
                      message=message)
 
 
-def multid_search(cf, x0, xtol, args=(), simplex_method="spendley"):
+def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
+                  scaled_lb=None, scaled_ub=None):
     """
     Multidimensional search optimiser, as described in Secion 8.2 of Kelley,
     "Iterative Methods for Optimization".
@@ -362,11 +440,16 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley"):
     if len(x0) != len(xtol):
         raise ValueError("Multidimensional search: x0 and xtol have "
                          "incompatible lengths")
-    # Calculate geometric mean of xtol and make sure that it's sensible
-    xtol_gm = np.prod(xtol) ** (1 / np.size(xtol))
 
+    # If scaled_lb and scaled_ub are given, then we need to make sure that the
+    # simplex length is not larger than the smallest ub.
+    if scaled_ub is not None:
+        min_ub = np.amin(scaled_ub)
+        length = min(min_ub, 0.15)
+    else:
+        length = 0.15
     # Create and initialise simplex object.
-    sim = Simplex(x0, method=simplex_method, length=min(10 * xtol_gm, 0.999))
+    sim = Simplex(x0, method=simplex_method, length=length)
     # Number of iterations. Function evaluations are stored as cf.calls.
     niter = 0
 
@@ -459,28 +542,18 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley"):
                      message=message)
 
 
-def pybobyqa_interface(cf, x0, xtol, args=()):
-    # This should be optional, i.e. we shouldn't force people to install it.
-    try:
-        import pybobyqa as pb
-    except ImportError:
-        # Give a nice useful message.
-        raise ImportError("The Py-BOBYQA package and/or its dependencies "
-                          "have not been installed. Please install them "
-                          "before using the Py-BOBYQA optimiser.")
+def pybobyqa_interface(cf, x0, xtol, args=(),
+                       scaled_lb=None, scaled_ub=None):
     x0 = np.asfarray(x0).flatten()
-    # Instead of returning np.inf when x is out of bounds, we'll use
-    # PyBOBYQA's bounds argument. But first we need to calculate the bounds.
-    # The unscaled bounds are attributes of the Routine object which is the
-    # second element of args.
-    r = args[1]
-    lb, ub, tol = (np.array(i) for i in (r.lb, r.ub, r.tol))
-    scaled_lb = (lb - lb) * 0.03 / tol
-    scaled_ub = (ub - lb) * 0.03 / tol
-    # Run the optimisation.
+    # Run the optimisation, using PyBOBYQA's bounds keyword arguments.
+    if scaled_lb is None and scaled_ub is None:
+        bounds = None
+    else:
+        bounds = (scaled_lb, scaled_ub)
+    min_ub = np.min(scaled_ub)
     pb_sol = pb.solve(cf, x0, args=args,
-                      rhobeg=min(0.3, max(scaled_ub) * 0.499), rhoend=0.03,
-                      bounds=(scaled_lb, scaled_ub), objfun_has_noise=True,
+                      rhobeg=min(0.15, min_ub * 0.499), rhoend=0.03,
+                      bounds=bounds, objfun_has_noise=True,
                       user_params={'restarts.use_restarts': False})
     # Catch Py-BOBYQA complaints.
     if pb_sol.flag in [pb_sol.EXIT_INPUT_ERROR,

@@ -15,7 +15,8 @@ if __name__ == "__main__" and __package__ is None:
     sys.path.insert(1, str(Path(__file__).parents[1].resolve()))
     __import__(__package__)
 
-from .optpoise import nelder_mead, multid_search, pybobyqa_interface
+from .optpoise import (scale, unscale,
+                       nelder_mead, multid_search, pybobyqa_interface)
 
 optimiser = None
 routine_id = None
@@ -61,9 +62,11 @@ def main():
 
     # Scale the initial values and tolerances
     npars = len(routine.pars)
-    scaleby = "bounds" if optimiser in ["nm", "mds"] else "tols"
-    x0, _, _, xtol = scale(routine.init, routine.lb,
-                           routine.ub, routine.tol, scaleby=scaleby)
+    scaled_x0, scaled_lb, scaled_ub, scaled_xtol = scale(routine.init,
+                                                         routine.lb,
+                                                         routine.ub,
+                                                         routine.tol,
+                                                         scaleby="tols")
 
     # Some logging
     with open(p_optlog, "a") as log:
@@ -98,12 +101,12 @@ def main():
     # Set up optimisation arguments
     optimargs = (cost_function, routine)
     # Carry out the optimisation
-    opt_result = optimfn(acquire_nmr, x0, xtol, optimargs)
+    opt_result = optimfn(acquire_nmr, scaled_x0, scaled_xtol, optimargs,
+                         scaled_lb=scaled_lb, scaled_ub=scaled_ub)
 
     # Tell frontend script that the optimisation is done
-    scaleby = "bounds" if optimiser in ["nm", "mds"] else "tols"
     best_values = unscale(opt_result.xbest, routine.lb,
-                          routine.ub, routine.tol, scaleby=scaleby)
+                          routine.ub, routine.tol, scaleby="tols")
     print("optima: " + " ".join([str(i) for i in best_values]))
 
     # More logging
@@ -181,7 +184,7 @@ def acquire_nmr(x, cost_function, routine):
     Returns:
         float : value of the cost function.
     """
-    scaleby = "bounds" if optimiser in ["nm", "mds"] else "tols"
+    scaleby = "tols"
     unscaled_val = unscale(x, routine.lb, routine.ub,
                            routine.tol, scaleby=scaleby)
 
@@ -224,75 +227,6 @@ def send_values(unscaled_val):
     """
     print("values: " + " ".join([str(i) for i in unscaled_val]))
 
-
-def scale(val, lb, ub, tol, scaleby="bounds"):
-    """
-    For scaleby="bounds", scales a set of values such that the lower and upper
-    bounds for all variables are 0 and 1 respectively).
-
-    For scaleby="tols", scales a set of values such that the tolerances for all
-    variables are 0.03.
-
-    Returns None if any of the values are outside the bounds.
-
-    Arguments:
-        val: list/array of float - the values to be scaled
-        lb : list/array of float - the lower bounds
-        ub : list/array of float - the upper bounds
-        tol: list/array of float - the tolerances
-        scaleby: string - Method to scale by. Either "bounds" or "tols".
-
-    Returns:
-        scaled_val: np.ndarray of float - the scaled values
-        scaled_lb : np.ndarray of float - the scaled lower bounds
-        scaled_ub : np.ndarray of float - the scaled upper bounds
-        scaled_tol: np.ndarray of float - the scaled tolerances
-    """
-    if scaleby not in ["bounds", "tols"]:
-        raise ValueError(f"Invalid argument scaleby={scaleby} given.")
-    # Convert to ndarray
-    val, lb, ub, tol = (np.array(i) for i in (val, lb, ub, tol))
-    # Check if any are outside bounds
-    if np.any(val < lb) or np.any(val > ub):
-        return None
-    # Scale them
-    if scaleby == "bounds":
-        scaled_val = (val - lb)/(ub - lb)
-        scaled_lb = (lb - lb)/(ub - lb)  # all 0's
-        scaled_ub = (ub - lb)/(ub - lb)  # all 1's
-        scaled_tol = tol/(ub - lb)
-    elif scaleby == "tols":
-        scaled_val = (val - lb) * 0.03 / tol
-        scaled_lb = (lb - lb) * 0.03 / tol   # all 0's
-        scaled_ub = (ub - lb) * 0.03 / tol
-        scaled_tol = tol * 0.03 / tol        # all 0.03's
-    return scaled_val, scaled_lb, scaled_ub, scaled_tol
-
-
-def unscale(scaled_val, orig_lb, orig_ub, orig_tol, scaleby="bounds"):
-    """
-    Unscales a set of scaled values to their original values.
-
-    Arguments:
-        scaled_val: list/array of float - the values to be unscaled
-        orig_lb   : list/array of float - the original lower bounds
-        orig_ub   : list/array of float - the original upper bounds
-        orig_tol  : list/array of float - the original tolerances
-        scaleby   : string - Method to scale by. Either "bounds" or "tols".
-
-    Returns:
-        np.ndarray of float - the unscaled values
-    """
-    if scaleby not in ["bounds", "tols"]:
-        raise ValueError(f"Invalid argument scaleby={scaleby} given.")
-    scaled_val, orig_lb, orig_ub, orig_tol = (np.array(i) for i in (scaled_val,
-                                                                    orig_lb,
-                                                                    orig_ub,
-                                                                    orig_tol))
-    if scaleby == "bounds":
-        return orig_lb + (scaled_val * (orig_ub - orig_lb))
-    elif scaleby == "tols":
-        return (scaled_val * orig_tol / 0.03) + orig_lb
 
 # ----------------------------------------
 # Helper functions used in cost functions.
