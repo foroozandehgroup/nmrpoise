@@ -136,12 +136,13 @@ def main(args):
         while True:
             # Read in what the backend has to say.
             line = backend.stdout.readline()
-            # This line indicates that the optimisation has converged.
+
+            # CASE 1 -- Optimisation has converged
             if line.startswith("optima:"):
                 optima = line.split()[1:]
                 break
-            # This line indicates a set of values for which the cost function
-            # should be evaluated, i.e. an experiment should be ran.
+
+            # CASE 2 -- Values to put in an experiment
             elif line.startswith("values:"):
                 # Increment expno if it's not the first time.
                 if args.separate:
@@ -191,12 +192,21 @@ def main(args):
                 print("done", file=backend.stdin)
                 print(make_p_spectrum(), file=backend.stdin)
                 backend.stdin.flush()
-            # Otherwise it would be an error.
+
+            # CASE 3 - Value of cost function at current spectrum
+            # We take this value and put it inside the parameter TI.
+            elif line.startswith("cf:"):
+                cf_val = line.split()[1]
+                PUTPAR("TI", cf_val)
+
+            # CASE 4 - Traceback for backend error
             # The entire main() routine in the backend is wrapped by a
             # try/except which catches all exceptions and propagates them to
             # the frontend by printing the traceback.
             elif line.startswith("Backend exception: "):
                 raise RuntimeError(line)
+
+            # CASE 5 - Everything else
             else:
                 raise RuntimeError("Invalid message from backend: '{}'."
                                    "Please see error log for more "

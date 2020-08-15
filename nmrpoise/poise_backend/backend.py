@@ -227,11 +227,13 @@ def acquire_nmr(x, cost_function, routine):
         # This is important when using the separate_expnos option.
         global p_spectrum
         p_spectrum = Path(input())  # frontend prints path to active spectrum
-        # Evaluate the cost function, log, and return.
+        # Evaluate the cost function, log, pass the cost function value back
+        # to the frontend (it's stored in the `TI` parameter), and return.
         if signal == "done":
             cf_val = cost_function()
             fstr = "{:^10.4f}  " * (len(x) + 1)
             print(fstr.format(*unscaled_val, cf_val), file=log)
+            print(f"cf: {cf_val}")
             return cf_val
         else:
             # This really shouldn't happen.
