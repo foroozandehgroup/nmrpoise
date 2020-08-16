@@ -1,32 +1,35 @@
 import json
 import re
+from pathlib import Path
 
 import pandas as pd
 
 
-def _parse_poise_log(fname, logtype="new"):
+def parse_log(fname, logtype="new"):
     """
     Parse a poise.log file.
 
-    Arguments:
-        fname (str or pathlib.Path) : Path to poise.log file, or the folder
-                                      containing it (this would be the TopSpin
-                                      EXPNO folder).
-        logtype (str)               : "old" or "new". Old log files don't
-                                      contain information about the lower and
-                                      upper bounds, as well as tolerances.
-                                      WARNING: This will be deprecated in
-                                      future. It mainly exists because I need
-                                      it to analyse some of my own data which
-                                      did not have this information in the
-                                      log files.
+    Parameters
+    ----------
+    fname : str or pathlib.Path
+        Path to poise.log file, or the folder containing it (this would be the
+        TopSpin EXPNO folder).
 
-    Returns:
-        pandas DataFrame object. Rows correspond to optimisations which
-        successfully terminated. The time taken is given in seconds.
+    Returns
+    -------
+    log_df : pandas.DataFrame
+        Dataframe with rows corresponding to optimisations which successfully
+        terminated. The time taken is given in seconds.
     """
+    # Check if the file exists
+    fname = Path(fname)
+    if fname.is_dir():
+        fname = fname / "poise.log"
+    if not fname.exists():
+        raise FileNotFoundError(f"The log file '{fname}' was not found.")
+
     empty_run = {"routine": None, "init": None, "cf": None, "algo": None,
-                 "lb": None, "ub": None, "tol": None,
+                 "au": None, "lb": None, "ub": None, "tol": None,
                  "best": None, "feval": None, "elapsed": None,
                  }
     current_run = dict(empty_run)  # make a copy
@@ -83,6 +86,8 @@ def _parse_poise_log(fname, logtype="new"):
                 current_run["tol"] = parse_list_params(line)
             elif line.startswith("Cost function  "):
                 current_run["cf"] = line.split("-", maxsplit=1)[1].strip()
+            elif line.startswith("AU programme"):
+                current_run["au"] = line.split("-", maxsplit=1)[1].strip()
             elif line.startswith("Optimisation algorithm"):
                 current_run["algo"] = line.split("-", maxsplit=1)[1].strip()
             elif line.startswith("Best values found"):
@@ -106,6 +111,7 @@ def _parse_poise_log(fname, logtype="new"):
     elif logtype == "old" and not \
         any(i is None for i in [current_run["init"],
                                 current_run["cf"],
+                                current_run["au"],
                                 current_run["algo"],
                                 current_run["best"],
                                 current_run["feval"],
@@ -124,15 +130,8 @@ def _parse_poise_log(fname, logtype="new"):
         data["tol"] = [run["tol"] for run in all_runs]
     data["algorithm"] = [run["algo"] for run in all_runs]
     data["costfn"] = [run["cf"] for run in all_runs]
+    data["auprog"] = [run["au"] for run in all_runs]
     data["optimum"] = [run["best"] for run in all_runs]
     data["nfev"] = [run["feval"] for run in all_runs]
     data["time"] = [run["elapsed"] for run in all_runs]
     return pd.DataFrame(data=data)
-
-
-def parse_poise_log(fname):
-    """
-    Interface to the private function, because nobody should really have to use
-    the 'logtype' parameter except me.
-    """
-    return _parse_poise_log(fname=fname, logtype="new")
