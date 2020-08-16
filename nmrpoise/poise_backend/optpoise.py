@@ -359,9 +359,11 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
             niter += 1
             sim.sort()  # for good measure
 
-            # Check number of iterations
+            # Check number of iterations and fevals
             if niter >= maxiter:
                 raise MaxItersReached
+            if cf.calls >= maxfev:
+                raise MaxFevalsReached
 
             # Step 3(a)
             x_r = xnew(mu_r, sim)  # shorthand for x(mu_r)
