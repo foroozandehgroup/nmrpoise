@@ -21,6 +21,7 @@ optimiser = None
 routine_id = None
 p_spectrum = None
 p_optlog = None
+maxfev = 0
 p_poise = Path(__file__).parent.resolve()
 tic = datetime.now()
 spec_f1p = None
@@ -91,7 +92,8 @@ def main():
     optimargs = (cost_function, routine)
     # Carry out the optimisation
     opt_result = optimfn(acquire_nmr, scaled_x0, scaled_xtol, optimargs,
-                         scaled_lb=scaled_lb, scaled_ub=scaled_ub)
+                         scaled_lb=scaled_lb, scaled_ub=scaled_ub,
+                         maxfev=maxfev)
 
     # Tell frontend script that the optimisation is done
     best_values = unscale(opt_result.xbest, routine.lb,
@@ -820,6 +822,7 @@ if __name__ == "__main__":
         optimiser = input()
         routine_id = input()
         p_spectrum = Path(input())
+        maxfev = int(input())
         p_optlog = p_spectrum.parents[1] / "poise.log"
         p_errlog = p_spectrum.parents[1] / "poise_err_backend.log"
         # Run main routine.

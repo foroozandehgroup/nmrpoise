@@ -129,6 +129,7 @@ def main(args):
         print(args.algorithm, file=backend.stdin)
         print(routine_id, file=backend.stdin)
         print(p_spectrum, file=backend.stdin)
+        print(args.maxfev, file=backend.stdin)
         backend.stdin.flush()
 
         # Main loop, controlled by the lines printed by the backend.
@@ -766,6 +767,14 @@ if __name__ == "__main__":
         "--list",
         action="store_true",
         help="List all available routines and exit."
+    )
+    parser.add_argument(
+        "--maxfev",
+        type=int,
+        default=0,
+        help=("Maximum function evaluations to allow. Use 0 to not enforce "
+              "any limit (technically there is a hard limit, which is 500 "
+              "times the number of parameters being optimised). (default: 0)")
     )
     parser.add_argument(
         "-q",

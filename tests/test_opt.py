@@ -110,6 +110,6 @@ def test_MDS_fevals():
 
 
 def test_maxfevals_reached():
-    optResult = multid_search(cf=rosenbrock, x0=x0, xtol=([1e-6] * len(x0)),
-                              simplex_method="random")
+    optResult = nelder_mead(cf=quadratic, x0=x0, xtol=([1e-6] * len(x0)),
+                            maxfev=10)
     assert optResult.message == "Maximum function evaluations reached."

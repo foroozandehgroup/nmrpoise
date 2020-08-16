@@ -236,7 +236,7 @@ class OptResult:
 
 
 def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
-                scaled_lb=None, scaled_ub=None):
+                scaled_lb=None, scaled_ub=None, maxfev=0):
     """
     Nelder-Mead optimiser, as described in Section 8.1 of Kelley, "Iterative
     Methods for Optimization".
@@ -260,6 +260,9 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
     scaled_ub : ndarray, optional
         Scaled upper bounds for the optimisation. This is used to place an
         upper bound on the simplex size.
+    maxfev : int, optional
+        Maximum function evaluations to use. Defaults to 500 times the number
+        of parameters.
 
     Returns
     -------
@@ -293,8 +296,9 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
     # Default maxiter and maxfev. We could make this customisable in future.
     # For example, we could use TopSpin's `expt' to calculate the duration of
     # one experiment, and then set maxiter to not overshoot a given time.
-    maxiter = 200 * N
-    maxfev = 500 * N
+    maxiter = 500 * N
+    if maxfev <= 0:
+        maxfev = 500 * N
 
     # Check length of xtol
     if len(x0) != len(xtol):
@@ -439,7 +443,7 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
 
 
 def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
-                  scaled_lb=None, scaled_ub=None):
+                  scaled_lb=None, scaled_ub=None, maxfev=0):
     """
     Multidimensional search optimiser, as described in Secion 8.2 of Kelley,
     "Iterative Methods for Optimization".
@@ -463,6 +467,9 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
     scaled_ub : ndarray, optional
         Scaled upper bounds for the optimisation. This is used to place an
         upper bound on the simplex size.
+    maxfev : int, optional
+        Maximum function evaluations to use. Defaults to 500 times the number
+        of parameters.
 
     Returns
     -------
@@ -488,8 +495,9 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
     # Default maxiter and maxfev. We could make this customisable in future.
     # For example, we could use TopSpin's `expt' to calculate the duration of
     # one experiment, and then set maxiter to not overshoot a given time.
-    maxiter = 200 * N
-    maxfev = 500 * N
+    maxiter = 500 * N
+    if maxfev <= 0:
+        maxfev = 500 * N
 
     # Check length of xtol
     if len(x0) != len(xtol):
@@ -598,7 +606,7 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
 
 
 def pybobyqa_interface(cf, x0, xtol, args=(),
-                       scaled_lb=None, scaled_ub=None):
+                       scaled_lb=None, scaled_ub=None, maxfev=0):
     """
     Interface to pybobyqa.solve() which takes similar arguments to the other
     two optimisation functions and returns an OptResult object.
@@ -640,6 +648,10 @@ def pybobyqa_interface(cf, x0, xtol, args=(),
             message (str)     : Message indicating reason for termination.
     """
     x0 = np.asfarray(x0).flatten()
+    # Calculate maxfev
+    N = x0.size
+    if maxfev <= 0:
+        maxfev = 500 * N
     # Run the optimisation, using PyBOBYQA's bounds keyword arguments.
     if scaled_lb is None and scaled_ub is None:
         bounds = None
@@ -648,6 +660,7 @@ def pybobyqa_interface(cf, x0, xtol, args=(),
     min_ub = np.min(scaled_ub)
     pb_sol = pb.solve(cf, x0, args=args,
                       rhobeg=min(0.15, min_ub * 0.499), rhoend=0.03,
+                      maxfun=maxfev,
                       bounds=bounds, objfun_has_noise=True,
                       user_params={'restarts.use_restarts': False})
     # Catch Py-BOBYQA complaints.
