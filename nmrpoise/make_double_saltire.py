@@ -2,7 +2,7 @@
 make_double_saltire.py
 ----------------------
 
-This script reads in a pulse duration (stored in us as P20) and bandwidth
+This script reads in a pulse duration (stored in us as P40) and bandwidth
 (stored in Hz as CNST21), then creates a double saltire shaped file called
 "jy_auto_double_saltire" which can be directly used as the shaped file in
 PSYCHE experiments.
@@ -79,10 +79,13 @@ if __name__ == "__main__":
     # Let the user know what's going on
     SHOW_STATUS("make_double_saltire: generating saltire...")
     # Pulses are by default in us, so must convert first
-    duration = float(GETPAR("P 20"))/1000000
+    duration = float(GETPAR("P 40"))/1000000
     # Bandwidth is specified in Hz.
     bandwidth = float(GETPAR("CNST 21"))
     # Generate the amplitudes and phases.
     A, phi = make_double_saltire(duration, bandwidth)
-    # Save it to disk. This shaped pulse can be used directly as SPNAM20.
-    SAVE_SHAPE("jy_auto_double_saltire", "Excitation", A, phi)
+    # Save it to disk.
+    shape_name = "auto_double_saltire"
+    SAVE_SHAPE(shape_name, "Excitation", A, phi)
+    # Use it as SPNAM40. It's too easy to forget this!
+    PUTPAR("SPNAM 40", shape_name)
