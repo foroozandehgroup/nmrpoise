@@ -733,56 +733,69 @@ def pulprog_contains_wvm():
 
 if __name__ == "__main__":
     # Parse arguments.
-    parser = argparse.ArgumentParser(prog="poise", add_help=False)
-    parser.add_argument("routine", nargs="?")
-    parser.add_argument("-h", "--help", action="store_true",)
-    parser.add_argument("-l", "--list", action="store_true",)
-    parser.add_argument("-s", "--separate", action="store_true")
-    parser.add_argument("-a", "--algorithm", default="nm")
-    parser.add_argument("-q", "--quiet", action="store_true")
-    parser.add_argument("--setup", action="store_true")
+    parser = argparse.ArgumentParser(
+        prog="poise",
+        add_help=False,
+        description=("Python script for optimisation of acquisition "
+                     "parameters in TopSpin. Requires a separate Python 3 "
+                     "backend (run `pip install nmrpoise` to download the "
+                     "backend). Full documentation can be found at "
+                     "https://poise.readthedocs.io.")
+    )
+    parser.add_argument(
+        "routine",
+        nargs="?",
+        help=("The name of the routine to use (use 'poise --list' to see "
+              "available routines).")
+    )
+    parser.add_argument(
+        "-a",
+        "--algorithm",
+        default="nm",
+        choices=["nm", "mds", "bobyqa"],
+        help="Optimisation algorithm to use. (default: 'nm')"
+    )
+    parser.add_argument(
+        "-h",
+        "--help",
+        action="store_true",
+        help="Show this help message and exit."
+    )
+    parser.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        help="List all available routines and exit."
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help=("Don't display any messages at the end of the optimisation. "
+              "Using this flag is necessary if POISE is to be run under "
+              "automation. (default: off)")
+    )
+    parser.add_argument(
+        "-s",
+        "--separate",
+        action="store_true",
+        help=("Use separate expnos for each function evaluation. (default: "
+              "off)")
+    )
+    parser.add_argument(
+        "--setup",
+        action="store_true",
+        help=("Create a new routine only. Don't run the optimisation. "
+              "(default: off)")
+    )
     args = parser.parse_args()
 
-    # argparse's standard help message can only be printed; it can't be
-    # redirected elsewhere, as far as I know. In TopSpin, the Python script's
-    # stdout is sent to the terminal which opens it. However, that's a really
-    # user-unfriendly place for messages to go to (and on MacOS the terminal
-    # does not even exist). To get around that, we disable argparse's help
-    # functionality, construct the help message manually, and show it in a
-    # TopSpin window.
-    help_message = """
-usage: poise [-h] [-l] [-s] [-a ALGORITHM] [--setup] [routine]
-
-Python script for optimisation of acquisition parameters in TopSpin.
-Full documentation can be found at https://poise.readthedocs.io.
-
-positional arguments:
-
-    routine
-        The name of the routine to use.
-
-optional arguments:
-
-    -h, --help
-        Show this help message and exit
-
-    -l, --list
-        List all available routines and exit
-
-    -s, --separate
-        Use separate expnos for each function evaluation (default: off)
-
-    -a ALGORITHM, --algorithm ALGORITHM
-        Optimisation algorithm to use
-        [choices: 'nm' (default) / 'mds' / 'bobyqa']
-
-    -q, --quiet
-        Don't display a message at the end of the optimisation (default: off)
-        This flag is necessary if POISE is to be run under automation.
-
-    --setup
-        Create a new routine only. Don't run the optimisation.
-    """
+    # In TopSpin, the Python script's stdout is sent to the terminal which
+    # opens it. However, that's a really user-unfriendly place for messages to
+    # go to (and on MacOS the terminal does not even exist). To get around
+    # that, we disable argparse's help functionality, construct the help
+    # message manually, and show it in a TopSpin window.
+    help_message = parser.format_help()
 
     if args.help:
         VIEWTEXT(title="poise help", text=help_message)
