@@ -125,7 +125,7 @@ class Simplex():
 
         # Generate simplex
         self.x = np.zeros((self.N + 1, self.N))
-        self.f = np.zeros(self.N + 1)
+        self.f = np.full(self.N + 1, fill_value=np.inf)
 
         if method == "spendley":
             # Default method.
@@ -346,15 +346,17 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
     # Decorate cost function so that it keeps tracks of nfev.
     cf = deco_count(cf)
 
-    # Evaluate the cost function for the initial simplex.
-    # Steps 1 and 2 in Algorithm 8.1.1
-    for i in range(N + 1):
-        sim.f[i] = cf(sim.x[i], *args)
-    # Sort simplex
-    sim.sort()
-
-    # Main loop.
     try:
+        # Evaluate the cost function for the initial simplex.
+        # Steps 1 and 2 in Algorithm 8.1.1
+        for i in range(N + 1):
+            if cf.calls >= maxfev:
+                raise MaxFevalsReached
+            sim.f[i] = cf(sim.x[i], *args)
+            # Sort simplex
+            sim.sort()
+
+        # Main loop.
         while not converged(sim, xtol):
             niter += 1
             sim.sort()  # for good measure
@@ -540,15 +542,17 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
     # Decorate cost function so that it keeps tracks of nfev.
     cf = deco_count(cf)
 
-    # Evaluate the cost function for the initial simplex.
-    # Steps 1 and 2 in Algorithm 8.2.1
-    for i in range(N + 1):
-        sim.f[i] = cf(sim.x[i], *args)
-    # Sort simplex
-    sim.sort()
-
-    # Main loop.
     try:
+        # Evaluate the cost function for the initial simplex.
+        # Steps 1 and 2 in Algorithm 8.2.1
+        for i in range(N + 1):
+            if cf.calls >= maxfev:
+                raise MaxFevalsReached
+            sim.f[i] = cf(sim.x[i], *args)
+            # Sort simplex
+            sim.sort()
+
+        # Main loop.
         while not converged(sim, xtol):
             niter += 1
             sim.sort()  # for good measure
