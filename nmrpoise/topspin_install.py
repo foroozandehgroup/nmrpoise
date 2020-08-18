@@ -66,7 +66,7 @@ def install_addons():
 
     # List of all the files we want to copy over.
     python_scripts = ["make_double_saltire.py",
-                      # "dosy_opt.py",
+                      "dosy_opt.py",
                       ]
     au_scripts = ["poise_1d",
                   "poise_psyche",
