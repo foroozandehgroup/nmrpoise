@@ -501,9 +501,7 @@ def check_python3path():
     -------
     None
     """
-    try:
-        subprocess.check_call([p_python3, "--version"])
-    except subprocess.CalledProcessError:
+    if not os.path.isfile(p_python3):
         err_exit("The python3 executable was not found.\n"
                  "Please specify p_python3 in poise.py.")
 
