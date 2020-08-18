@@ -4,7 +4,7 @@ make_double_saltire.py
 
 This script reads in a pulse duration (stored in us as P40) and bandwidth
 (stored in Hz as CNST21), then creates a double saltire shaped file called
-"jy_auto_double_saltire" which can be directly used as the shaped file in
+"auto_double_saltire" which can be directly used as the shaped file in
 PSYCHE experiments.
 
 This can be included in an AU programme using the line:
