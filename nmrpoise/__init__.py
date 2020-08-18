@@ -2,10 +2,11 @@ import json
 import re
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 
-def parse_log(fname, logtype="new"):
+def parse_log(fname):
     """
     Parse a poise.log file.
 
@@ -30,13 +31,10 @@ def parse_log(fname, logtype="new"):
 
     empty_run = {"routine": None, "init": None, "cf": None, "algo": None,
                  "au": None, "lb": None, "ub": None, "tol": None,
-                 "best": None, "feval": None, "elapsed": None,
+                 "xbest": None, "feval": None, "elapsed": None,
                  }
     current_run = dict(empty_run)  # make a copy
     all_runs = []   # List of all successful optimisation runs
-
-    if logtype not in ["new", "old"]:
-        raise ValueError("logtype can only be 'new' or 'old'.")
 
     def parse_list_params(line):
         """
@@ -54,17 +52,7 @@ def parse_log(fname, logtype="new"):
         for line in fp:
             # Check if there is a completed optimisation stored.
             # If so, add it to all_runs then reset the current run.
-            if logtype == "new" and not any(i is None
-                                            for i in current_run.values()):
-                all_runs.append(current_run)
-                current_run = dict(empty_run)
-            elif logtype == "old" and not \
-                any(i is None for i in [current_run["init"],
-                                        current_run["cf"],
-                                        current_run["algo"],
-                                        current_run["best"],
-                                        current_run["feval"],
-                                        current_run["elapsed"]]):
+            if not any(i is None for i in current_run.values()):
                 all_runs.append(current_run)
                 current_run = dict(empty_run)
             # Start of a new optimisation, reset all values
@@ -91,7 +79,10 @@ def parse_log(fname, logtype="new"):
             elif line.startswith("Optimisation algorithm"):
                 current_run["algo"] = line.split("-", maxsplit=1)[1].strip()
             elif line.startswith("Best values found"):
-                current_run["best"] = parse_list_params(line)
+                current_run["xbest"] = parse_list_params(line)
+            elif line.startswith("Cost function at"):
+                fbest = line.split("-", maxsplit=1)[1].strip()
+                current_run["fbest"] = float(fbest)
             elif line.startswith("Number of spectra ran"):
                 feval = line.split("-", maxsplit=1)[1].strip()
                 current_run["feval"] = int(feval)
@@ -104,34 +95,40 @@ def parse_log(fname, logtype="new"):
 
     # Check one more time at the end of the file to make sure that the
     # last entry is recorded.
-    if logtype == "new" and not any(i is None
-                                    for i in current_run.values()):
+    if not any(i is None for i in current_run.values()):
         all_runs.append(current_run)
         current_run = dict(empty_run)
-    elif logtype == "old" and not \
-        any(i is None for i in [current_run["init"],
-                                current_run["cf"],
-                                current_run["au"],
-                                current_run["algo"],
-                                current_run["best"],
-                                current_run["feval"],
-                                current_run["elapsed"]]):
-        all_runs.append(current_run)
 
     # Construct dataframe and return.
     data = {}
-    if logtype == "new":
-        data["routine"] = [run["routine"] for run in all_runs]
+    data["routine"] = [run["routine"] for run in all_runs]
     data["initial"] = [run["init"] for run in all_runs]
-    if logtype == "new":
-        data["param"] = [run["param"] for run in all_runs]
-        data["lb"] = [run["lb"] for run in all_runs]
-        data["ub"] = [run["ub"] for run in all_runs]
-        data["tol"] = [run["tol"] for run in all_runs]
+    data["param"] = [run["param"] for run in all_runs]
+    data["lb"] = [run["lb"] for run in all_runs]
+    data["ub"] = [run["ub"] for run in all_runs]
+    data["tol"] = [run["tol"] for run in all_runs]
     data["algorithm"] = [run["algo"] for run in all_runs]
     data["costfn"] = [run["cf"] for run in all_runs]
     data["auprog"] = [run["au"] for run in all_runs]
-    data["optimum"] = [run["best"] for run in all_runs]
+    data["optimum"] = [run["xbest"] for run in all_runs]
+    data["fbest"] = [run["fbest"] for run in all_runs]
     data["nfev"] = [run["feval"] for run in all_runs]
     data["time"] = [run["elapsed"] for run in all_runs]
     return pd.DataFrame(data=data)
+
+
+def xmean(series):
+    """
+    An aggregator function that allows you to average lists in DataFrame
+    columns. This is useful for analysing optimisation runs with multiple
+    parameters.
+
+    For example:
+
+    >>> df = parse_log(logfile)
+    >>> # works for 1D, but not for nD optimisations
+    >>> df.groupby("algorithm").mean()
+    >>> # works for all dimensions.
+    >>> df.groupby("algorithm").agg(xmean)
+    """
+    return np.mean(np.array(series.to_list()), axis=0).tolist()
