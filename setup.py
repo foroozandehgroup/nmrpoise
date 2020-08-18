@@ -34,8 +34,13 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yongrenjie/nmrpoise",
+    packages=[
+        "nmrpoise",
+        "nmrpoise.poise_backend",
+        "nmrpoise.py",
+        "nmrpoise.au",
+    ],
     include_package_data=True,
-    packages=find_packages(exclude=["tests"]),
     classifiers=[
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
@@ -53,7 +58,8 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "poise_tsinstall = nmrpoise.topspin_install:main",
+            "poise_ts = nmrpoise.topspin_install:main",
+            "poise_addons = nmrpoise.topspin_install:install_addons",
         ]
     },
 )

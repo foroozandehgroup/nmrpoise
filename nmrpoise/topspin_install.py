@@ -7,20 +7,25 @@ from pathlib import Path
 from glob import glob
 
 
-def main():
-    """
-    Attempts to install poise to TopSpin directory.
-    """
-    dirname = Path(__file__).parent.resolve()
-
+def get_ostype():
     osname = platform.system()
     if osname in ["Darwin", "Linux"]:
-        ostype = "unix"
+        return "unix"
     elif osname in ["Windows"]:
-        ostype = "win"
+        return "win"
     else:
         raise OSError("Unsupported operating system. "
                       "Please perform a manual installation.")
+
+
+def main():
+    """
+    Attempts to install poise's core scripts (frontend and beckend) to TopSpin
+    directory.
+    """
+    dirname = Path(__file__).parent.resolve()
+    ostype = get_ostype()
+    ts_paths = get_topspin_path(ostype)
 
     # Set path to Python executable in poise.py
     poise_py = dirname / "poise.py"
@@ -40,14 +45,46 @@ def main():
     # Replace the old file with the new file.
     copy_file(str(poise_py_out), str(poise_py), verbose=1)
 
-    # Find TopSpin installation path(s).
-    ts_paths = get_topspin_path(ostype)
+    # Copy the files to TopSpin's directories.
     for ts_path in ts_paths:
-        ts_backend_path = ts_path / "poise_backend"
+        ts_user_path = ts_path / "py" / "user"
+        ts_backend_path = ts_path / "py" / "user" / "poise_backend"
         # Copy files to TopSpin path.
-        copy_file(str(poise_py), str(ts_path), verbose=1)
+        copy_file(str(poise_py), str(ts_user_path), verbose=1)
         copy_tree(str(poise_backend), str(ts_backend_path), verbose=1)
     print("topspin_install.py: completed")
+
+
+def install_addons():
+    """
+    Attempts to install additional AU programmes and Python scripts into the
+    TopSpin user directories.
+    """
+    dirname = Path(__file__).parent.resolve()
+    ostype = get_ostype()
+    ts_paths = get_topspin_path(ostype)
+
+    # List of all the files we want to copy over.
+    python_scripts = ["make_double_saltire.py",
+                      # "dosy_opt.py",
+                      ]
+    au_scripts = ["poise_1d",
+                  "poise_psyche",
+                  "poise_2d",
+                  ]
+    # Copy them to TopSpin's directories.
+    for ts_path in ts_paths:
+        ts_py_user_path = ts_path / "py" / "user"
+        for pyscript in python_scripts:
+            src = dirname / "py" / pyscript
+            dest = ts_py_user_path / pyscript
+            copy_file(str(src), str(dest), verbose=1)
+        ts_au_user_path = ts_path / "au" / "src" / "user"
+        for auscript in au_scripts:
+            src = dirname / "au" / auscript
+            dest = ts_au_user_path / auscript
+            copy_file(str(src), str(dest), verbose=1)
+    print("install_addons: complete")
 
 
 def get_topspin_path(ostype):
@@ -58,8 +95,8 @@ def get_topspin_path(ostype):
     Otherwise, tries to find the path to the most recent TopSpin directory.
     Searches under /opt on Unix/Linux systems, or under C:\\Bruker on Windows.
 
-    Returns a list of Path objects pointing to /exp/stan/nmr/py/user for each
-    TopSpin directory found.
+    Returns a list of Path objects pointing to /exp/stan/nmr/ for each TopSpin
+    directory found.
 
     Raises RuntimeError if none are found.
     """
@@ -84,7 +121,7 @@ def get_topspin_path(ostype):
         py_user = ts / "py" / "user"
         if not ts.is_dir() and py_user.is_dir():
             raise RuntimeError(invalid_envvar_error)
-        ts_paths = [py_user]
+        dirs = [ts]
     else:
         if ostype == "unix":
             glob_query = "/opt/topspin*/exp/stan/nmr"
@@ -98,19 +135,18 @@ def get_topspin_path(ostype):
             if ostype == "win":
                 raise RuntimeError(no_tsdir_win_error)
         else:
-            # Convert to pathlib.Path
-            dirs = [Path(dir) / "py" / "user" for dir in dirs]
-            # Filter out invalid paths
-            ts_paths = [dir for dir in dirs if dir.is_dir()]
+            # Convert to pathlib.Path and filter out invalid entries
+            dirs = [Path(dir) for dir in dirs
+                    if (Path(dir) / "py" / "user").is_dir()]
             # Error out if no valid ones were found
-            if ts_paths == []:
+            if dirs == []:
                 if ostype == "unix":
                     raise RuntimeError(no_tsdir_unix_error)
                 if ostype == "win":
                     raise RuntimeError(no_tsdir_win_error)
 
-    print("topspin_install.py: found TopSpin paths", ts_paths)
-    return ts_paths
+    print("topspin_install.py: found TopSpin paths", dirs)
+    return dirs
 
 
 if __name__ == "__main__":
