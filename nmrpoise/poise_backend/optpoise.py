@@ -98,7 +98,7 @@ class Simplex():
     """
     Simplex class.
     """
-    def __init__(self, x0, method="spendley", length=0.15):
+    def __init__(self, x0, method="spendley", length=0.3):
         """
         Initialises a Simplex object.
 
@@ -116,8 +116,8 @@ class Simplex():
                 - "random"   : Every point is randomly generated in [0,1].
                                Don't recommend using this.
         length : float, optional
-            A measure of the size of the initial simplex. Defaults to 0.15,
-            because that's 5 times the tolerances after the problem is scaled
+            A measure of the size of the initial simplex. Defaults to 0.3,
+            because that's 10 times the tolerances after the problem is scaled
             by tols.
         """
         self.x0 = np.ravel(np.asfarray(x0))
@@ -308,9 +308,9 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
     # simplex length is not larger than the smallest ub.
     if scaled_ub is not None:
         min_ub = np.amin(scaled_ub)
-        length = min(min_ub, 0.15)
+        length = min(min_ub, 0.3)
     else:
-        length = 0.15
+        length = 0.3
     # Create and initialise simplex object.
     sim = Simplex(x0, method=simplex_method, length=length)
     # Number of iterations. Function evaluations are stored as cf.calls.
@@ -512,9 +512,9 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
     # simplex length is not larger than the smallest ub.
     if scaled_ub is not None:
         min_ub = np.amin(scaled_ub)
-        length = min(min_ub, 0.15)
+        length = min(min_ub, 0.3)
     else:
-        length = 0.15
+        length = 0.3
     # Create and initialise simplex object.
     sim = Simplex(x0, method=simplex_method, length=length)
     # Number of iterations. Function evaluations are stored as cf.calls.
@@ -665,7 +665,7 @@ def pybobyqa_interface(cf, x0, xtol, args=(),
         bounds = (scaled_lb, scaled_ub)
     min_ub = np.min(scaled_ub)
     pb_sol = pb.solve(cf, x0, args=args,
-                      rhobeg=min(0.15, min_ub * 0.499), rhoend=0.03,
+                      rhobeg=min(0.3, min_ub * 0.499), rhoend=0.03,
                       maxfun=maxfev,
                       bounds=bounds, objfun_has_noise=True,
                       user_params={'restarts.use_restarts': False})
