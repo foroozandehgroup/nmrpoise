@@ -53,7 +53,7 @@ def make_double_saltire(duration, bandwidth):
                else sin((pi * (1 - t)) / (2 * s))
                for t in ts]
     # These are phases for a single chirp, not a saltire.
-    phi_chirp = [pi * duration * bandwidth * ((t - 0.5) ** 2) for t in ts]
+    phi_chirp = [pi * (duration/2) * bandwidth * ((t - 0.5) ** 2) for t in ts]
     # Calculate x-coefficients (Cx) for the saltire.
     Cx = [100 * a * cos(phi) for a, phi in zip(A_chirp, phi_chirp)]
     # The Cy's are 100 * a * sin(phi) ..., but that's only for one chirp. For a
