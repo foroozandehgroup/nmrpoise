@@ -8,6 +8,20 @@ from glob import glob
 
 
 def get_ostype():
+    """
+    Attempts to find out the operating system that it's running on. This
+    influences the glob pattern used when searching for the TopSpin directory,
+    as well as the error message that is shown.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    ostype: str
+        "unix" or "win".
+    """
     osname = platform.system()
     if osname in ["Darwin", "Linux"]:
         return "unix"
@@ -21,7 +35,16 @@ def get_ostype():
 def main():
     """
     Attempts to install poise's core scripts (frontend and beckend) to TopSpin
-    directory.
+    directory. This function also makes sure to replace p_python3 (the path to
+    the Python 3 executable) in the frontend script.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
     """
     dirname = Path(__file__).parent.resolve()
     ostype = get_ostype()
@@ -59,6 +82,17 @@ def install_addons():
     """
     Attempts to install additional AU programmes and Python scripts into the
     TopSpin user directories.
+
+    This function can be called using the ``poise_addons`` command-line entry
+    point.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
     """
     dirname = Path(__file__).parent.resolve()
     ostype = get_ostype()
@@ -89,16 +123,29 @@ def install_addons():
 
 def get_topspin_path(ostype):
     """
-    First searches the environment variable TSDIR and returns that if it is
-    a valid path.
+    Searches for the path to the TopSpin /exp/stan/nmr folder(s).
 
-    Otherwise, tries to find the path to the most recent TopSpin directory.
-    Searches under /opt on Unix/Linux systems, or under C:\\Bruker on Windows.
+    First searches the environment variable TSDIR and returns that if it is a
+    valid path. Otherwise, tries to find the path to the most recent TopSpin
+    directory.  Searches under /opt on Unix/Linux systems, or under C:\\Bruker
+    on Windows.
 
-    Returns a list of Path objects pointing to /exp/stan/nmr/ for each TopSpin
-    directory found.
+    Parameters
+    ----------
+    ostype : str
+        "unix" or "win". The string returned by get_ostype().
 
-    Raises RuntimeError if none are found.
+    Returns
+    -------
+    tsdirs : list of pathlib.Path
+        Every /exp/stan/nmr directory found. This can be more than one if there
+        is more than one version of TopSpin installed.
+
+    Raises
+    ------
+    RuntimeError
+        If no paths were found. We need to throw an error so that the pip
+        installation fails.
     """
     invalid_envvar_error = (
         "The TopSpin installation directory was specified as the environment "
