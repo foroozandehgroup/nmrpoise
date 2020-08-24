@@ -299,7 +299,7 @@ def list_files(path, ext=""):
 
     Returns
     -------
-    fnames : list
+    fnames : list of str
         A list of the filenames as strings. Filenames include the extension (if
         given) but are not prefixed by the directory.
     """
@@ -490,8 +490,8 @@ def check_routine(routine):
 
 def check_python3path():
     """
-    Checks that the global variable p_python3 is set to a valid python3
-    executable. Exits the programme if it isn't.
+    Checks that the global variable p_python3 is set to a valid file. Exits the
+    programme if it isn't.
 
     Parameters
     ----------
