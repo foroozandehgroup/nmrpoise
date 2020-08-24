@@ -210,14 +210,17 @@ class MaxItersReached(Exception):
 
 def deco_count(fn):
     """
-    Decorator which counts the number of times a function has been called.
-
-    The number can be accessed with ``fn.calls``.
+    Decorator which counts the number of times a function has been called, as
+    long as the function does not return np.inf. This makes sure that
+    acquire_nmr.calls is not incremented when an out-of-bounds value is
+    "sampled".
     """
     @wraps(fn)
     def counter(*args, **kwargs):
-        counter.calls += 1
-        return fn(*args, **kwargs)
+        result = fn(*args, **kwargs)
+        if result != np.inf:
+            counter.calls += 1
+        return result
     counter.calls = 0
     return counter
 

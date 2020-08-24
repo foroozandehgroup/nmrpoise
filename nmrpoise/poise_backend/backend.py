@@ -109,8 +109,7 @@ def main():
         print(fmt.format("Best values found", best_values.tolist()), file=log)
         print(fmt.format("Cost function at minimum", opt_result.fbest),
               file=log)
-        print(fmt.format("Number of fevals", acquire_nmr.calls), file=log)
-        print(fmt.format("Number of spectra ran", send_values.calls),
+        print(fmt.format("Number of spectra ran", acquire_nmr.calls),
               file=log)
         print(fmt.format("Total time taken", time_taken), file=log)
 
@@ -177,8 +176,8 @@ def acquire_nmr(x, cost_function, routine):
     Briefly, this function does the following:
 
      - Returns np.inf immediately if the values are outside the given bounds.
-     - Otherwise, prints the values to stdout using send_values(), which
-       triggers acquisition by the frontend.
+     - Otherwise, prints the values to stdout, which triggers acquisition by
+       the frontend.
      - Waits for the frontend to pass the message "done" back, indicating that
        the spectrum has been acquired and processed.
      - Calculates the cost function using the user-defined cost_function().
@@ -222,7 +221,7 @@ def acquire_nmr(x, cost_function, routine):
             return cf_val
 
         # Print unscaled values, prompting frontend script to start acquisition
-        send_values(unscaled_val)
+        print("values: " + " ".join([str(i) for i in unscaled_val]))
         # Wait for acquisition to complete, then calculate cost function
         signal = input()  # frontend prints "done" here
         # Set p_spectrum according to which spectrum the frontend evaluated.
@@ -240,32 +239,6 @@ def acquire_nmr(x, cost_function, routine):
         else:
             # This really shouldn't happen.
             raise ValueError(f"Invalid signal passed from frontend: {signal}")
-
-
-@deco_count
-def send_values(unscaled_val):
-    """
-    Prints a list of unscaled values, which prompts frontend script to
-    start acquisition.
-
-    Parameters
-    ----------
-    unscaled_val : ndarray
-        Unscaled values to be evaluated.
-
-    Returns
-    -------
-    None
-
-    Notes
-    -----
-    This needs to be a separate function so that we can decorate it.
-    acquire_nmr() measures the number of function evaluations, but since some
-    of those can be out-of-bounds evaluations which return infinity, this is
-    what represents the actual number of NMR spectra acquired, which is
-    actually more important.
-    """
-    print("values: " + " ".join([str(i) for i in unscaled_val]))
 
 
 ###############################################################################
