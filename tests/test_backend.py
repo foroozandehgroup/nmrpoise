@@ -213,8 +213,3 @@ def test_deco_count():
     for i in range(n):
         peep()
     assert peep.calls == n
-
-
-def test_send_values(capsys):
-    be.send_values([0.1, 0.2, 0.3, 0.4, 0.5])
-    assert capsys.readouterr().out == "values: 0.1 0.2 0.3 0.4 0.5\n"

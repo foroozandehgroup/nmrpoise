@@ -3,10 +3,12 @@ import pytest
 
 from nmrpoise.poise_backend.optpoise import (nelder_mead,
                                              multid_search,
-                                             pybobyqa_interface)
+                                             pybobyqa_interface,
+                                             deco_count)
 from nmrpoise.poise_backend.backend import scale, unscale
 
 
+@deco_count
 def rosenbrock(x, arg1=None, arg2=None):
     # Using scipy's definition. We have a couple of dummy arguments because
     # because PyBOBYQA *requires* optimargs and then passes them to the cost
@@ -15,6 +17,7 @@ def rosenbrock(x, arg1=None, arg2=None):
     return sum(100.0*(x[1:] - x[:-1]**2.0)**2.0 + (1 - x[:-1])**2.0)
 
 
+@deco_count
 def quadratic(x):
     return np.sum(x ** 2)
 
@@ -44,9 +47,11 @@ def test_errors():
 
 def test_NM_accuracy():
     for method, nexpt in nm_simplex_methods_nexpts.items():
+        quadratic.calls = 0  # reset fevals
         optResult = nelder_mead(cf=quadratic, x0=x0, xtol=xtol,
                                 simplex_method=method)
         if not np.allclose(optResult.xbest, np.zeros(len(x0)), atol=2e-2):
+            quadratic.calls = 0  # reset fevals
             optResult = nelder_mead(cf=quadratic, x0=x0, xtol=xtol,
                                     simplex_method=method)
         assert np.allclose(optResult.xbest, np.zeros(len(x0)), atol=2e-2)
@@ -56,6 +61,7 @@ def test_NM_iters():
     for method, nexpt in nm_simplex_methods_nexpts.items():
         count = 0
         for i in range(nexpt):
+            quadratic.calls = 0  # reset fevals
             optResult = nelder_mead(cf=quadratic, x0=x0, xtol=xtol,
                                     simplex_method=method)
             count += optResult.niter
@@ -67,6 +73,7 @@ def test_NM_fevals():
     for method, nexpt in nm_simplex_methods_nexpts.items():
         count = 0
         for i in range(nexpt):
+            quadratic.calls = 0  # reset fevals
             optResult = nelder_mead(cf=quadratic, x0=x0, xtol=xtol,
                                     simplex_method=method)
             count += optResult.nfev
@@ -82,6 +89,7 @@ mds_simplex_methods_nexpts = {
 
 def test_MDS_accuracy():
     for method, nexpt in mds_simplex_methods_nexpts.items():
+        quadratic.calls = 0  # reset fevals
         optResult = multid_search(cf=quadratic, x0=x0, xtol=xtol,
                                   simplex_method=method)
         assert np.allclose(optResult.xbest, np.zeros(len(x0)), atol=2e-2)
@@ -91,6 +99,7 @@ def test_MDS_iters():
     for method, nexpt in mds_simplex_methods_nexpts.items():
         count = 0
         for i in range(nexpt):
+            quadratic.calls = 0  # reset fevals
             optResult = multid_search(cf=quadratic, x0=x0, xtol=xtol,
                                       simplex_method=method)
             count += optResult.niter
@@ -102,6 +111,7 @@ def test_MDS_fevals():
     for method, nexpt in mds_simplex_methods_nexpts.items():
         count = 0
         for i in range(nexpt):
+            quadratic.calls = 0  # reset fevals
             optResult = multid_search(cf=quadratic, x0=x0, xtol=xtol,
                                       simplex_method=method)
             count += optResult.nfev

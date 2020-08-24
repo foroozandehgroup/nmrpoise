@@ -249,7 +249,8 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
     cf : function
         The cost function. For POISE, this means acquire_nmr(), not the
         user-defined cost function. However in general, this can be any cost
-        function.
+        function. The cost function *must* be decorated with deco_count() (for
+        POISE, this is already done).
     x0 : ndarray or list
         Initial point for optimisation.
     xtol : ndarray or list
@@ -345,9 +346,6 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
         # Rosenbrock function).
         #
         # return np.max(np.ravel(np.abs(sim[1:] - sim[0]))) <= xtol[0]
-
-    # Decorate cost function so that it keeps tracks of nfev.
-    cf = deco_count(cf)
 
     try:
         # Evaluate the cost function for the initial simplex.
@@ -460,7 +458,8 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
     cf : function
         The cost function. For POISE, this means acquire_nmr(), not the
         user-defined cost function. However in general, this can be any cost
-        function.
+        function. The cost function *must* be decorated with deco_count() (for
+        POISE, this is already done).
     x0 : ndarray or list
         Initial point for optimisation.
     xtol : ndarray or list
@@ -541,9 +540,6 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
         # Rosenbrock function).
         #
         # return np.max(np.ravel(np.abs(sim[1:] - sim[0]))) <= xtol[0]
-
-    # Decorate cost function so that it keeps tracks of nfev.
-    cf = deco_count(cf)
 
     try:
         # Evaluate the cost function for the initial simplex.
