@@ -17,27 +17,33 @@ if __name__ == "__main__" and __package__ is None:
 from .optpoise import (scale, unscale, deco_count,
                        nelder_mead, multid_search, pybobyqa_interface)
 
-optimiser = None
-routine_id = None
-p_spectrum = None
-p_optlog = None
-maxfev = 0
-p_poise = Path(__file__).parent.resolve()
-tic = datetime.now()
-spec_f1p = None
-spec_f2p = None
 Routine = namedtuple("Routine", "name pars lb ub init tol cf au")
+
+
+class _g():
+    """
+    Class to store the "global" variables.
+    """
+    optimiser = None
+    routine_id = None
+    p_spectrum = None
+    p_optlog = None
+    p_errlog = None
+    maxfev = 0
+    p_poise = Path(__file__).parent.resolve()
+    spec_f1p = None
+    spec_f2p = None
 
 
 def main():
     """
     Main routine.
     """
-    # Load the routine and cost function.
-    routine, cost_function = get_routine_cf(routine_id)
+    tic = datetime.now()
 
-    # Check that the optimiser is set to a legitimate value.
-    global optimiser
+    # Load the routine and cost function.
+    routine, cost_function = get_routine_cf(_g.routine_id)
+
     # Choose the optimisation function. optpoise implements a PyBOBYQA
     # interface so that the returned result has the same attributes as our
     # other optimisers.
@@ -46,9 +52,9 @@ def main():
                    "bobyqa": pybobyqa_interface
                    }
     try:
-        optimfn = optimfndict[optimiser.lower()]
+        optimfn = optimfndict[_g.optimiser.lower()]
     except KeyError:
-        raise ValueError(f"Invalid optimiser {optimiser} specified.")
+        raise ValueError(f"Invalid optimiser {_g.optimiser} specified.")
 
     # Scale the initial values and tolerances
     npars = len(routine.pars)
@@ -59,7 +65,7 @@ def main():
                                                          scaleby="tols")
 
     # Some logging
-    with open(p_optlog, "a") as log:
+    with open(_g.p_optlog, "a") as log:
         print("\n\n\n", file=log)
         print("=" * 40, file=log)
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=log)
@@ -72,28 +78,27 @@ def main():
         print(fmt.format("Lower bounds", routine.lb), file=log)
         print(fmt.format("Upper bounds", routine.ub), file=log)
         print(fmt.format("Tolerances", routine.tol), file=log)
-        print(fmt.format("Optimisation algorithm", optimiser), file=log)
+        print(fmt.format("Optimisation algorithm", _g.optimiser), file=log)
         print("", file=log)
         fmt = "{:^10s}  " * (npars + 1)
         print(fmt.format(*routine.pars, "cf"), file=log)
         print("-" * 12 * (npars + 1), file=log)
 
     # Get F1P/F2P parameters
-    global spec_f1p, spec_f2p
     x, y = getpar("F1P"), getpar("F2P")
     if isinstance(x, float) and isinstance(y, float):  # 1D
         if x != 0 and y != 0:
-            spec_f1p, spec_f2p = x, y
+            _g.spec_f1p, _g.spec_f2p = x, y
     elif isinstance(x, np.ndarray) and isinstance(y, np.ndarray):  # 2D
         if not np.array_equal(x, [0, 0]) and not np.array_equal(y, [0, 0]):
-            spec_f1p, spec_f2p = x, y
+            _g.spec_f1p, _g.spec_f2p = x, y
 
     # Set up optimisation arguments
     optimargs = (cost_function, routine)
     # Carry out the optimisation
     opt_result = optimfn(acquire_nmr, scaled_x0, scaled_xtol, optimargs,
                          scaled_lb=scaled_lb, scaled_ub=scaled_ub,
-                         maxfev=maxfev)
+                         maxfev=_g.maxfev)
 
     # Tell frontend script that the optimisation is done
     best_values = unscale(opt_result.xbest, routine.lb,
@@ -103,7 +108,7 @@ def main():
     # More logging
     toc = datetime.now()
     time_taken = str(toc - tic).split(".")[0]  # remove microseconds
-    with open(p_optlog, "a") as log:
+    with open(_g.p_optlog, "a") as log:
         print("", file=log)
         fmt = "{:27s} - {}"
         print(fmt.format("Best values found", best_values.tolist()), file=log)
@@ -144,12 +149,12 @@ def get_routine_cf(routine_id, p_routine_dir=None, p_cf_dir=None):
         unit test purposes and should not otherwise be used.
     """
     # Load the routine.
-    p_routine_dir = p_routine_dir or (p_poise / "routines")
+    p_routine_dir = p_routine_dir or (_g.p_poise / "routines")
     with open(p_routine_dir / (routine_id + ".json"), "rb") as f:
         routine = Routine(**json.load(f))
 
     # Load the cost function
-    p_cf_dir = p_cf_dir or (p_poise / "cost_functions")
+    p_cf_dir = p_cf_dir or (_g.p_poise / "cost_functions")
     p_cf_file = p_cf_dir / (routine.cf + ".py")
     ld = {}
     exec(open(p_cf_file).read(), globals(), ld)
@@ -203,7 +208,7 @@ def acquire_nmr(x, cost_function, routine):
     # Format string for logging.
     fstr = "{:^10.4f}  " * (len(x) + 1)
 
-    with open(p_optlog, "a") as log:
+    with open(_g.p_optlog, "a") as log:
         # Enforce constraints on optimisation.
         # This doesn't need to be done for BOBYQA, because we pass the `bounds`
         # parameter, which automatically stops it from sampling outside the
@@ -211,8 +216,9 @@ def acquire_nmr(x, cost_function, routine):
         # to bad errors, as due to floating-point inaccuracy sometimes it tries
         # to sample a point that is ___just___ outside of the bounds (see #39).
         # Instead, we should just let it evaluate the point as usual.
-        if optimiser in ["nm", "mds"] and (np.any(unscaled_val < routine.lb) or
-                                           np.any(unscaled_val > routine.ub)):
+        if (_g.optimiser in ["nm", "mds"] and
+                (np.any(unscaled_val < routine.lb)
+                 or np.any(unscaled_val > routine.ub))):
             # Set the value of the cost function to infinity.
             cf_val = np.inf
             # Log that.
@@ -226,8 +232,7 @@ def acquire_nmr(x, cost_function, routine):
         signal = input()  # frontend prints "done" here
         # Set p_spectrum according to which spectrum the frontend evaluated.
         # This is important when using the separate_expnos option.
-        global p_spectrum
-        p_spectrum = Path(input())  # frontend prints path to active spectrum
+        _g.p_spectrum = Path(input())  # frontend prints path to active spec.
         # Evaluate the cost function, log, pass the cost function value back
         # to the frontend (it's stored in the `TI` parameter), and return.
         if signal == "done":
@@ -246,9 +251,8 @@ def acquire_nmr(x, cost_function, routine):
 # ---------------------------------------                                     #
 #                                                                             #
 # Unfortunately, these need to be in backend.py instead of being imported     #
-# from a different module, because many of them rely on the global variable   #
-# p_spectrum to work. Please don't judge me, it's really the simplest way. I  #
-# think.                                                                      #
+# from a different module, because many of them rely on _g.p_spectrum to      #
+# work.                                                                       #
 ###############################################################################
 
 
@@ -323,7 +327,7 @@ def _ppm_to_point(shift, axis=None, p_spec=None):
     passed in a cost function. Under normal circumstances this will default to
     the FID or spectrum being measured.
     """
-    p_spec = p_spec or p_spectrum
+    p_spec = p_spec or _g.p_spectrum
     si = getpar("SI", p_spec)
     o1p = getpar("O1", p_spec) / getpar("SFO1", p_spec)
     sw = getpar("SW", p_spec)
@@ -374,7 +378,7 @@ def get1d_fid(p_spec=None):
     passed in a cost function. Under normal circumstances this will default to
     the FID or spectrum being measured.
     """
-    p_spec = p_spec or p_spectrum
+    p_spec = p_spec or _g.p_spectrum
     p_fid = p_spec.parents[1] / "fid"
     fid = np.fromfile(p_fid, dtype=np.int32)
     td = fid.size
@@ -431,23 +435,23 @@ def _get_1d(spec_fname, bounds="", epno=None, p_spec=None):
     # Check whether user has specified epno
     if epno is not None:
         if len(epno) == 2:
-            p_spec = p_spec or p_spectrum
+            p_spec = p_spec or _g.p_spectrum
             p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
         else:
             raise ValueError("Please provide a valid [expno, procno] "
                              "combination.")
 
-    p_spec = p_spec or p_spectrum
+    p_spec = p_spec or _g.p_spectrum
     p_specdata = p_spec / spec_fname
     spec = np.fromfile(p_specdata, dtype=np.int32)
     nc_proc = int(getpar("NC_proc", p_spec))
     spec = spec * (2 ** nc_proc)
 
     if bounds == "":
-        if spec_f1p is None and spec_f2p is None:  # DPL not used
+        if _g.spec_f1p is None and _g.spec_f2p is None:  # DPL not used
             return spec
         else:
-            left, right = spec_f1p, spec_f2p
+            left, right = _g.spec_f1p, _g.spec_f2p
     else:
         right, left = _parse_bounds(bounds)
 
@@ -523,13 +527,13 @@ def _get_2d(spec_fname, f1_bounds="", f2_bounds="", epno=None, p_spec=None):
     # Check whether user has specified epno
     if epno is not None:
         if len(epno) == 2:
-            p_spec = p_spec or p_spectrum
+            p_spec = p_spec or _g.p_spectrum
             p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
         else:
             raise ValueError("Please provide a valid [expno, procno] "
                              "combination.")
 
-    p_spec = p_spec or p_spectrum
+    p_spec = p_spec or _g.p_spectrum
     p_specdata = p_spec / "2rr"
 
     # Check data type (TopSpin 3 int vs TopSpin 4 float)
@@ -562,12 +566,12 @@ def _get_2d(spec_fname, f1_bounds="", f2_bounds="", epno=None, p_spec=None):
 
     # Read in DPL and overwrite bounds if the bounds were not set
     if f1_bounds == "":
-        if spec_f1p is not None and spec_f2p is not None:  # DPL was used
+        if _g.spec_f1p is not None and _g.spec_f2p is not None:  # DPL was used
             # f2p is lower than f1p.
-            f1_bounds = f"{spec_f2p[0]}..{spec_f1p[0]}"
+            f1_bounds = f"{_g.spec_f2p[0]}..{_g.spec_f1p[0]}"
     if f2_bounds == "":
-        if spec_f1p is not None and spec_f2p is not None:  # DPL was used
-            f2_bounds = f"{spec_f2p[1]}..{spec_f1p[1]}"
+        if _g.spec_f1p is not None and _g.spec_f2p is not None:  # DPL was used
+            f2_bounds = f"{_g.spec_f2p[1]}..{_g.spec_f1p[1]}"
     f1_lower, f1_upper = _parse_bounds(f1_bounds)
     f2_lower, f2_upper = _parse_bounds(f2_bounds)
     # Convert ppm to points
@@ -753,7 +757,7 @@ def getpar(par, p_spec=None):
     The p_spec parameter is only used in unit tests and should not actually be
     passed in a cost function.
     """
-    p_spec = p_spec or p_spectrum
+    p_spec = p_spec or _g.p_spectrum
 
     # Try to get acquisition parameter first.
     # Check indirect dimension
@@ -792,12 +796,12 @@ if __name__ == "__main__":
     # for the error logging.
     try:
         # Set global variables by reading in input from frontend.
-        optimiser = input()
-        routine_id = input()
-        p_spectrum = Path(input())
-        maxfev = int(input())
-        p_optlog = p_spectrum.parents[1] / "poise.log"
-        p_errlog = p_spectrum.parents[1] / "poise_err_backend.log"
+        _g.optimiser = input()
+        _g.routine_id = input()
+        _g.p_spectrum = Path(input())
+        _g.maxfev = int(input())
+        _g.p_optlog = _g.p_spectrum.parents[1] / "poise.log"
+        _g.p_errlog = _g.p_spectrum.parents[1] / "poise_err_backend.log"
         # Run main routine.
         main()
     except Exception as e:
@@ -806,7 +810,7 @@ if __name__ == "__main__":
         # very short summary line.
         print(f"Backend exception: {type(e).__name__}({repr(e.args)})")
         # Then print it to the errlog.
-        with open(p_errlog, "a") as ferr:
+        with open(_g.p_errlog, "a") as ferr:
             print("======= From backend =======", file=ferr)
             print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=ferr)
             print_exc(file=ferr)
