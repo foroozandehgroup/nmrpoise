@@ -66,15 +66,23 @@ def main():
             # includes one for us.
             print(line.rstrip(), file=outfile)
     # Replace the old file with the new file.
-    copy_file(str(poise_py_out), str(poise_py), verbose=1)
+    copy_file(str(poise_py_out), str(poise_py))
 
     # Copy the files to TopSpin's directories.
     for ts_path in ts_paths:
         ts_user_path = ts_path / "py" / "user"
         ts_backend_path = ts_path / "py" / "user" / "poise_backend"
         # Copy files to TopSpin path.
-        copy_file(str(poise_py), str(ts_user_path), verbose=1)
-        copy_tree(str(poise_backend), str(ts_backend_path), verbose=1)
+        copy_file(str(poise_py), str(ts_user_path))
+        copy_tree(str(poise_backend), str(ts_backend_path))
+        # Copy core AU scripts over. The others can be installed with
+        # poise_addons.
+        ts_au_user_path = ts_path / "au" / "src" / "user"
+        core_au_scripts = ["poise_1d", "poise_2d"]
+        for auscript in core_au_scripts:
+            src = dirname / "au" / auscript
+            dest = ts_au_user_path / auscript
+            copy_file(str(src), str(dest))
     print("topspin_install.py: completed")
 
 
@@ -112,12 +120,12 @@ def install_addons():
         for pyscript in python_scripts:
             src = dirname / "py" / pyscript
             dest = ts_py_user_path / pyscript
-            copy_file(str(src), str(dest), verbose=1)
+            copy_file(str(src), str(dest))
         ts_au_user_path = ts_path / "au" / "src" / "user"
         for auscript in au_scripts:
             src = dirname / "au" / auscript
             dest = ts_au_user_path / auscript
-            copy_file(str(src), str(dest), verbose=1)
+            copy_file(str(src), str(dest))
     print("install_addons: complete")
 
 

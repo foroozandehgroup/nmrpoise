@@ -10,9 +10,9 @@ hostname = platform.node()
 pkg_toplevel_dir = Path(__file__).parents[1].resolve()
 
 # Have to hardcode these. I don't see a way around it.
-hostname_to_tspath_dict = {
-    "jymbp": Path("/opt/topspin4.0.9/exp/stan/nmr/py/user/"),
-    "CARP-CRL": Path(r"C:\Bruker\TopSpin4.0.7\exp\stan\nmr\py\user"),
+hostname_to_tspath = {
+    "jymbp": Path("/opt/topspin4.0.9/exp/stan/nmr"),
+    "CARP-CRL": Path(r"C:\Bruker\TopSpin4.0.7\exp\stan\nmr"),
 }
 
 
@@ -26,21 +26,26 @@ def delete_file_force(path):
 
 
 @pytest.mark.skipif(all(host not in platform.node()
-                        for host in hostname_to_tspath_dict.keys()),
+                        for host in hostname_to_tspath.keys()),
                     reason=f"Testing on {hostname} is not supported.")
 def test_topspin_installation(tmpdir):
-    # Path to TopSpin py/user.
-    for host in hostname_to_tspath_dict.keys():
+    # Path to TopSpin py/user, and /au/src/user.
+    for host in hostname_to_tspath.keys():
         if host in platform.node():
-            ts_path = hostname_to_tspath_dict[host]
+            py_user_path = hostname_to_tspath[host] / "py" / "user"
+            au_src_user_path = hostname_to_tspath[host] / "au" / "src" / "user"
     # Make sure it's right
-    assert ts_path.is_dir()
+    assert py_user_path.is_dir()
 
     # Clear out the existing installation of poise
-    delete_file_force(ts_path / "poise.py")
-    remove_tree(str(ts_path / "poise_backend"))
-    assert not (ts_path / "poise.py").exists()
-    assert not (ts_path / "poise_backend").exists()
+    delete_file_force(py_user_path / "poise.py")
+    remove_tree(str(py_user_path / "poise_backend"))
+    delete_file_force(au_src_user_path / "poise_1d")
+    delete_file_force(au_src_user_path / "poise_2d")
+    assert not (py_user_path / "poise.py").exists()
+    assert not (py_user_path / "poise_backend").exists()
+    assert not (au_src_user_path / "poise_1d").exists()
+    assert not (au_src_user_path / "poise_2d").exists()
 
     # Copy package to a temporary directory
     tmpdir = Path(tmpdir)
@@ -55,9 +60,11 @@ def test_topspin_installation(tmpdir):
     subprocess.run(["python3", str(new_ts_install_script)])
 
     # Check whether the files were installed to TopSpin correctly
-    assert (ts_path / "poise.py").exists()
-    assert (ts_path / "poise_backend").exists()
-    assert (ts_path / "poise_backend" / "backend.py").exists()
-    assert (ts_path / "poise_backend" / "optpoise.py").exists()
-    assert (ts_path / "poise_backend" / "cost_functions").exists()
-    assert (ts_path / "poise_backend" / "routines").exists()
+    assert (py_user_path / "poise.py").exists()
+    assert (py_user_path / "poise_backend").exists()
+    assert (py_user_path / "poise_backend" / "backend.py").exists()
+    assert (py_user_path / "poise_backend" / "optpoise.py").exists()
+    assert (py_user_path / "poise_backend" / "cost_functions").exists()
+    assert (py_user_path / "poise_backend" / "routines").exists()
+    assert (au_src_user_path / "poise_1d").exists()
+    assert (au_src_user_path / "poise_2d").exists()
