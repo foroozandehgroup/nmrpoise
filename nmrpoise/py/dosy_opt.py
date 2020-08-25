@@ -32,11 +32,11 @@ import time
 import os
 
 # Find the correct parameter set for the 1D sequence.
-if GETPAR("PULPROG") == "doneshot.mf":
-    pulprog = "jy-1d-doneshot"
+if GETPAR("PULPROG") == "doneshot_2d_jy":
+    pulprog = "doneshot_1d_jy"
 else:
     MSG("dosy_opt: unsupported pulse programme")
-# Other variants can be added here in the future.
+# Other variants can be added here.
 
 # Get the expno of the 2D dataset, and store the parameter set. This is
 # important because we want the optimisation to inherit most parameters, e.g.
@@ -77,11 +77,17 @@ XCMD("sendgui browse_update_tree")
 # parameter set we set the experiments up with). If we don't do this, then
 # POISE gets very confused as it looks at the file structure and thinks that
 # they are 2D spectra.
-ref_expnof = os.path.join(reference_dataset[3], reference_dataset[0], reference_dataset[1])
-opt_expnof = os.path.join(optimisation_dataset[3], optimisation_dataset[0], optimisation_dataset[1])
-for f in (os.path.join(ref_expnof, "acqu2s"), os.path.join(opt_expnof, "acqu2s"),
+ref_expnof = os.path.join(reference_dataset[3],
+                          reference_dataset[0],
+                          reference_dataset[1])
+opt_expnof = os.path.join(optimisation_dataset[3],
+                          optimisation_dataset[0],
+                          optimisation_dataset[1])
+for f in (os.path.join(ref_expnof, "acqu2s"),
+          os.path.join(opt_expnof, "acqu2s"),
           os.path.join(ref_expnof, "pdata", reference_dataset[2], "proc2s"),
-          os.path.join(opt_expnof, "pdata", optimisation_dataset[2], "proc2s")):
+          os.path.join(opt_expnof, "pdata", optimisation_dataset[2], "proc2s")
+          ):
     if os.path.isfile(f):
         os.remove(f)
 
