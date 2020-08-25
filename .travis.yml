@@ -11,4 +11,4 @@ install:
   - python setup.py notopspin
 
 script:
-  - pytest -v --cov=poptpy/poptpy_backend
+  - pytest -v --cov=nmrpoise/poise_backend

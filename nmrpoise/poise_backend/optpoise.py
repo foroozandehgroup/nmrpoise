@@ -370,6 +370,9 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
         #
         # return np.max(np.ravel(np.abs(sim[1:] - sim[0]))) <= xtol[0]
 
+    # Create temporary list of points evaluated during this iteration (and
+    # their corresponding cost function values).
+    iter_xs, iter_fs = [], []
     try:
         # Evaluate the cost function for the initial simplex.
         # Steps 1 and 2 in Algorithm 8.1.1
@@ -387,13 +390,16 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
             if niter >= maxiter:
                 raise MaxItersReached
 
+            # Reset both lists.
+            iter_xs, iter_fs = [], []
+
             # Step 3(a)
             x_r = xnew(mu_r, sim)  # shorthand for x(mu_r)
             f_r = cf(x_r, *args)
+            iter_xs.append(x_r)
+            iter_fs.append(f_r)
 
             # Step 3(b): Reflect (+ 3g if needed)
-            if cf.calls >= maxfev:
-                raise MaxFevalsReached
             if sim.f[0] <= f_r and f_r < sim.f[N - 1]:
                 sim.replace_worst(x_r, f_r)
                 sim.sort()  # Step 3(g)
@@ -403,6 +409,8 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
             if f_r < sim.f[0]:
                 x_e = xnew(mu_e, sim)
                 f_e = cf(x_e, *args)
+                iter_xs.append(x_e)
+                iter_fs.append(f_e)
                 if f_e < f_r:
                     sim.replace_worst(x_e, f_e)
                 else:
@@ -414,6 +422,8 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
             if sim.f[N - 1] <= f_r and f_r < sim.f[N]:
                 x_oc = xnew(mu_oc, sim)
                 f_c = cf(x_oc, *args)
+                iter_xs.append(x_oc)
+                iter_fs.append(f_c)
                 if f_c <= f_r:
                     sim.replace_worst(x_oc, f_c)
                     sim.sort()  # Step 3(g)
@@ -431,6 +441,8 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
             if f_r >= sim.f[N]:
                 x_ic = xnew(mu_ic, sim)
                 f_c = cf(x_ic, *args)
+                iter_xs.append(x_ic)
+                iter_fs.append(f_c)
                 if f_c < sim.f[N]:
                     sim.replace_worst(x_ic, f_c)
                     sim.sort()  # Step 3(g)
@@ -453,8 +465,13 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
 
     # sort the simplex in ascending order of fvals
     sim.sort()
+    # Check whether the simplex or iter_fs has the lowest cost function.
+    if len(iter_fs) != 0 and np.amin(iter_fs) < sim.f[0]:
+        xbest, fbest = iter_xs[np.argmin(iter_fs)], np.amin(iter_fs)
+    else:
+        xbest, fbest = sim.x[0], sim.f[0]
 
-    return OptResult(xbest=sim.x[0], fbest=sim.f[0],
+    return OptResult(xbest=xbest, fbest=fbest,
                      niter=niter, nfev=cf.calls,
                      simplex=sim.x, fvals=sim.f,
                      message=message)
@@ -556,6 +573,10 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
         #
         # return np.max(np.ravel(np.abs(sim[1:] - sim[0]))) <= xtol[0]
 
+    # Create temporary list of points evaluated during this iteration (and
+    # their corresponding cost function values).
+    iter_xs, iter_fs = [], []
+
     try:
         # Evaluate the cost function for the initial simplex.
         # Steps 1 and 2 in Algorithm 8.2.1
@@ -573,12 +594,17 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
             if niter >= maxiter:
                 raise MaxItersReached
 
+            # Reset the xs and fs lists.
+            iter_xs, iter_fs = [], []
+
             # Step 3(a): Reflect
             r_j = np.zeros((N, N))
             f_r_j = np.zeros(N)
             for j in range(1, N + 1):
                 r_j[j - 1] = sim.x[0] - (sim.x[j] - sim.x[0])
                 f_r_j[j - 1] = cf(r_j[j - 1], *args)
+                iter_xs.append(r_j[j - 1])
+                iter_fs.append(f_r_j[j - 1])
 
             # Step 3(b): Expand
             if sim.f[0] > np.amin(f_r_j):
@@ -587,6 +613,8 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
                 for j in range(1, N + 1):
                     e_j[j - 1] = sim.x[0] - mu_e * (sim.x[j] - sim.x[0])
                     f_e_j[j - 1] = cf(e_j[j - 1], *args)
+                    iter_xs.append(e_j[j - 1])
+                    iter_fs.append(f_e_j[j - 1])
                 # Replace the values, 3(b)(ii)
                 if np.amin(f_r_j) > np.amin(f_e_j):
                     for j in range(1, N + 1):
@@ -601,6 +629,8 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
             # Step 3(c): Contract
             else:
                 for j in range(1, N + 1):
+                    # For this one we don't need to append to iter_xs and
+                    # iter_fs since this directly updates the simplex.
                     sim.x[j] = sim.x[0] + mu_c * (sim.x[j] - sim.x[0])
                     sim.f[j] = cf(sim.x[j], *args)
                 sim.sort()  # Step 3(d)
@@ -614,8 +644,13 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
 
     # sort the simplex in ascending order of fvals
     sim.sort()
+    # Check whether the simplex or iter_fs has the lowest cost function.
+    if len(iter_fs) != 0 and np.amin(iter_fs) < sim.f[0]:
+        xbest, fbest = iter_xs[np.argmin(iter_fs)], np.amin(iter_fs)
+    else:
+        xbest, fbest = sim.x[0], sim.f[0]
 
-    return OptResult(xbest=sim.x[0], fbest=sim.f[0],
+    return OptResult(xbest=xbest, fbest=fbest,
                      niter=niter, nfev=cf.calls,
                      simplex=sim.x, fvals=sim.f,
                      message=message)
