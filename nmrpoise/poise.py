@@ -119,8 +119,14 @@ def main(args):
                "using Nelder-Mead instead".format(args.algorithm))
         args.algorithm = "nm"
 
+    # Before we start the main loop, we need to kill off any other backend
+    # processes that are still alive. (We don't do it too early, otherwise we
+    # could accidentally terminate a POISE run by running something innocuous
+    # like poise --setup or poise -l.)
+    kill_remaining_backends()
+
     # We need to catch java.lang.Error throughout the main loop so that cleanup
-    # can be performed if the script is killed from within TopSpin.  See #23.
+    # can be performed if the script is killed from within TopSpin. See #23.
     try:
         backend = subprocess.Popen([p_python3, '-u', p_backend],
                                    stdin=subprocess.PIPE,
@@ -212,15 +218,22 @@ def main(args):
                 raise RuntimeError("Invalid message from backend: '{}'."
                                    "Please see error log for more "
                                    "information.".format(line))
-    except RuntimeError as e:
-        # Notify the user and quit.
-        err_exit("Error during acquisition loop:\n" + e.message, log=True)
-    # Cleanup code if the frontend is killed in TopSpin.
-    except Error as e:
-        # Kill the backend process if it's still running.
-        if backend.poll() is None:
-            backend.terminate()
-        err_exit("Error:\n" + e.message, log=True)
+    # Cleanup code if anything goes wrong.
+    except (Error, RuntimeError) as e:
+        # For some really silly reason, I can't just call
+        # kill_remaining_backends() here, or else if the *original* POISE is
+        # killed (using TopSpin's `kill`), it throws a
+        # java.nio.BufferOverflowException. On Windows 10, this *does*
+        # terminate the backend process, but it doesn't delete the .pidXXX
+        # file. In principle there's nothing *wrong* with that because the
+        # .pidXXX file will be cleaned up on the next run, but this just works
+        # more cleanly.
+        XCMD("xpy poise --kill")
+        # BTW, err_exit() only gets called if it's RuntimeError. I don't know
+        # why. If it's killed via TopSpin, then it just shows
+        # java.lang.ThreadDeath as usual.
+        err_exit("Error during acquisition loop:\n{}".format(e.message),
+                 log=True)
 
     # Store the optima in the (final) dataset, and show a message to the user
     # if not in quiet mode.
@@ -730,6 +743,45 @@ def pulprog_contains_wvm():
     return False
 
 
+def kill_remaining_backends():
+    """
+    Checks the poise_backend folder for any .pidXXXX files (which represent
+    backends that have not exited), then kills all the associated PIDs and
+    deletes the files.
+    """
+    for file in os.listdir(p_poise):
+        if file.startswith(".pid"):
+            try:
+                pid = int(file[4:])
+            except ValueError:  # not an int
+                pass
+            else:
+                kill_pid(file[4:])
+                os.remove(os.path.join(p_poise, file))
+
+
+def kill_pid(pid):
+    """
+    Kills a process with PID pid.
+
+    Parameters
+    ----------
+    pid : int or str
+        The process ID.
+
+    Returns
+    -------
+    None
+    """
+    from java.lang.System import getProperty
+    # Windows
+    if "wind" in getProperty("os.name").lower():
+        subprocess.call(["taskkill", "/f", "/pid", str(pid)])
+    # *nix
+    else:
+        subprocess.call(["kill", "-9", str(pid)])
+
+
 if __name__ == "__main__":
     # Parse arguments.
     parser = argparse.ArgumentParser(
@@ -741,6 +793,10 @@ if __name__ == "__main__":
                      "backend). Full documentation can be found at "
                      "https://poise.readthedocs.io.")
     )
+    # Commands that don't actually do any optimisations; they just run one
+    # function and exit. These are mutually exclusive (since in general the
+    # user should only be doing one of these at a time).
+    me_group = parser.add_mutually_exclusive_group()
     parser.add_argument(
         "routine",
         nargs="?",
@@ -754,13 +810,18 @@ if __name__ == "__main__":
         choices=["nm", "mds", "bobyqa"],
         help="Optimisation algorithm to use. (default: 'nm')"
     )
-    parser.add_argument(
+    me_group.add_argument(
         "-h",
         "--help",
         action="store_true",
         help="Show this help message and exit."
     )
-    parser.add_argument(
+    me_group.add_argument(
+        "--kill",
+        action="store_true",
+        help=("Kill POISE backends that may still be running.")
+    )
+    me_group.add_argument(
         "-l",
         "--list",
         action="store_true",
@@ -789,7 +850,7 @@ if __name__ == "__main__":
         help=("Use separate expnos for each function evaluation. (default: "
               "off)")
     )
-    parser.add_argument(
+    me_group.add_argument(
         "--setup",
         action="store_true",
         help=("Create a new routine only. Don't run the optimisation. "
@@ -812,5 +873,7 @@ if __name__ == "__main__":
         VIEWTEXT(title="Available poise routines",
                  text="\n".join(saved_routines))
         EXIT()
+    elif args.kill:
+        kill_remaining_backends()
     else:
         main(args)

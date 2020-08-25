@@ -1,9 +1,11 @@
+import os
 import sys
 import json
 from traceback import print_exc
 from datetime import datetime
 from pathlib import Path
 from collections import namedtuple
+from contextlib import contextmanager
 
 import numpy as np
 
@@ -37,6 +39,56 @@ class _g():
     p_poise = Path(__file__).parent.resolve()
     spec_f1p = None
     spec_f2p = None
+
+
+@contextmanager
+def pidfile():
+    """
+    Context manager that creates a 'pid.log' file inside the poise_backend
+    directory and writes the backend's PID to the file. Deletes the file once
+    the backend exits.
+    """
+    pid = os.getpid()
+    pid_fname = Path(__file__).resolve().expanduser().parent / f".pid{pid}"
+    pid_fname.touch()
+    try:
+        yield
+    finally:
+        pid_fname.unlink(missing_ok=True)
+
+
+def main_wrapper():
+    """
+    Wrapper for main(). This performs several tasks:
+      1. Reads in the global variables printed by the frontend.
+      2. Implements a context manager to print the backend PID to a file
+         ($ts/py/user/poise_backend/pid.log), deleting the file after the
+         backend completes.
+      3. Catches all exceptions, propagates them to the frontend by printing to
+         stdout, and prints the full traceback to the backend error log.
+    """
+    with pidfile() as _:
+        try:
+            # Set global variables by reading in input from frontend.
+            _g.optimiser = input()
+            _g.routine_id = input()
+            _g.p_spectrum = Path(input())
+            _g.maxfev = int(input())
+            _g.p_optlog = _g.p_spectrum.parents[1] / "poise.log"
+            _g.p_errlog = _g.p_spectrum.parents[1] / "poise_err_backend.log"
+            # Run main routine.
+            main()
+        except Exception as e:
+            # Because the frontend is only reading one line at a time, there's
+            # no point in printing the entire traceback. Thus we just print a
+            # very short summary line.
+            print(f"Backend exception: {type(e).__name__}({repr(e.args)})")
+            # Then print it to the errlog.
+            with open(_g.p_errlog, "a") as ferr:
+                print("======= From backend =======", file=ferr)
+                print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=ferr)
+                print_exc(file=ferr)
+                print("\n\n", file=ferr)
 
 
 def main():
@@ -871,27 +923,4 @@ def getpar(par, p_spec=None):
 
 
 if __name__ == "__main__":
-    # All errors in main() must be propagated back to the frontend so that
-    # timely feedback can be provided to the user. The frontend is responsible
-    # for the error logging.
-    try:
-        # Set global variables by reading in input from frontend.
-        _g.optimiser = input()
-        _g.routine_id = input()
-        _g.p_spectrum = Path(input())
-        _g.maxfev = int(input())
-        _g.p_optlog = _g.p_spectrum.parents[1] / "poise.log"
-        _g.p_errlog = _g.p_spectrum.parents[1] / "poise_err_backend.log"
-        # Run main routine.
-        main()
-    except Exception as e:
-        # Because the frontend is only reading one line at a time, there's
-        # no point in printing the entire traceback. Thus we just print a
-        # very short summary line.
-        print(f"Backend exception: {type(e).__name__}({repr(e.args)})")
-        # Then print it to the errlog.
-        with open(_g.p_errlog, "a") as ferr:
-            print("======= From backend =======", file=ferr)
-            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), file=ferr)
-            print_exc(file=ferr)
-            print("\n\n", file=ferr)
+    main_wrapper()
