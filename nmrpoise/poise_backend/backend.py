@@ -264,7 +264,7 @@ def acquire_nmr(x, cost_function, routine):
     # Format string for logging.
     fstr = "{:^10.4f}  " * (len(x) + 1)
 
-    with open(_g.p_optlog, "a") as log:
+    with open(_g.p_optlog, "a") as logf:
         # Enforce constraints on optimisation.
         # This doesn't need to be done for BOBYQA, because we pass the `bounds`
         # parameter, which automatically stops it from sampling outside the
@@ -278,7 +278,7 @@ def acquire_nmr(x, cost_function, routine):
             # Set the value of the cost function to infinity.
             cf_val = np.inf
             # Log that.
-            print(fstr.format(*unscaled_val, cf_val), file=log)
+            print(fstr.format(*unscaled_val, cf_val), file=logf)
             # Return immediately.
             return cf_val
 
@@ -294,7 +294,7 @@ def acquire_nmr(x, cost_function, routine):
         if signal == "done":
             cf_val = cost_function()
             fstr = "{:^10.4f}  " * (len(x) + 1)
-            print(fstr.format(*unscaled_val, cf_val), file=log)
+            print(fstr.format(*unscaled_val, cf_val), file=logf)
             print(f"cf: {cf_val}")
             return cf_val
         else:
@@ -920,6 +920,27 @@ def getpar(par, p_spec=None):
 
     # If reached here, neither was found
     return None
+
+
+def log(s):
+    """
+    Prints a string to the poise.log file. If this is called from inside a cost
+    function, the text is printed *before* the cost function is evaluated, so
+    will appear above the corresponding function evaluation.
+
+    Parameters
+    ----------
+    s : object
+        The object to be printed. Typically a string, but since this is just
+        passed directly to print(), anything with a __str__() method can be
+        used.
+
+    Returns
+    -------
+    None
+    """
+    with open(_g.p_optlog, 'a') as fp:
+        print(s, file=fp)
 
 
 if __name__ == "__main__":
