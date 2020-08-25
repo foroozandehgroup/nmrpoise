@@ -1,3 +1,16 @@
+"""
+poise.py
+--------
+
+Parameter Optimisation by Iterative Spectral Evaluation
+
+Frontend Python script that runs in TopSpin. Type `poise -h` into the TopSpin
+command line for help, or visit `https://nmrpoise.readthedocs.io` for a more
+thorough introduction.
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
 from __future__ import division, with_statement, print_function
 
 import os
@@ -808,7 +821,7 @@ if __name__ == "__main__":
                      "parameters in TopSpin. Requires a separate Python 3 "
                      "backend (run `pip install nmrpoise` to download the "
                      "backend). Full documentation can be found at "
-                     "https://poise.readthedocs.io.")
+                     "https://nmrpoise.readthedocs.io.")
     )
     # Commands that don't actually do any optimisations; they just run one
     # function and exit. These are mutually exclusive (since in general the

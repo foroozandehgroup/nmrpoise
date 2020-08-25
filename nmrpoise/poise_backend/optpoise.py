@@ -1,3 +1,12 @@
+"""
+optpoise.py
+-----------
+
+Module containing optimisation functions.
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
 from functools import wraps
 
 import numpy as np

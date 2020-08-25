@@ -1,3 +1,7 @@
+"""
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
 import sys
 import subprocess
 from pathlib import Path

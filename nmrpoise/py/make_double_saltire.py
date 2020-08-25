@@ -10,6 +10,8 @@ PSYCHE experiments.
 This can be included in an AU programme using the line:
 
     XCMD("sendgui xpy make_double_saltire")
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 from __future__ import division

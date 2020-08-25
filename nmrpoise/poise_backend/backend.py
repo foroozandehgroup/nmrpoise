@@ -1,3 +1,13 @@
+"""
+backend.py
+----------
+
+Backend POISE script which carries out the optimisation, passing values to the
+frontend to trigger acquisition.
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
 import os
 import sys
 import json

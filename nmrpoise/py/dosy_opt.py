@@ -26,6 +26,8 @@ The algorithm is as follows:
     is achieved.
  5. Once this gradient strength has been found, returns to the 2D experiment
     and runs the `dosy` Bruker AU programme using the new parameter.
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 import time

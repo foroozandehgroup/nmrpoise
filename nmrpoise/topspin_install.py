@@ -1,3 +1,12 @@
+"""
+topspin_install.py
+------------------
+
+Script which carries out installation of POISE files to TopSpin directories.
+
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
 import os
 import sys
 from distutils.dir_util import copy_tree
