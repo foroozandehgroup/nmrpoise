@@ -782,11 +782,28 @@ def kill_pid(pid):
         subprocess.call(["kill", "-9", str(pid)])
 
 
+class TSArgumentParser(argparse.ArgumentParser):
+    """
+    Custom ArgumentParser class which shows a TopSpin dialog box with errors
+    instead of printing to stderr.
+    """
+    def print_usage(self, file=None):
+        VIEWTEXT(title="poise usage", text=self.format_usage())
+        EXIT()
+
+    def print_help(self, file=None):
+        VIEWTEXT(title="poise help", text=self.format_help())
+        EXIT()
+
+    def error(self, message):
+        ERRMSG(title="poise", message=message)
+        EXIT()
+
+
 if __name__ == "__main__":
     # Parse arguments.
-    parser = argparse.ArgumentParser(
+    parser = TSArgumentParser(
         prog="poise",
-        add_help=False,
         description=("Python script for optimisation of acquisition "
                      "parameters in TopSpin. Requires a separate Python 3 "
                      "backend (run `pip install nmrpoise` to download the "
@@ -809,12 +826,6 @@ if __name__ == "__main__":
         default="nm",
         choices=["nm", "mds", "bobyqa"],
         help="Optimisation algorithm to use. (default: 'nm')"
-    )
-    me_group.add_argument(
-        "-h",
-        "--help",
-        action="store_true",
-        help="Show this help message and exit."
     )
     me_group.add_argument(
         "--kill",
@@ -858,17 +869,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # In TopSpin, the Python script's stdout is sent to the terminal which
-    # opens it. However, that's a really user-unfriendly place for messages to
-    # go to (and on MacOS the terminal does not even exist). To get around
-    # that, we disable argparse's help functionality, construct the help
-    # message manually, and show it in a TopSpin window.
-    help_message = parser.format_help()
-
-    if args.help:
-        VIEWTEXT(title="poise help", text=help_message)
-        EXIT()
-    elif args.list:
+    if args.list:
         saved_routines = list_files(p_routines, ext=".json")
         VIEWTEXT(title="Available poise routines",
                  text="\n".join(saved_routines))
