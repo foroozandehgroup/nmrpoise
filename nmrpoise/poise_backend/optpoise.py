@@ -225,6 +225,27 @@ def deco_count(fn):
     return counter
 
 
+def deco_maxfev(maxfev):
+    """
+    Decorator factory which returns a decorator that causes a function to raise
+    MaxFevalsReached if its number of calls is greater than maxfev.
+
+    Yes, it's confusing, but that's how decorators with parameters work...
+
+    Decorate with @deco_maxfev(MAXFEVS), or in order to set maxfev dynamically
+    (as is needed in POISE), do it using cf = deco_maxfev(MAXFEVS)(cf).
+    """
+    def decorator(fn):
+        @wraps(fn)
+        def counted_cf(*args, **kwargs):
+            if fn.calls >= maxfev:
+                raise MaxFevalsReached
+            else:
+                return fn(*args, **kwargs)
+        return counted_cf
+    return decorator
+
+
 class OptResult:
     """
     A *very* generic class that exists solely to store the result of an
@@ -303,6 +324,8 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
     maxiter = 500 * N
     if maxfev <= 0:
         maxfev = 500 * N
+    # Decorate the cost function to raise MaxFevalsReached
+    cf = deco_maxfev(maxfev)(cf)
 
     # Check length of xtol
     if len(x0) != len(xtol):
@@ -351,8 +374,6 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
         # Evaluate the cost function for the initial simplex.
         # Steps 1 and 2 in Algorithm 8.1.1
         for i in range(N + 1):
-            if cf.calls >= maxfev:
-                raise MaxFevalsReached
             sim.f[i] = cf(sim.x[i], *args)
             # Sort simplex
             sim.sort()
@@ -362,11 +383,9 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
             niter += 1
             sim.sort()  # for good measure
 
-            # Check number of iterations and fevals
+            # Check number of iterations.
             if niter >= maxiter:
                 raise MaxItersReached
-            if cf.calls >= maxfev:
-                raise MaxFevalsReached
 
             # Step 3(a)
             x_r = xnew(mu_r, sim)  # shorthand for x(mu_r)
@@ -381,8 +400,6 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
                 continue
 
             # Step 3(c): Expand (+ 3g if needed)
-            if cf.calls >= maxfev:
-                raise MaxFevalsReached
             if f_r < sim.f[0]:
                 x_e = xnew(mu_e, sim)
                 f_e = cf(x_e, *args)
@@ -394,8 +411,6 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
                 continue
 
             # Step 3(d): Outside contraction (+ 3f and 3g if needed)
-            if cf.calls >= maxfev:
-                raise MaxFevalsReached
             if sim.f[N - 1] <= f_r and f_r < sim.f[N]:
                 x_oc = xnew(mu_oc, sim)
                 f_c = cf(x_oc, *args)
@@ -413,8 +428,6 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
                     continue
 
             # Step 3(e): Inside contraction (+ 3f and 3g if needed)
-            if cf.calls >= maxfev:
-                raise MaxFevalsReached
             if f_r >= sim.f[N]:
                 x_ic = xnew(mu_ic, sim)
                 f_c = cf(x_ic, *args)
@@ -504,6 +517,8 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
     maxiter = 500 * N
     if maxfev <= 0:
         maxfev = 500 * N
+    # Decorate cost function so that it raises MaxFevalsReached.
+    cf = deco_maxfev(maxfev)(cf)
 
     # Check length of xtol
     if len(x0) != len(xtol):
@@ -545,8 +560,6 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
         # Evaluate the cost function for the initial simplex.
         # Steps 1 and 2 in Algorithm 8.2.1
         for i in range(N + 1):
-            if cf.calls >= maxfev:
-                raise MaxFevalsReached
             sim.f[i] = cf(sim.x[i], *args)
             # Sort simplex
             sim.sort()
@@ -556,11 +569,9 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
             niter += 1
             sim.sort()  # for good measure
 
-            # Check number of iterations and function evaluations
+            # Check number of iterations
             if niter >= maxiter:
                 raise MaxItersReached
-            if cf.calls >= maxfev:
-                raise MaxFevalsReached
 
             # Step 3(a): Reflect
             r_j = np.zeros((N, N))
