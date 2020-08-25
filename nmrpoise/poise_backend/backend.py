@@ -9,6 +9,10 @@ import numpy as np
 
 # Enable relative imports when invoked directly as __main__ by TopSpin.
 # cf. PEP 366 and https://stackoverflow.com/a/54490918
+# This allows us to import the optpoise.py that is inside $ts/py/user, instead
+# of the one inside site-packages. Essentially, that allows us to maintain
+# internal consistency as the version of code that is run is always the one
+# inside $ts/py/user.
 if __name__ == "__main__" and __package__ is None:
     __package__ = "poise_backend"
     sys.path.insert(1, str(Path(__file__).parents[1].resolve()))
@@ -396,25 +400,25 @@ def _get_1d(spec_fname, bounds="", epno=None, p_spec=None):
     To get the real spectrum and imaginary spectrum, pass spec_fname="1r" or
     spec_fname="1i" respectively.
 
-    Note that this function only works for 1D spectra. It does NOT work for 1D
-    projections of 2D spectra. If you want to work with projections, you can
+    Note that this function only works for 1D spectra. It does *not* work for
+    1D projections of 2D spectra. If you want to work with projections, you can
     use get_2d_spectrum() to get the full 2D spectrum, then manipulate it using
     numpy functions as appropriate. Examples can be found in the docs.
 
     The bounds parameter may be specified in the following formats:
-       - between 5 and 8 ppm:   bounds="5..8"
-       - greater than 9.3 ppm:  bounds="9.3.."
-       - less than -2 ppm:      bounds="..-2"
+       - between 5 and 8 ppm:   bounds="5..8"  OR bounds=(5, 8)
+       - greater than 9.3 ppm:  bounds="9.3.." OR bounds=(9.3, None)
+       - less than -2 ppm:      bounds="..-2"  OR bounds=(None, -2)
 
     Parameters
     ----------
     spec_fname : str
         File name of the spectrum; "1r" for real or "1i" for imaginary.
-    bounds : str, optional
-        String describing the region of interest. See above for examples. If no
-        bounds are provided, uses the ``F1P`` and ``F2P`` processing
-        parameters, which can be specified via ``dpl``. If these are not
-        specified, defaults to the whole spectrum.
+    bounds : str or tuple, optional
+        String or tuple describing the region of interest. See above for
+        examples. If no bounds are provided, uses the ``F1P`` and ``F2P``
+        processing parameters, which can be specified via ``dpl``. If these are
+        not specified, defaults to the whole spectrum.
     epno : tuple of int, optional
         (expno, procno) of spectrum of interest. Defaults to the spectrum
         being evaluated. As of now, there is no way to read in a spectrum in a
@@ -469,14 +473,51 @@ def _get_1d(spec_fname, bounds="", epno=None, p_spec=None):
 
 def get1d_real(bounds="", epno=None, p_spec=None):
     """
-    To be rewritten when tuple bounds are accepted [copy it over from _get_1d].
+    Get the real spectrum. This function accounts for TopSpin's NC_PROC
+    variable, scaling the spectrum intensity accordingly.
+
+    Note that this function only works for 1D spectra. It does *not* work for
+    1D projections of 2D spectra. If you want to work with projections, you can
+    use get_2d_spectrum() to get the full 2D spectrum, then manipulate it using
+    numpy functions as appropriate. Examples can be found in the docs.
+
+    The bounds parameter may be specified in the following formats:
+       - between 5 and 8 ppm:   bounds="5..8"  OR bounds=(5, 8)
+       - greater than 9.3 ppm:  bounds="9.3.." OR bounds=(9.3, None)
+       - less than -2 ppm:      bounds="..-2"  OR bounds=(None, -2)
+
+    Parameters
+    ----------
+    spec_fname : str
+        File name of the spectrum; "1r" for real or "1i" for imaginary.
+    bounds : str or tuple, optional
+        String or tuple describing the region of interest. See above for
+        examples. If no bounds are provided, uses the ``F1P`` and ``F2P``
+        processing parameters, which can be specified via ``dpl``. If these are
+        not specified, defaults to the whole spectrum.
+    epno : tuple of int, optional
+        (expno, procno) of spectrum of interest. Defaults to the spectrum
+        being evaluated. As of now, there is no way to read in a spectrum in a
+        folder with a different name (please let us know if this is a useful
+        feature that should be implemented).
+
+    Returns
+    -------
+    ndarray
+        Array containing the spectrum or the desired section of it (if bounds
+        were specified).
+
+    Notes
+    -----
+    The p_spec parameter is only used in unit tests and should not actually be
+    passed in a cost function.
     """
     return _get_1d(spec_fname="1r", bounds=bounds, epno=epno, p_spec=p_spec)
 
 
 def get1d_imag(bounds="", epno=None, p_spec=None):
     """
-    To be rewritten when tuple bounds are accepted [copy it over from _get_1d].
+    Same as `get1d_real`, except that it reads the imaginary spectrum.
     """
     return _get_1d(spec_fname="1i", bounds=bounds, epno=epno, p_spec=p_spec)
 
@@ -488,24 +529,24 @@ def _get_2d(spec_fname, f1_bounds="", f2_bounds="", epno=None, p_spec=None):
 
     The f1_bounds and f2_bounds parameters may be specified in the following
     formats:
-       - between 5 and 8 ppm:   bounds="5..8"
-       - greater than 9.3 ppm:  bounds="9.3.."
-       - less than -2 ppm:      bounds="..-2"
+       - between 5 and 8 ppm:   f1_bounds="5..8"  OR f1_bounds=(5, 8)
+       - greater than 9.3 ppm:  f1_bounds="9.3.." OR f1_bounds=(9.3, None)
+       - less than -2 ppm:      f1_bounds="..-2"  OR f1_bounds=(None, -2)
 
     Parameters
     ----------
     spec_fname : str
         Filename of the spectrum of interest. Can be "2rr", "2ri", "2ir", or
         "2ii", corresponding to the four hypercomplex quadrants.
-    f1_bounds : str, optional
-        String describing the indirect-dimension region of interest. See above
-        for examples. If no bounds are provided, uses the ``1 F1P`` and ``1
-        F2P`` processing parameters, which can be specified via ``dpl``. If
-        these are not specified, defaults to the whole spectrum.
-    f2_bounds : str, optional
-        String describing the direct-dimension region of interest. See above
-        for examples. If no bounds are provided, uses the ``2 F1P`` and ``2
-        F2P`` processing parameters, which can be specified via ``dpl``. If
+    f1_bounds : str or tuple, optional
+        String or tuple describing the indirect-dimension region of interest.
+        See above for examples. If no bounds are provided, uses the ``1 F1P``
+        and ``1 F2P`` processing parameters, which can be specified via
+        ``dpl``. If these are not specified, defaults to the whole spectrum.
+    f2_bounds : str or tuple, optional
+        String or tuple describing the direct-dimension region of interest. See
+        above for examples. If no bounds are provided, uses the ``2 F1P`` and
+        ``2 F2P`` processing parameters, which can be specified via ``dpl``. If
         these are not specified, defaults to the whole spectrum.
     epno : tuple of int, optional
         (expno, procno) of spectrum of interest. Defaults to the spectrum
@@ -589,7 +630,46 @@ def _get_2d(spec_fname, f1_bounds="", f2_bounds="", epno=None, p_spec=None):
 
 def get2d_rr(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
     """
-    To be rewritten when tuple bounds are accepted [copy it over from _get_2d].
+    Get the real part of the 2D spectrum (the "RR" quadrant). This function
+    takes into account the NC_proc value in TopSpin's processing parameters.
+
+    The f1_bounds and f2_bounds parameters may be specified in the following
+    formats:
+       - between 5 and 8 ppm:   f1_bounds="5..8"  OR f1_bounds=(5, 8)
+       - greater than 9.3 ppm:  f1_bounds="9.3.." OR f1_bounds=(9.3, None)
+       - less than -2 ppm:      f1_bounds="..-2"  OR f1_bounds=(None, -2)
+
+    Parameters
+    ----------
+    spec_fname : str
+        Filename of the spectrum of interest. Can be "2rr", "2ri", "2ir", or
+        "2ii", corresponding to the four hypercomplex quadrants.
+    f1_bounds : str or tuple, optional
+        String or tuple describing the indirect-dimension region of interest.
+        See above for examples. If no bounds are provided, uses the ``1 F1P``
+        and ``1 F2P`` processing parameters, which can be specified via
+        ``dpl``. If these are not specified, defaults to the whole spectrum.
+    f2_bounds : str or tuple, optional
+        String or tuple describing the direct-dimension region of interest. See
+        above for examples. If no bounds are provided, uses the ``2 F1P`` and
+        ``2 F2P`` processing parameters, which can be specified via ``dpl``. If
+        these are not specified, defaults to the whole spectrum.
+    epno : tuple of int, optional
+        (expno, procno) of spectrum of interest. Defaults to the spectrum
+        being evaluated. As of now, there is no way to read in a spectrum in a
+        folder with a different name (please let us know if this is a useful
+        feature that should be implemented).
+
+    Returns
+    -------
+    ndarray
+        2D array containing the spectrum or the desired section of it (if
+        *f1_bounds* or *f2_bounds* were specified).
+
+    Notes
+    -----
+    The p_spec parameter is only used in unit tests and should not actually be
+    passed in a cost function.
     """
     return _get_2d(spec_fname="2rr",
                    f1_bounds=f1_bounds, f2_bounds=f2_bounds,
@@ -598,7 +678,7 @@ def get2d_rr(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
 
 def get2d_ri(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
     """
-    Same as get2d_rr, except that it reads the '2ri' file.
+    Same as `get2d_rr`, except that it reads the '2ri' file.
     """
     return _get_2d(spec_fname="2ri",
                    f1_bounds=f1_bounds, f2_bounds=f2_bounds,
@@ -607,7 +687,7 @@ def get2d_ri(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
 
 def get2d_ir(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
     """
-    Same as get2d_rr, except that it reads the '2ir' file.
+    Same as `get2d_rr`, except that it reads the '2ir' file.
     """
     return _get_2d(spec_fname="2ir",
                    f1_bounds=f1_bounds, f2_bounds=f2_bounds,
@@ -616,7 +696,7 @@ def get2d_ir(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
 
 def get2d_ii(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
     """
-    Same as get2d_rr, except that it reads the '2ii' file.
+    Same as `get2d_rr`, except that it reads the '2ii' file.
     """
     return _get_2d(spec_fname="2ii",
                    f1_bounds=f1_bounds, f2_bounds=f2_bounds,
