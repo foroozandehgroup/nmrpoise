@@ -1,0 +1,130 @@
+;spfgsenoezs2.1_jy
+;1D NOESY using selective refocussing with two shaped pulses
+;dipolar coupling may be due to noe or chemical exchange.
+;H. Kessler, H. Oschkinat, C. Griesinger & W. Bermel,
+;   J. Magn. Reson. 70, 106 (1986)
+;J. Stonehouse, P. Adell, J. Keeler & A.J. Shaka, J. Am. Chem. Soc 116,
+;   6037 (1994)
+;K. Stott, J. Stonehouse, J. Keeler, T.L. Hwang & A.J. Shaka, 
+;   J. Am. Chem. Soc 117, 4199-4200 (1995)
+
+;Tim C 2/2008 Using two nulling 180s and ZQC filter at end of mixing time
+;Includes adiabatic pulse/gradient combination for ZQC suppression
+;Thrippleton & Keeler, Angew. Chem. Int. Ed., 2003, 42, 3938-3941.
+;Tim C 10/2007 updated to match Bruker format
+;Tim C 11/2008 matches Bruker ZQS nomenclature 
+;Jon Y 21/07/2020 added CALC_SPOFFS acquisition flag
+
+;$CLASS=HighRes
+;$DIM=1D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+
+#include <Avance.incl>
+#include <Grad.incl>
+
+"p2=p1*2"
+"d21=d8*0.3-p16-d16-3u"
+"d22=d8*0.5-p16*2-d16*2-6u"
+"d23=d8*0.2-p16-d16*2-p32-53u"
+
+#ifdef CALC_SPOFFS
+"spoff2=bf1*(cnst21/1000000)-o1"
+#else
+#endif /*CALC_SPOFFS*/
+
+1 ze
+2 30m
+  20u BLKGRAD
+  d1
+  50u UNBLKGRAD
+  (p1 ph1):f1
+  3u
+  p16:gp1
+  d16 pl0:f1
+  3u
+  p12:sp2:f1 ph2:r
+  3u
+  p16:gp1
+  d16 pl1:f1
+  3u
+  (p1 ph4):f1
+  d21
+  p16:gp3
+  d16
+  3u
+  (p2 ph5):f1
+  3u
+  p16:gp3*-1
+  d16
+  d22
+  p16:gp4
+  d16
+  3u
+  (p2 ph5):f1
+  3u
+  p16:gp4*-1
+  d16
+  d23
+  20u pl0:f1
+  10u gron0		;ZQC suppression
+  (p32:sp29 ph7):f1
+  20u groff
+  d16 pl1:f1
+  (p1 ph6):f1
+  go=2 ph31
+  30m mc #0 to 2 F0(zd)
+  20u BLKGRAD
+exit
+
+
+ph1=0 2 
+ph2=0 0 1 1 2 2 3 3
+ph4=0
+ph5=0
+ph6=0
+ph7=0
+ph31=0 2 2 0 0 2 2 0 
+
+
+;pl0 : 120dB
+;pl1 : f1 channel - power level for pulse (default)
+;sp2: f1 channel - shaped pulse
+;sp29: f1 channel - shaped pulse (adiabatic sweep)
+;p1 : f1 channel -  90 degree high power pulse
+;p2 : f1 channel - 180 degree high power pulse
+;p12: f1 channel - 180 degree shaped pulse
+;p16: homospoil/gradient pulse                            [1 msec]
+;p32: f1 channel - 180 shaped adiabatic pulse
+;		smoothed CHIRP
+;d1 : relaxation delay; 1-5 * T1
+;d8 : mixing time
+;d16: delay for homospoil/gradient recovery
+;d21: d8*0.3-p16-d16-3u
+;d22: d8*0.5-p16*2-d16*2-6u
+;d23: d8*0.2-p16-d16*2-p32-53u
+;NS: 2 * n
+;DS: 4 
+
+;cnst21: chemical shift for selective pulse (offset, in ppm)
+
+
+;choose p12 according to desired selectivity
+;the flip-angle is determined by the amplitude
+;set O1 on resonance on the multiplet to be excited or use spoffs
+
+;use gradient ratio:   gp 0 : gp 1 : gp 3 : gp 4
+;                      ~10  :  17  :  40  :  25
+
+;for z-only gradients:
+;gpz0: ca. 10 %
+;gpz1: 17%
+;gpz3: 40%
+;gpz4: 25%
+
+;use gradient files:   
+;gpnam1: SINE.100
+;gpnam2: SINE.100
+;gpnam3: SINE.100
+;gpnam4: SINE.100

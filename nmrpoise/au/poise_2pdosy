@@ -1,0 +1,17 @@
+// By the time the AU programme runs, the values to be evaluated have already
+// been stored in the optn. expno by POISE.
+
+// Get the value of the diffusion delay, store it in f1.
+FETCHPAR("D 20", &f1)
+// Go over to the ref. expno, set that delay, then run the acquisition.
+REXPNO(99998)
+STOREPAR("D 20", f1)
+ZG
+EFP
+APBK
+// Go back to the optn. expno and acquire.
+REXPNO(99999)
+ZG
+EFP
+APBK
+QUIT

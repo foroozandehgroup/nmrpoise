@@ -107,24 +107,41 @@ def install_addons():
     ts_paths = get_topspin_path(ostype)
 
     # List of all the files we want to copy over.
-    python_scripts = ["make_double_saltire.py",
-                      "dosy_opt.py",
-                      ]
-    au_scripts = ["poise_1d",
-                  "poise_psyche",
-                  "poise_2d",
-                  ]
+    python_scripts = [
+        "make_double_saltire.py",
+        "dosy_opt.py",
+    ]
+    au_scripts = [
+        "poise_psyche",
+        "poise_2pdosy",
+    ]
+    pulse_programmes = [
+        "asaphsqc_jy",
+        "doneshot_1d_jy",
+        "doneshot_2d_jy",
+        "psyche_1dopt_jy",
+        "spfgsenoezs2.1_jy",
+        "zg",
+    ]
     # Copy them to TopSpin's directories.
     for ts_path in ts_paths:
+        # Python scripts first
         ts_py_user_path = ts_path / "py" / "user"
         for pyscript in python_scripts:
             src = dirname / "py" / pyscript
             dest = ts_py_user_path / pyscript
             copy_file(str(src), str(dest))
+        # AU scripts next
         ts_au_user_path = ts_path / "au" / "src" / "user"
         for auscript in au_scripts:
             src = dirname / "au" / auscript
             dest = ts_au_user_path / auscript
+            copy_file(str(src), str(dest))
+        # Pulse programmes finally
+        pp_user_path = ts_path / "lists" / "pp" / "user"
+        for pulprog in pulse_programmes:
+            src = dirname / "pp" / pulprog
+            dest = pp_user_path / pulprog
             copy_file(str(src), str(dest))
     print("install_addons: complete")
 

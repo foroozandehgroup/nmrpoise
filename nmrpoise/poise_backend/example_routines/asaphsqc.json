@@ -1,0 +1,1 @@
+{"name": "asaphsqc", "pars": ["cnst3"], "lb": [120.0], "ub": [280.0], "init": [150.0], "tol": [10.0], "cf": "asaphsqc", "au": "poise_2d"}

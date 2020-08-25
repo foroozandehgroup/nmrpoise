@@ -1,0 +1,1 @@
+{"name": "psyche2", "pars": ["cnst20", "gpz10"], "lb": [10.0, 0.2], "ub": [35.0, 5.0], "init": [25.0, 2.0], "tol": [2.0, 0.2], "cf": "specdiff", "au": "poise_1d"}
