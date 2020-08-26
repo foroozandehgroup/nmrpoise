@@ -52,7 +52,7 @@ def parse_log(fname):
         for line in fp:
             # Check if there is a completed optimisation stored.
             # If so, add it to all_runs then reset the current run.
-            if not any(i is None for i in current_run.values()):
+            if current_run["elapsed"] is not None:
                 all_runs.append(current_run)
                 current_run = dict(empty_run)
             # Start of a new optimisation, reset all values
@@ -95,7 +95,7 @@ def parse_log(fname):
 
     # Check one more time at the end of the file to make sure that the
     # last entry is recorded.
-    if not any(i is None for i in current_run.values()):
+    if current_run["elapsed"] is not None:
         all_runs.append(current_run)
         current_run = dict(empty_run)
 
