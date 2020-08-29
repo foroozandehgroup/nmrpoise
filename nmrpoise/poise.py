@@ -47,28 +47,30 @@ def main(args):
     -------
     None
     """
-    # Make sure user has opened a dataset
-    if CURDATA() is None:
-        err_exit("Please select a dataset!")
-    # Keep track of the currently active dataset. We want to make sure that
-    # it is _the_ active dataset every time the AU programme starts, or else we
-    # risk running `zg` on a different dataset --> overwriting other data!!
-    current_dataset = CURDATA()
+    if not args.setup:
+        # Make sure user has opened a dataset
+        if CURDATA() is None:
+            err_exit("Please select a dataset!")
 
-    # Construct the path to the folder of the current spectrum.
-    p_spectrum = make_p_spectrum()
-    # Generate the path to the log file. The log file belongs to the folder
-    # containing the first expno.
-    p_optlog = os.path.normpath(os.path.join(current_dataset[3],
-                                             current_dataset[0],
-                                             current_dataset[1],
-                                             "poise.log"))
+        # Keep track of the currently active dataset. We want to make sure that
+        # it is _the_ active dataset every time the AU programme starts, or
+        # else we risk running `zg` on a different dataset --> overwriting
+        # other data!!
+        current_dataset = CURDATA()
 
-    # Issue a warning if dataset is > 2D
-    if GETACQUDIM() > 2:
-        MSG("Warning: poise is only designed for 1D and 2D data.\n"
-            "If you are sure you want to use it on this {}D dataset, press "
-            "OK to dismiss this warning.".format(GETACQUDIM()))
+        # Construct the path to the folder of the current spectrum.
+        p_spectrum = make_p_spectrum()
+        # Generate the path to the log file. The log file belongs to the folder
+        # containing the first expno.
+        p_optlog = os.path.normpath(os.path.join(current_dataset[3],
+                                                 current_dataset[0],
+                                                 current_dataset[1],
+                                                 "poise.log"))
+        # Issue a warning if dataset is > 2D
+        if GETACQUDIM() > 2:
+            MSG("Warning: poise is only designed for 1D and 2D data.\n"
+                "If you are sure you want to use it on this {}D dataset, press"
+                " OK to dismiss this warning.".format(GETACQUDIM()))
 
     # Check that the folders are valid
     for folder in [p_poise, p_routines, p_costfunctions]:
