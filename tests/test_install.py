@@ -11,7 +11,7 @@ pkg_toplevel_dir = Path(__file__).parents[1].resolve()
 
 # Have to hardcode these. I don't see a way around it.
 hostname_to_tspath = {
-    "jymbp": Path("/opt/topspin4.0.9/exp/stan/nmr"),
+    "Empoleon": Path("/opt/topspin4.0.9/exp/stan/nmr"),
     "CARP-CRL": Path(r"C:\Bruker\TopSpin4.0.7\exp\stan\nmr"),
 }
 
