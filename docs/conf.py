@@ -33,6 +33,18 @@ extensions = [
     "numpydoc"
 ]
 
+rst_prolog = """
+.. |ndarray| replace:: :class:`ndarray <numpy.ndarray>`
+.. |v| replace:: |br| |vspace|
+.. |br| raw:: html
+
+   <br />
+
+.. |vspace| raw:: latex
+
+   \\vspace{5mm}
+"""
+
 default_role = "any"
 
 # Add any paths that contain templates here, relative to this directory.
@@ -55,3 +67,8 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+html_theme_options = {
+    "page_width": "1000px",
+    "sidebar_width": "250px",
+}
