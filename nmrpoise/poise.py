@@ -114,8 +114,7 @@ def main(args):
         routine_id = routine.name
     # Otherwise, load a saved routine.
     else:
-        with open(os.path.join(p_routines, routine_id + ".json"), "rb") as f:
-            routine = Routine(**json.load(f))
+        routine = load_routine(routine_id)
 
     # Check that the Routine object is valid
     check_routine(routine)
@@ -312,7 +311,7 @@ def err_exit(error, log=False):
     EXIT()
 
 
-def list_files(path, ext=""):
+def list_files(path, ext="", with_ext=False):
     """
     Lists all files with a given extension found in a directory, if the
     directory exists.
@@ -324,21 +323,28 @@ def list_files(path, ext=""):
     ext : str, optional
         Extension of files to be searched for. Should include the dot, i.e. to
         search for Python files, use ext=".py".
+    with_ext : bool, optional
+        Whether to return filenames with the extension, or without it (i.e.
+        with the extension stripped).
 
     Returns
     -------
     fnames : list of str
-        A list of the filenames as strings. Filenames include the extension (if
-        given) but are not prefixed by the directory.
+        A list of the filenames as strings.
     """
     if os.path.isdir(path):
         if ext == "":
             return [i for i in os.listdir(path)
                     if os.path.isfile(os.path.join(path, i))]
         else:
-            return [os.path.splitext(i)[0] for i in os.listdir(path)
-                    if i.endswith(ext)
-                    and os.path.isfile(os.path.join(path, i))]
+            if with_ext:
+                return [i for i in os.listdir(path)
+                        if i.endswith(ext)
+                        and os.path.isfile(os.path.join(path, i))]
+            else:
+                return [os.path.splitext(i)[0] for i in os.listdir(path)
+                        if i.endswith(ext)
+                        and os.path.isfile(os.path.join(path, i))]
     else:
         return []
 
@@ -495,6 +501,26 @@ def get_new_routine():
     return Routine(name, opt_pars, lbs, ubs, inits, tols, cf, au)
 
 
+def load_routine(routine_name):
+    """
+    Reads in a Routine serialised as JSON inside the p_routines directory.
+
+    Parameters
+    ----------
+    routine_name : str
+        The name of the routine. The routine is read from the
+        p_routines/<routine_name>.json file.
+
+    Returns
+    -------
+    Routine
+        The Routine object.
+    """
+    with open(os.path.join(p_routines, routine_name + ".json"), "rb") as f:
+        routine = Routine(**json.load(f))
+    return routine
+
+
 def check_routine(routine):
     """
     Checks that a Routine object is valid. Exits the programme if it isn't.
@@ -514,6 +540,49 @@ def check_routine(routine):
     except AttributeError:
         err_exit("The routine file is invalid.\n"
                  "Please delete it and recreate it from within poise.")
+
+
+def routine_to_str(routine):
+    """
+    Generates a paragraph of text that summarises the parameters of a Routine.
+
+    Parameters
+    ----------
+    routine : Routine
+        The Routine to be described.
+
+    Returns
+    -------
+    str
+        The various parameters of the Routine in human-readable form.
+    """
+    d = routine._asdict()
+    s = routine.name
+
+    for key in sorted(list(d.keys())):
+        s += "\n\t{:5}: {}".format(key, str(d[key]))
+    return s
+
+
+def list_routines():
+    """
+    Shows the user a list of routines and their parameters. Invoked via ``poise
+    -l``.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
+    routine_names = sorted(list_files(p_routines, ext=".json"))
+    routine_strings = [routine_to_str(load_routine(routine_name))
+                       for routine_name in routine_names]
+    text = "\n\n".join(routine_strings)
+    VIEWTEXT(title="Available poise routines", text=text)
+    EXIT()
 
 
 def check_python3path():
@@ -884,11 +953,9 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    # List
     if args.list:
-        saved_routines = list_files(p_routines, ext=".json")
-        VIEWTEXT(title="Available poise routines",
-                 text="\n".join(saved_routines))
-        EXIT()
+        list_routines()
     elif args.kill:
         kill_remaining_backends()
     else:
