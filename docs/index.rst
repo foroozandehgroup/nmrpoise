@@ -36,6 +36,7 @@ Contents
    install
    routines
    running
+   frontend
    costfunctions
    dev
 
