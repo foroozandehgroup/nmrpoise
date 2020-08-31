@@ -11,6 +11,4 @@ POISE can be installed using ``pip``:
 
     pip install nmrpoise
 
-Documentation is hosted at https://poise.readthedocs.io/.
-
-
+Documentation is hosted at https://nmrpoise.readthedocs.io/.
