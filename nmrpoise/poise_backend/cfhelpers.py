@@ -8,9 +8,47 @@ functions.
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+from pathlib import Path
+
 import numpy as np
 
 from .shared import _g
+
+
+def make_p_spec(path=None, expno=None, procno=None):
+    """
+    Constructs a |Path| object corresponding to the procno folder
+    ``<path>/<expno>/pdata/<procno>``. If parameters are not passed, they are
+    inherited from the currently active spectrum (_g.p_spectrum).
+
+    Thus, for example, ``make_p_spec(expno=1, procno=1)`` returns a path to the
+    spectrum with EXPNO 1 and PROCNO 1, but with the same name as the currently
+    active spectrum.
+
+    Parameters
+    ----------
+    path : str or |Path|, optional
+        Path to the main folder of the spectrum (one level above the expno
+        folders).
+    expno : int, optional
+    procno : int, optional
+
+    Returns
+    -------
+    p_spec : |Path|
+        Path pointing to the requested spectrum.
+    """
+    # this check is only needed for the unit tests, during normal usage it
+    # should never be None
+    if _g.p_spectrum is not None:
+        default_procno = int(_g.p_spectrum.name)
+        default_expno = int(_g.p_spectrum.parents[1].name)
+        default_path = _g.p_spectrum.parents[2]
+    # overwrite defaults with user-passed parameters
+    path = Path(path) or default_path
+    expno = expno or default_expno
+    procno = procno or default_procno
+    return path / str(expno) / "pdata" / str(procno)
 
 
 def _parse_bounds(b):
@@ -122,18 +160,15 @@ def get1d_fid(p_spec=None):
 
     Parameters
     ----------
-    None
+    p_spec : |Path|, optional
+        Path to the procno folder of interest. (The FID is taken from the expno
+        folder two levels up.) Leave blank to use the currently active spectrum
+        (i.e. _g.p_spectrum).
 
     Returns
     -------
-    ndarray
+    |ndarray|
         Complex-valued array containing the FID.
-
-    Notes
-    -----
-    The p_spec parameter is only used in unit tests and should not actually be
-    passed in a cost function. Under normal circumstances this will default to
-    the FID or spectrum being measured.
     """
     p_spec = p_spec or _g.p_spectrum
     p_fid = p_spec.parents[1] / "fid"
@@ -145,59 +180,14 @@ def get1d_fid(p_spec=None):
     return fid[0] + (1j * fid[1])
 
 
-def _get_1d(spec_fname, bounds="", epno=None, p_spec=None):
+def _get_1d(spec_fname, bounds="", p_spec=None):
     """
-    Get a 1D spectrum. This function accounts for TopSpin's NC_PROC variable,
-    scaling the spectrum intensity accordingly.
+    Helper-helper function which does the real work in reading the spectrum.
 
-    To get the real spectrum and imaginary spectrum, pass spec_fname="1r" or
-    spec_fname="1i" respectively.
-
-    Note that this function only works for 1D spectra. It does *not* work for
-    1D projections of 2D spectra. If you want to work with projections, you can
-    use get_2d_spectrum() to get the full 2D spectrum, then manipulate it using
-    numpy functions as appropriate. Examples can be found in the docs.
-
-    The bounds parameter may be specified in the following formats:
-       - between 5 and 8 ppm:   bounds="5..8"  OR bounds=(5, 8)
-       - greater than 9.3 ppm:  bounds="9.3.." OR bounds=(9.3, None)
-       - less than -2 ppm:      bounds="..-2"  OR bounds=(None, -2)
-
-    Parameters
-    ----------
-    spec_fname : str
-        File name of the spectrum; "1r" for real or "1i" for imaginary.
-    bounds : str or tuple, optional
-        String or tuple describing the region of interest. See above for
-        examples. If no bounds are provided, uses the ``F1P`` and ``F2P``
-        processing parameters, which can be specified via ``dpl``. If these are
-        not specified, defaults to the whole spectrum.
-    epno : tuple of int, optional
-        (expno, procno) of spectrum of interest. Defaults to the spectrum
-        being evaluated. As of now, there is no way to read in a spectrum in a
-        folder with a different name (please let us know if this is a useful
-        feature that should be implemented).
-
-    Returns
-    -------
-    ndarray
-        Array containing the spectrum or the desired section of it (if bounds
-        were specified).
-
-    Notes
-    -----
-    The p_spec parameter is only used in unit tests and should not actually be
-    passed in a cost function.
+    The interface is the same as get1d_real, but with an additional parameter
+    spec_fname. This is a string that is either "1r" (for the real spectrum) or
+    "1i" (for the imaginary spectrum).
     """
-    # Check whether user has specified epno
-    if epno is not None:
-        if len(epno) == 2:
-            p_spec = p_spec or _g.p_spectrum
-            p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
-        else:
-            raise ValueError("Please provide a valid [expno, procno] "
-                             "combination.")
-
     p_spec = p_spec or _g.p_spectrum
     p_specdata = p_spec / spec_fname
     spec = np.fromfile(p_specdata, dtype=np.int32)
@@ -224,111 +214,59 @@ def _get_1d(spec_fname, bounds="", epno=None, p_spec=None):
     return spec[left_point:right_point + 1]
 
 
-def get1d_real(bounds="", epno=None, p_spec=None):
+def get1d_real(bounds="", p_spec=None):
     """
-    Get the real spectrum. This function accounts for TopSpin's NC_PROC
-    variable, scaling the spectrum intensity accordingly.
+    Return the real spectrum as a |ndarray|. This function accounts for
+    TopSpin's ``NC_PROC`` variable, scaling the spectrum intensity accordingly.
 
     Note that this function only works for 1D spectra. It does *not* work for
     1D projections of 2D spectra. If you want to work with projections, you can
-    use get_2d_spectrum() to get the full 2D spectrum, then manipulate it using
-    numpy functions as appropriate. Examples can be found in the docs.
+    use `get2d_rr` to get the full 2D spectrum, then manipulate it using numpy
+    functions as appropriate. Examples can be found in the docs.
 
     The bounds parameter may be specified in the following formats:
-       - between 5 and 8 ppm:   bounds="5..8"  OR bounds=(5, 8)
-       - greater than 9.3 ppm:  bounds="9.3.." OR bounds=(9.3, None)
-       - less than -2 ppm:      bounds="..-2"  OR bounds=(None, -2)
+
+     - between 5 and 8 ppm:  ``bounds="5..8"``  OR ``bounds=(5, 8)``
+     - greater than 9.3 ppm: ``bounds="9.3.."`` OR ``bounds=(9.3, None)``
+     - less than -2 ppm:     ``bounds="..-2"``  OR ``bounds=(None, -2)``
 
     Parameters
     ----------
-    spec_fname : str
-        File name of the spectrum; "1r" for real or "1i" for imaginary.
     bounds : str or tuple, optional
         String or tuple describing the region of interest. See above for
         examples. If no bounds are provided, uses the ``F1P`` and ``F2P``
         processing parameters, which can be specified via ``dpl``. If these are
         not specified, defaults to the whole spectrum.
-    epno : tuple of int, optional
-        (expno, procno) of spectrum of interest. Defaults to the spectrum
-        being evaluated. As of now, there is no way to read in a spectrum in a
-        folder with a different name (please let us know if this is a useful
-        feature that should be implemented).
+    p_spec : |Path|, optional
+        Path to the procno folder of interest. (The FID is taken from the expno
+        folder two levels up.) Leave blank to use the currently active spectrum
+        (i.e. _g.p_spectrum).
 
     Returns
     -------
-    ndarray
+    |ndarray|
         Array containing the spectrum or the desired section of it (if bounds
         were specified).
-
-    Notes
-    -----
-    The p_spec parameter is only used in unit tests and should not actually be
-    passed in a cost function.
     """
-    return _get_1d(spec_fname="1r", bounds=bounds, epno=epno, p_spec=p_spec)
+    return _get_1d(spec_fname="1r", bounds=bounds, p_spec=p_spec)
 
 
-def get1d_imag(bounds="", epno=None, p_spec=None):
+def get1d_imag(bounds="", p_spec=None):
     """
     Same as `get1d_real`, except that it reads the imaginary spectrum.
     """
-    return _get_1d(spec_fname="1i", bounds=bounds, epno=epno, p_spec=p_spec)
+    return _get_1d(spec_fname="1i", bounds=bounds, p_spec=p_spec)
 
 
-def _get_2d(spec_fname, f1_bounds="", f2_bounds="", epno=None, p_spec=None):
+def _get_2d(spec_fname, f1_bounds="", f2_bounds="", p_spec=None):
     """
-    Get a 2D spectrum. This function takes into account the NC_proc value in
-    TopSpin's processing parameters.
+    Helper-helper function which does the real work in reading the spectrum.
 
-    The f1_bounds and f2_bounds parameters may be specified in the following
-    formats:
-       - between 5 and 8 ppm:   f1_bounds="5..8"  OR f1_bounds=(5, 8)
-       - greater than 9.3 ppm:  f1_bounds="9.3.." OR f1_bounds=(9.3, None)
-       - less than -2 ppm:      f1_bounds="..-2"  OR f1_bounds=(None, -2)
-
-    Parameters
-    ----------
-    spec_fname : str
-        Filename of the spectrum of interest. Can be "2rr", "2ri", "2ir", or
-        "2ii", corresponding to the four hypercomplex quadrants.
-    f1_bounds : str or tuple, optional
-        String or tuple describing the indirect-dimension region of interest.
-        See above for examples. If no bounds are provided, uses the ``1 F1P``
-        and ``1 F2P`` processing parameters, which can be specified via
-        ``dpl``. If these are not specified, defaults to the whole spectrum.
-    f2_bounds : str or tuple, optional
-        String or tuple describing the direct-dimension region of interest. See
-        above for examples. If no bounds are provided, uses the ``2 F1P`` and
-        ``2 F2P`` processing parameters, which can be specified via ``dpl``. If
-        these are not specified, defaults to the whole spectrum.
-    epno : tuple of int, optional
-        (expno, procno) of spectrum of interest. Defaults to the spectrum
-        being evaluated. As of now, there is no way to read in a spectrum in a
-        folder with a different name (please let us know if this is a useful
-        feature that should be implemented).
-
-    Returns
-    -------
-    ndarray
-        2D array containing the spectrum or the desired section of it (if
-        *f1_bounds* or *f2_bounds* were specified).
-
-    Notes
-    -----
-    The p_spec parameter is only used in unit tests and should not actually be
-    passed in a cost function.
+    The interface is the same as get2d_rr, but with an additional parameter
+    spec_fname. This is a string that is either "2rr", "2ri", "2ir", or "2ii".
     """
-    # Check whether user has specified epno
-    if epno is not None:
-        if len(epno) == 2:
-            p_spec = p_spec or _g.p_spectrum
-            p_spec = p_spec.parents[2] / str(epno[0]) / "pdata" / str(epno[1])
-        else:
-            raise ValueError("Please provide a valid [expno, procno] "
-                             "combination.")
-
     p_spec = p_spec or _g.p_spectrum
-    p_specdata = p_spec / "2rr"
+    p_specdata = p_spec / spec_fname
 
     # Check data type (TopSpin 3 int vs TopSpin 4 float)
     dtypp = getpar("dtypp", p_spec)
@@ -336,7 +274,7 @@ def _get_2d(spec_fname, f1_bounds="", f2_bounds="", epno=None, p_spec=None):
         dt = "<" if np.all(getpar("bytordp", p_spec) == 0) else ">"
         dt += "i4"
     else:
-        raise NotImplementedError("get_2d_spectrum(): "
+        raise NotImplementedError("_get_2d: "
                                   "float data not yet accepted")
     sp = np.fromfile(p_specdata, dtype=np.dtype(dt))
     # Format according to xdim. See TopSpin "data format" manual.
@@ -381,22 +319,21 @@ def _get_2d(spec_fname, f1_bounds="", f2_bounds="", epno=None, p_spec=None):
               f2_upper_point:f2_lower_point + 1]
 
 
-def get2d_rr(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
+def get2d_rr(f1_bounds="", f2_bounds="", p_spec=None):
     """
-    Get the real part of the 2D spectrum (the "RR" quadrant). This function
-    takes into account the NC_proc value in TopSpin's processing parameters.
+    Return the real part of the 2D spectrum (the "RR" quadrant) as a 2D
+    |ndarray|. This function takes into account the NC_proc value in TopSpin's
+    processing parameters.
 
     The f1_bounds and f2_bounds parameters may be specified in the following
     formats:
-       - between 5 and 8 ppm:   f1_bounds="5..8"  OR f1_bounds=(5, 8)
-       - greater than 9.3 ppm:  f1_bounds="9.3.." OR f1_bounds=(9.3, None)
-       - less than -2 ppm:      f1_bounds="..-2"  OR f1_bounds=(None, -2)
+
+     - between 5 and 8 ppm:  ``f1_bounds="5..8"``  OR ``f1_bounds=(5, 8)``
+     - greater than 9.3 ppm: ``f1_bounds="9.3.."`` OR ``f1_bounds=(9.3, None)``
+     - less than -2 ppm:     ``f1_bounds="..-2"``  OR ``f1_bounds=(None, -2)``
 
     Parameters
     ----------
-    spec_fname : str
-        Filename of the spectrum of interest. Can be "2rr", "2ri", "2ir", or
-        "2ii", corresponding to the four hypercomplex quadrants.
     f1_bounds : str or tuple, optional
         String or tuple describing the indirect-dimension region of interest.
         See above for examples. If no bounds are provided, uses the ``1 F1P``
@@ -407,15 +344,14 @@ def get2d_rr(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
         above for examples. If no bounds are provided, uses the ``2 F1P`` and
         ``2 F2P`` processing parameters, which can be specified via ``dpl``. If
         these are not specified, defaults to the whole spectrum.
-    epno : tuple of int, optional
-        (expno, procno) of spectrum of interest. Defaults to the spectrum
-        being evaluated. As of now, there is no way to read in a spectrum in a
-        folder with a different name (please let us know if this is a useful
-        feature that should be implemented).
+    p_spec : |Path|, optional
+        Path to the procno folder of interest. (The FID is taken from the expno
+        folder two levels up.) Leave blank to use the currently active spectrum
+        (i.e. _g.p_spectrum).
 
     Returns
     -------
-    ndarray
+    |ndarray|
         2D array containing the spectrum or the desired section of it (if
         *f1_bounds* or *f2_bounds* were specified).
 
@@ -425,35 +361,39 @@ def get2d_rr(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
     passed in a cost function.
     """
     return _get_2d(spec_fname="2rr",
-                   f1_bounds=f1_bounds, f2_bounds=f2_bounds,
-                   epno=epno, p_spec=p_spec)
+                   f1_bounds=f1_bounds,
+                   f2_bounds=f2_bounds,
+                   p_spec=p_spec)
 
 
-def get2d_ri(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
+def get2d_ri(f1_bounds="", f2_bounds="", p_spec=None):
     """
     Same as `get2d_rr`, except that it reads the '2ri' file.
     """
     return _get_2d(spec_fname="2ri",
-                   f1_bounds=f1_bounds, f2_bounds=f2_bounds,
-                   epno=epno, p_spec=p_spec)
+                   f1_bounds=f1_bounds,
+                   f2_bounds=f2_bounds,
+                   p_spec=p_spec)
 
 
-def get2d_ir(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
+def get2d_ir(f1_bounds="", f2_bounds="", p_spec=None):
     """
     Same as `get2d_rr`, except that it reads the '2ir' file.
     """
     return _get_2d(spec_fname="2ir",
-                   f1_bounds=f1_bounds, f2_bounds=f2_bounds,
-                   epno=epno, p_spec=p_spec)
+                   f1_bounds=f1_bounds,
+                   f2_bounds=f2_bounds,
+                   p_spec=p_spec)
 
 
-def get2d_ii(f1_bounds="", f2_bounds="", epno=None, p_spec=None):
+def get2d_ii(f1_bounds="", f2_bounds="", p_spec=None):
     """
     Same as `get2d_rr`, except that it reads the '2ii' file.
     """
     return _get_2d(spec_fname="2ii",
-                   f1_bounds=f1_bounds, f2_bounds=f2_bounds,
-                   epno=epno, p_spec=p_spec)
+                   f1_bounds=f1_bounds,
+                   f2_bounds=f2_bounds,
+                   p_spec=p_spec)
 
 
 def _get_acqu_par(par, p_acqus):
@@ -467,7 +407,7 @@ def _get_acqu_par(par, p_acqus):
     ----------
     par : str
         Name of the acquisition parameter.
-    p_acqus : pathlib.Path
+    p_acqus : |Path|
         Path to the status acquisition file (this is 'acqus' for 1D spectra and
         direct dimension of 2D spectra, or 'acqu2s' for indirect dimension of
         2D spectra).
@@ -534,7 +474,7 @@ def _get_proc_par(par, p_procs):
     ----------
     par : str
         Name of the processing parameter.
-    p_procs : pathlib.Path
+    p_procs : |Path|
         Path to the status processing file (this is 'procs' for 1D spectra and
         direct dimension of 2D spectra, or 'proc2s' for indirect dimension of
         2D spectra).
@@ -576,7 +516,7 @@ def getpar(par, p_spec=None):
 
     Returns
     -------
-    float or ndarray
+    float or |ndarray|
         Value(s) of the requested parameter. None if the given parameter was
         not found.
 

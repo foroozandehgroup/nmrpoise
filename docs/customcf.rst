@@ -45,6 +45,10 @@ The ones you are likely to use are the following:
 
 .. currentmodule:: nmrpoise.poise_backend.cfhelpers
 
+.. autofunction:: make_p_spec
+
+|v|
+
 .. autofunction:: get1d_fid
 
 |v|

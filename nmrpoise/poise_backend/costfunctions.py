@@ -58,25 +58,29 @@ def zerorealint():
 
 
 # def psyche():
-#     target = get1d_real(epno=[1, 1])
+#     reference_path = make_p_spec(expno=1, procno=1)
+#     target = get1d_real(p_spec=reference_path)
 #     spec = get1d_real()
 #     return np.linalg.norm(target/np.linalg.norm(target) -
 #                           spec/np.linalg.norm(spec))
 
 
 # def dosy():
-#     target = get1d_real(epno=[99998, 1])
+#     reference_path = make_p_spec(expno=99998, procno=1)
+#     target = get1d_real(p_spec=reference_path)
 #     spec = get1d_real()
 #     return np.abs(np.sum(spec)/np.sum(target) - 0.25)
 
 
 # def dosy_aux():
-#     target = get1d_real(epno=[99998, 1])
+#     reference_path = make_p_spec(expno=99998, procno=1)
+#     target = get1d_real(p_spec=reference_path)
 #     spec = get1d_real()
 #     return np.sum(spec)/np.sum(target) - 0.25
 
 
 # def dosy_2p():
-#     target = get1d_real(epno=[99998, 1])
+#     reference_path = make_p_spec(expno=99998, procno=1)
+#     target = get1d_real(p_spec=reference_path)
 #     spec = get1d_real()
 #     return np.abs(np.sum(spec)/np.sum(target) - 0.25) + getpar("D20")

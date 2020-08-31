@@ -7,9 +7,17 @@ import nmrpoise.poise_backend.cfhelpers as cfh
 from nmrpoise.poise_backend.backend import (Routine, scale, unscale)
 
 
+def test_make_p_spec():
+    ps = cfh.make_p_spec(path=(Path(__file__).parent / "test_data"),
+                         expno=1, procno=1)
+    assert ps == (Path(__file__).parent / "test_data" / "1"
+                  / "pdata" / "1")
+
+
 def makep(expno, procno):
-    return (Path(__file__).parent / "test_data" /
-            str(expno) / "pdata" / str(procno))
+    return cfh.make_p_spec(path=(Path(__file__).parent / "test_data"),
+                           expno=expno,
+                           procno=procno)
 
 
 def test_ppm_to_point():
