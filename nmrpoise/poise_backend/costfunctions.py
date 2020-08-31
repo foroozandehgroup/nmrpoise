@@ -10,6 +10,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 import numpy as np
 
 from .cfhelpers import *
+from .shared import _g
 
 
 def noe_1d():
