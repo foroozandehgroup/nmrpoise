@@ -38,6 +38,8 @@ Contents
    running
    frontend
    costfunctions
+   au
+   customcf
    dev
 
 * :ref:`genindex`

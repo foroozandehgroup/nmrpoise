@@ -33,6 +33,12 @@ extensions = [
     "numpydoc"
 ]
 
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+}
+
 rst_prolog = """
 .. |ndarray| replace:: :class:`ndarray <numpy.ndarray>`
 .. |v| replace:: |br| |vspace|

@@ -2,7 +2,7 @@ Running an optimisation
 -----------------------
 
 Assuming you've already created a routine (see `routines` if not), this page will show you how to run the optimisation.
-We'll use the same ``p1`` calibration routine that we described before, but the principles apply equally to all routines.
+We'll use the same ``p1`` calibration routine that we described on that page, but the principles apply equally to all routines.
 
 The first thing to do is to set up the NMR experiment.
 Use ``edc`` or ``new`` to create a new proton pulse-acquire experiment.
@@ -56,7 +56,8 @@ Parsing the log
 ===============
 
 If you are interested in analysing data from (possibly multiple) optimisation runs, all information is logged in a ``poise.log`` file.
-This log file can be parsed using a Python 3 script::
+This log file is stored inside the expno folder (the post-optimisation popup also tells you where it can be found — see above for an example).
+It can be parsed using a Python 3 script::
 
    >>> from nmrpoise import parse_log
    >>> # pass it the path to poise.log, or to the directory containing it
@@ -64,7 +65,7 @@ This log file can be parsed using a Python 3 script::
      routine  initial param    lb    ub  tol algorithm     costfn    auprog  optimum         fbest  nfev  time
    0   p1cal     48.0  [p1]  40.0  56.0  0.2        nm  minabsint  poise_1d   48.125  6.849146e+06    10    77
 
-`parse_log` returns a pandas DataFrame object which contains most of the information in the log file.
+`parse_log` returns a `pandas.DataFrame` object which contains most of the information in the log file.
 However, this object does not include details of individual cost function evaluations (even though these are fully logged).
 If you want to analyse that data, you will have to write your own function!
 

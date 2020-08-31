@@ -1,5 +1,5 @@
-Routines in POISE
------------------
+Setting up a Routine
+--------------------
 
 If you're coming here from the `install`, you should make sure that POISE has been installed correctly.
 A simple check is to type in ``poise -l`` into the TopSpin command line: if it shows a text box, then you should be good to go.
@@ -73,7 +73,7 @@ This cost function is also bundled with POISE, and is called ``minabsint``.
 (For those who are familiar with TopSpin's built-in ``popt``, this is equivalent to the ``MAGMIN`` criterion.)
 
 .. note::
-   For more information about the built-in cost functions, check out `something`.
+   For more information about the built-in cost functions, check out `costfunctions`.
 
 The corresponding AU programme simply needs to acquire the spectrum, then process using Fourier transform, phase correction, and baseline correction.
 POISE is bundled with one such AU programme, called ``poise_1d``, which performs all this.
