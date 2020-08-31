@@ -29,7 +29,6 @@ tshome = getTopspinHome()
 p_poise = os.path.join(tshome, "exp/stan/nmr/py/user/poise_backend")
 p_backend = os.path.join(p_poise, "backend.py")
 p_routines = os.path.join(p_poise, "routines")
-p_costfunctions = os.path.join(p_poise, "cost_functions")
 p_python3 = r"/usr/local/bin/python"
 Routine = namedtuple("Routine", "name pars lb ub init tol cf au")
 
@@ -73,11 +72,11 @@ def main(args):
                 " OK to dismiss this warning.".format(GETACQUDIM()))
 
     # Check that the folders are valid
-    for folder in [p_poise, p_routines, p_costfunctions]:
+    for folder in [p_poise, p_routines]:
         if not os.path.isdir(folder):
             os.makedirs(folder)
     # Check that cost functions folder actually has some cost functions
-    _cfs = list_files(p_costfunctions, ext=".py")
+    _cfs = detect_costfunctions()
     if _cfs == []:
         err_exit("No cost functions were found. Please define a cost function "
                  ", or reinstall poise to obtain the defaults.")
@@ -479,7 +478,7 @@ def get_new_routine():
 
     # Prompt for cost function.
     # Search for existing cost functions
-    saved_cfs = list_files(p_costfunctions, ext=".py")
+    saved_cfs = detect_costfunctions()
 
     if saved_cfs == []:
         err_exit("No cost functions have been defined!\n"
@@ -583,6 +582,27 @@ def list_routines():
     text = "\n\n".join(routine_strings)
     VIEWTEXT(title="Available poise routines", text=text)
     EXIT()
+
+
+def detect_costfunctions():
+    """
+    Gets poise_backend/get_cfs.py to parse the costfunctions.py file (using the
+    ast module) and pass the list of defined cost functions back to the
+    frontend.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    available_cfs : list of str
+        List of cost functions which have been defined.
+    """
+    p_get_cfs = os.path.join(p_poise, "get_cfs.py")
+    p = subprocess.Popen([p_python3, p_get_cfs], stdout=subprocess.PIPE)
+    cfs, _ = p.communicate()
+    return cfs.split()
 
 
 def check_python3path():

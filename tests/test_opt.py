@@ -8,6 +8,17 @@ from nmrpoise.poise_backend.optpoise import (nelder_mead,
 from nmrpoise.poise_backend.backend import scale, unscale
 
 
+def test_deco_count():
+    @deco_count
+    def peep():
+        print("PEEP")
+
+    n = 10
+    for i in range(n):
+        peep()
+    assert peep.calls == n
+
+
 @deco_count
 def rosenbrock(x, arg1=None, arg2=None):
     # Using scipy's definition. We have a couple of dummy arguments because

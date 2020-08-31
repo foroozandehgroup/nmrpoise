@@ -17,14 +17,6 @@ def test_style_backend():
     assert res.total_errors == 0
 
 
-def test_style_costfunctions():
-    s = pycodestyle.StyleGuide()
-    p = ((Path(__file__).parents[1].resolve()) / "nmrpoise" / "poise_backend" /
-         "cost_functions")
-    res = s.check_files([f for f in p.iterdir() if f.suffix == ".py"])
-    assert res.total_errors == 0
-
-
 def test_style_tests():   # how meta
     s = pycodestyle.StyleGuide()
     p = Path(__file__).parent
