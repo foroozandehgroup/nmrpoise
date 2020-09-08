@@ -115,12 +115,6 @@ def _ppm_to_point(shift, axis=None, p_spec=None):
     int or None
         The desired point. None if the chemical shift lies outside the spectral
         window.
-
-    Notes
-    -----
-    The p_spec parameter is only used in unit tests and should not actually be
-    passed in a cost function. Under normal circumstances this will default to
-    the FID or spectrum being measured.
     """
     p_spec = p_spec or _g.p_spectrum
     si = getpar("SI", p_spec)
@@ -224,7 +218,7 @@ def get1d_real(bounds="", p_spec=None):
     use `get2d_rr` to get the full 2D spectrum, then manipulate it using numpy
     functions as appropriate. Examples can be found in the docs.
 
-    The bounds parameter may be specified in the following formats:
+    The *bounds* parameter may be specified in the following formats:
 
      - between 5 and 8 ppm:  ``bounds="5..8"``  OR ``bounds=(5, 8)``
      - greater than 9.3 ppm: ``bounds="9.3.."`` OR ``bounds=(9.3, None)``
@@ -238,9 +232,8 @@ def get1d_real(bounds="", p_spec=None):
         processing parameters, which can be specified via ``dpl``. If these are
         not specified, defaults to the whole spectrum.
     p_spec : |Path|, optional
-        Path to the procno folder of interest. (The FID is taken from the expno
-        folder two levels up.) Leave blank to use the currently active spectrum
-        (i.e. _g.p_spectrum).
+        Path to the procno folder of interest. Leave blank to use the currently
+        active spectrum (i.e. _g.p_spectrum).
 
     Returns
     -------
@@ -322,11 +315,11 @@ def _get_2d(spec_fname, f1_bounds="", f2_bounds="", p_spec=None):
 def get2d_rr(f1_bounds="", f2_bounds="", p_spec=None):
     """
     Return the real part of the 2D spectrum (the "RR" quadrant) as a 2D
-    |ndarray|. This function takes into account the NC_proc value in TopSpin's
-    processing parameters.
+    |ndarray|. This function takes into account the ``NC_PROC`` value in
+    TopSpin's processing parameters.
 
-    The f1_bounds and f2_bounds parameters may be specified in the following
-    formats:
+    The *f1_bounds* and *f2_bounds* parameters may be specified in the
+    following formats:
 
      - between 5 and 8 ppm:  ``f1_bounds="5..8"``  OR ``f1_bounds=(5, 8)``
      - greater than 9.3 ppm: ``f1_bounds="9.3.."`` OR ``f1_bounds=(9.3, None)``
@@ -345,20 +338,14 @@ def get2d_rr(f1_bounds="", f2_bounds="", p_spec=None):
         ``2 F2P`` processing parameters, which can be specified via ``dpl``. If
         these are not specified, defaults to the whole spectrum.
     p_spec : |Path|, optional
-        Path to the procno folder of interest. (The FID is taken from the expno
-        folder two levels up.) Leave blank to use the currently active spectrum
-        (i.e. _g.p_spectrum).
+        Path to the procno folder of interest. Leave blank to use the currently
+        active spectrum (i.e. _g.p_spectrum).
 
     Returns
     -------
     |ndarray|
         2D array containing the spectrum or the desired section of it (if
         *f1_bounds* or *f2_bounds* were specified).
-
-    Notes
-    -----
-    The p_spec parameter is only used in unit tests and should not actually be
-    passed in a cost function.
     """
     return _get_2d(spec_fname="2rr",
                    f1_bounds=f1_bounds,
@@ -506,13 +493,17 @@ def _get_proc_par(par, p_procs):
 
 def getpar(par, p_spec=None):
     """
-    Obtains the value of an (acquisition or processing) parameter. Works for
-    both 1D and 2D spectra (see return type below).
+    Obtains the value of a numeric (acquisition or processing) parameter.
+    Non-numeric parameters (i.e. strings) are not currently accessible! Works
+    for both 1D and 2D spectra (see return type below).
 
     Parameters
     ----------
     par : str
         Name of the parameter.
+    p_spec : |Path|, optional
+        Path to the procno folder of interest. Leave blank to use the currently
+        active spectrum (i.e. _g.p_spectrum).
 
     Returns
     -------
@@ -524,11 +515,6 @@ def getpar(par, p_spec=None):
         returns an ndarray consisting of (f1_value, f2_value).  Otherwise (for
         1D spectra, or for 2D parameters which only apply to the direct
         dimension), getpar() returns a float.
-
-    Notes
-    -----
-    The p_spec parameter is only used in unit tests and should not actually be
-    passed in a cost function.
     """
     p_spec = p_spec or _g.p_spectrum
 

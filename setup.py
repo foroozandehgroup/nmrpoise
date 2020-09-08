@@ -32,12 +32,12 @@ setup(
     name="nmrpoise",
     version=__version__,
     author="Jonathan Yong",
-    author_email="yongrenjie@gmail.com",
+    author_email="jonathan.yong@chem.ox.ac.uk",
     description=("Parameter Optimisation by Iterative Spectral Evaluation, "
                  "a TopSpin-compatible NMR package"),
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yongrenjie/nmrpoise",
+    url="https://github.com/foroozandehgroup/nmrpoise",
     packages=[
         "nmrpoise",
         "nmrpoise.poise_backend",

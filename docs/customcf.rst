@@ -82,3 +82,16 @@ The ones you are likely to use are the following:
 |v|
 
 .. autofunction:: log
+
+|v|
+
+
+Examples
+========
+
+There are a number of cost functions which ship with POISE.
+These can all be found inside the ``costfunctions.py`` file referred to above.
+This file also contains a number of more specialised cost functions, which were used for the examples in the POISE paper.
+(Instead of opening the file, you can also find the `source code on GitHub <https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/poise_backend/costfunctions.py>`_.)
+
+A number of these are thoroughly commented with detailed explanations; do consider checking these out if you want more guidance on how to write your own cost function.

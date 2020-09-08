@@ -82,7 +82,7 @@ Errors
 POISE tries its best to exit gracefully from errors, and often you won't need to care about any of them.
 However, if something *does* go wrong during an optimisation, errors will be logged to the two files ``poise_err_frontend.log`` and ``poise_err_backend.log``, depending on which script runs into an error.
 These files reside in the same folder as ``poise.log``, i.e. the "expno folder".
-We welcome bug reports — please submit an issue on `GitHub <https://github.com/yongrenjie/nmrpoise/issues>`_ or drop us an email (replace AT with @):
+We welcome bug reports — please submit an issue on `GitHub <https://github.com/foroozandehgroup/nmrpoise/issues>`_ or drop us an email (replace AT with @):
 
 .. raw:: html
 

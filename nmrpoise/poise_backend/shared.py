@@ -23,14 +23,14 @@ class _g():
     routine_id : str
         The name of the routine being used.
 
-    p_spectrum : pathlib.Path
-        The path to the procno folder of the spectrum being acquired. (e.g.
+    p_spectrum : |Path|
+        The path to the procno folder of the spectrum just acquired. (e.g.
         ``/path/to/data/1/pdata/1``)
 
-    p_optlog : pathlib.Path
+    p_optlog : |Path|
         The path to the currently active ``poise.log`` file.
 
-    p_errlog : pathlib.Path
+    p_errlog : |Path|
         The path to the currently active ``poise_err_backend.log`` file.
 
     maxfev : int
@@ -38,7 +38,7 @@ class _g():
         be zero, indicating no limit (beyond the hard limit of 500 times the
         number of parameters).
 
-    p_poise : pathlib.Path
+    p_poise : |Path|
         The path to the ``$TS/exp/stan/nmr/py/user/poise_backend`` folder.
 
     spec_f1p : float or tuple of float
