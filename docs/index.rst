@@ -15,8 +15,6 @@ However, depending on your level of interaction with the software, you may not n
 For example, if somebody else has already set up POISE for you, you can probably skip to `running`.
 
 
-**Contents**
-
 .. toctree::
    :maxdepth: 2
    

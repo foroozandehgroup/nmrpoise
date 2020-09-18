@@ -1,7 +1,7 @@
 Running an optimisation
 -----------------------
 
-Assuming you've already created a routine (see `routines` if not), this page will show you how to run the optimisation.
+Assuming you or someone else has already created a routine (see `routines` if not), this page will show you how to run the optimisation.
 We'll use the same ``p1`` calibration routine that we described on that page, but the principles apply equally to all routines.
 
 The first thing to do is to set up the NMR experiment.
@@ -82,8 +82,4 @@ Errors
 POISE tries its best to exit gracefully from errors, and often you won't need to care about any of them.
 However, if something *does* go wrong during an optimisation, errors will be logged to the two files ``poise_err_frontend.log`` and ``poise_err_backend.log``, depending on which script runs into an error.
 These files reside in the same folder as ``poise.log``, i.e. the "expno folder".
-We welcome bug reports — please submit an issue on `GitHub <https://github.com/foroozandehgroup/nmrpoise/issues>`_ or drop us an email (replace AT with @):
-
-.. raw:: html
-
-   <span>j</span><span>o</span><span>n</span><span>a</span><span>t</span><span>h</span><span>a</span><span>n</span><span>.</span><span>y</span><span>o</span><span>n</span><span>g</span><span> AT </span><span>c</span><span>h</span><span>e</span><span>m</span><span>.</span><span>o</span><span>x</span><span>.</span><span>a</span><span>c</span><span>.</span><span>u</span><span>k</span><br><span>m</span><span>o</span><span>h</span><span>a</span><span>m</span><span>m</span><span>a</span><span>d</span><span>a</span><span>l</span><span>i</span><span>.</span><span>f</span><span>o</span><span>r</span><span>o</span><span>o</span><span>z</span><span>a</span><span>n</span><span>d</span><span>e</span><span>h</span><span> AT </span><span>c</span><span>h</span><span>e</span><span>m</span><span>.</span><span>o</span><span>x</span><span>.</span><span>a</span><span>c</span><span>.</span><span>u</span><span>k</span><span>
+We welcome bug reports — please `submit an issue on GitHub <https://github.com/foroozandehgroup/nmrpoise/issues>`_ or drop us an email (addresses can be found on the paper).

@@ -30,7 +30,7 @@ author = 'Jonathan Yong'
 extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.autodoc",
-    "numpydoc"
+    "numpydoc",
 ]
 
 intersphinx_mapping = {
@@ -78,4 +78,11 @@ html_static_path = ['_static']
 html_theme_options = {
     "page_width": "1000px",
     "sidebar_width": "250px",
+}
+
+
+# -- Options for LaTeX output ------------------------------------------------
+
+latex_elements = {
+    "preamble": r"\setkeys{Gin}{width=0.6\linewidth}"
 }
