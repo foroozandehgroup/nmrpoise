@@ -33,12 +33,21 @@ SPDX-License-Identifier: GPL-3.0-or-later
 import time
 import os
 
-# Find the correct parameter set for the 1D sequence.
-if GETPAR("PULPROG") == "doneshot_2d_jy":
-    pulprog = "doneshot_1d_jy"
+# Dictionary of DOSY pulse programmes, to be entered in the form
+# "2d_pulprog": "1d_pulprog". Other DOSY variants can be entered here to
+# "register" them and make them available for use with this script.
+pulprog_dict = {
+    "doneshot_2d_jy": "doneshot_1d_jy",
+}
+
+# Look up the 1D pulse programme based on the current 2D pulse programme.
+pp2d = GETPAR("PULPROG")
+if pp2d in pulprog_dict:
+    pp1d = pulprog_dict[pp2d]
 else:
-    MSG("dosy_opt: unsupported pulse programme")
-# Other variants can be added here.
+    MSG("dosy_opt: unsupported pulse programme. New pulse programmes can be"
+        " added in the dosy_opt.py script.")
+    EXIT()
 
 # Get the expno of the 2D dataset, and store the parameter set. This is
 # important because we want the optimisation to inherit most parameters, e.g.
@@ -54,7 +63,7 @@ reference_dataset = list(original_2d_dataset)
 reference_dataset[1] = str(reference_expno)
 NEWDATASET(reference_dataset, None, "dosytemp")
 RE(reference_dataset)
-PUTPAR("PULPROG", pulprog)
+PUTPAR("PULPROG", pp1d)
 PUTPAR("PARMODE", "1D")
 PUTPAR("PPARMOD", "1D")
 PUTPAR("GPZ 1", "10")
@@ -68,7 +77,7 @@ optimisation_dataset = list(original_2d_dataset)   # make a copy
 optimisation_dataset[1] = str(optimisation_expno)
 NEWDATASET(optimisation_dataset, None, "dosytemp")
 RE(optimisation_dataset)
-PUTPAR("PULPROG", pulprog)
+PUTPAR("PULPROG", pp1d)
 PUTPAR("PARMODE", "1D")
 PUTPAR("PPARMOD", "1D")
 PUTPAR("GPZ 1", "80")
