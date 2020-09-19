@@ -10,15 +10,17 @@ import numpy as np
 import pandas as pd
 
 
-def parse_log(fname):
+def parse_log(fname="."):
     """
     Parse a poise.log file.
 
     Parameters
     ----------
-    fname : str or pathlib.Path
+    fname : (optional) str or pathlib.Path or int
         Path to poise.log file, or the folder containing it (this would be the
-        TopSpin EXPNO folder).
+        TopSpin EXPNO folder). If not specified assumes the current working
+        directory. If passed as an int, assumes "./<fname>" (i.e. expno X in
+        the current working directory).
 
     Returns
     -------
@@ -26,8 +28,11 @@ def parse_log(fname):
         Dataframe with rows corresponding to optimisations which successfully
         terminated. The time taken is given in seconds.
     """
+    # Handle the int case
+    if isinstance(fname, int):
+        fname = f"./{fname}"
     # Check if the file exists
-    fname = Path(fname)
+    fname = Path(fname).resolve()
     if fname.is_dir():
         fname = fname / "poise.log"
     if not fname.exists():
