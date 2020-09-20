@@ -42,7 +42,6 @@ Running under automation
 ========================
 
 It is possible to run POISE under automation, by incorporating it into an acquisition AU programme (the ``AUNM`` parameter in TopSpin).
-(An example of a DOSY acquisition script is presented in the paper.)
 To do so, you can use the syntax::
 
     XCMD("sendgui xpy poise <routine_name> -q [options]")
@@ -50,6 +49,24 @@ To do so, you can use the syntax::
 inside the AU script.
 (Yes, this creates an AU script which runs a Python script which runs an AU script.)
 The ``-q`` flag (or equivalently ``--quiet``) ensures that POISE does not show the final popup informing the user (this popup has to be dismissed before anything else can be done).
+
+Here's an example of how the ``p1`` optimisation above can be incorporated into an AU script:
+
+.. code-block:: c
+
+   #include <stdio.h>
+
+   int main (int argc, **char argv)
+   {
+       printf("Hello, world.");
+       return 0;
+   }
+
+You can also incorporate POISE into other Python scripts in TopSpin.
+The paper has an example of such a Python script used for DOSY optimisations.
+The Python equivalent of the AU script above would be::
+
+   print("Hello, world.")
 
 
 Parsing the log

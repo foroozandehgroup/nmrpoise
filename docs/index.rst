@@ -26,6 +26,3 @@ For example, if somebody else has already set up POISE for you, you can probably
    au
    customcf
    dev
-
-* :ref:`genindex`
-* :ref:`search`

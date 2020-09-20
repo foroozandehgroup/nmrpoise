@@ -17,11 +17,12 @@ The package requirements are ``numpy``, ``scipy``, ``pandas``, and ``Py-BOBYQA``
 ``pip`` tries to take care of installing the scripts to your TopSpin directory.
 To do so, it checks for TopSpin installations in standard directories (``/opt`` on Unix and ``C:\Bruker`` on Windows).
 If ``pip`` exits without errors, this should have succeeded; you can test it by typing ``poise -h`` into TopSpin's command-line, which should spawn a popup.
-If that is the case, congratulations — you can move on to the next chapter.
+If that is the case, congratulations — you can move on to the next chapter, `routines`.
 
------
+Troubleshooting
+---------------
 
-However, this can occasionally fail if TopSpin is installed to a non-standard location.
+The installation can occasionally fail if TopSpin is installed to a non-standard location.
 To solve this issue, you can specify the TopSpin installation directory as an environment variable ``TSDIR`` before installing POISE.
 The way to do this depends on what operating system (and shell) you use.
 
@@ -48,3 +49,16 @@ On Unix systems, use:
 (Unless you're using ``csh`` or the like, in which case you use ``setenv``, although you probably didn't need to be told that!)
 
 After running the appropriate command for your operating system, ``pip install nmrpoise`` should be able to detect the ``TSDIR`` environment variable and install the scripts accordingly.
+
+From source
+-----------
+
+If you obtained the source code (e.g. from ``git clone`` or a `GitHub release <https://github.com/foroozandehgroup/nmrpoise/releases>`_) and want to install from there, simply ``cd`` into the top-level ``nmrpoise`` directory and run::
+
+   pip install .
+
+or equivalently::
+
+   python setup.py install
+
+The installation to the TopSpin directory is subject to the same considerations as above.
