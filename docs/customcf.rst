@@ -18,6 +18,8 @@ The rules for cost functions
 
 Cost functions are defined as a standard Python 3 function which takes no parameters and returns a float (the value of the cost function).
 
+Do write a useful docstring if you can: this docstring will be shown to the user when they type ``poise -l`` (which lists all available cost functions and routines).
+
 Also, you should *never* print anything inside a cost function directly to ``stdout``.
 That will cause the optimisation to stop.
 If you want to do some debugging, read on — there's a function for that.

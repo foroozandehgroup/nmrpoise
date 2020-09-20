@@ -8,7 +8,9 @@ Used by the frontend.
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+import sys
 import ast
+import json
 from pathlib import Path
 
 
@@ -21,9 +23,15 @@ def main():
     cf_file = Path(__file__).resolve().parent / "costfunctions.py"
     with open(cf_file, 'r') as fp:
         tree = ast.parse(fp.read())
-    functions = [func.name for func in tree.body
+    # Find out which nodes are actually functions.
+    functions = [func for func in tree.body
                  if isinstance(func, ast.FunctionDef)]
-    print(" ".join(functions))
+    # Get their names as well as their docstrings.
+    function_names = [func.name for func in functions]
+    docstrings = [ast.get_docstring(func) for func in functions]
+    # Serialise both as a JSON string, which the frontend can parse.
+    fdict = dict(zip(function_names, docstrings))
+    print(json.dumps(fdict))
 
 
 if __name__ == "__main__":

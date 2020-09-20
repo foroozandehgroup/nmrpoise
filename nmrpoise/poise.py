@@ -77,7 +77,7 @@ def main(args):
             os.makedirs(folder)
     # Check that cost functions folder actually has some cost functions
     _cfs = detect_costfunctions()
-    if _cfs == []:
+    if len(_cfs) == 0:
         err_exit("No cost functions were found. Please define a cost function "
                  ", or reinstall poise to obtain the defaults.")
 
@@ -478,7 +478,7 @@ def get_new_routine():
 
     # Prompt for cost function.
     # Search for existing cost functions
-    saved_cfs = detect_costfunctions()
+    saved_cfs = detect_costfunctions().keys()
 
     if saved_cfs == []:
         err_exit("No cost functions have been defined!\n"
@@ -563,10 +563,10 @@ def routine_to_str(routine):
     return s
 
 
-def list_routines():
+def list_routines_cfs():
     """
-    Shows the user a list of routines and their parameters. Invoked via ``poise
-    -l``.
+    Shows the user a list of cost functions and their docstrings, then routines
+    and their parameters. Invoked via ``poise -l``.
 
     Parameters
     ----------
@@ -576,19 +576,29 @@ def list_routines():
     -------
     None
     """
+    # Get cost functions
+    cfs = detect_costfunctions()
+    text = "Available cost functions (and their descriptions)\n"
+    text += "-------------------------------------------------\n"
+    cf_strings = [" * {}\n    {}".format(function_name, docstring)
+                  for function_name, docstring in cfs.items()]
+    text += "\n\n".join(cf_strings)
+    # Get routines
+    text += "\n"
+    text += "\nAvailable routines\n-------------------\n"
     routine_names = sorted(list_files(p_routines, ext=".json"))
     routine_strings = [routine_to_str(load_routine(routine_name))
                        for routine_name in routine_names]
-    text = "\n\n".join(routine_strings)
-    VIEWTEXT(title="Available poise routines", text=text)
+    text += "\n\n".join(routine_strings)
+    VIEWTEXT(title="Available poise cost functions and routines", text=text)
     EXIT()
 
 
 def detect_costfunctions():
     """
     Gets poise_backend/get_cfs.py to parse the costfunctions.py file (using the
-    ast module) and pass the list of defined cost functions back to the
-    frontend.
+    ast module) and pass a dictionary of defined cost functions and their
+    docstrings back to the frontend.
 
     Parameters
     ----------
@@ -596,13 +606,14 @@ def detect_costfunctions():
 
     Returns
     -------
-    available_cfs : list of str
-        List of cost functions which have been defined.
+    available_cfs : dict
+        Dictionary where keys are the names of the cost function and values are
+        their docstrings.
     """
     p_get_cfs = os.path.join(p_poise, "get_cfs.py")
     p = subprocess.Popen([p_python3, p_get_cfs], stdout=subprocess.PIPE)
-    cfs, _ = p.communicate()
-    return cfs.split()
+    fdict_as_str, _ = p.communicate()
+    return json.loads(fdict_as_str)
 
 
 def check_python3path():
@@ -975,7 +986,7 @@ if __name__ == "__main__":
 
     # List
     if args.list:
-        list_routines()
+        list_routines_cfs()
     elif args.kill:
         kill_remaining_backends()
     else:
