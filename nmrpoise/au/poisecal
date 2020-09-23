@@ -1,24 +1,39 @@
-// use current dataset but change expno to 99999
+/******************************************************************************
+ * poisecal
+ * --------
+ * 
+ * AU script which automates p1 optimisation using POISE. Behaves similarly to
+ * pulsecal: optimises the value of p1 in expno 99999, then sets the optimised
+ * value to the current dataset and shows a message.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *****************************************************************************/
+
+// Use EXPNO 99999 in the current folder for optimisation.
 GETCURDATA
 int old_expno = expno;
 DATASET(name, 99999, procno, disk, user)
-// set some key params
+// Set some key parameters. Notice that these lines can be substantially cut
+// if an appropriate parameter set is set up beforehand.
 RPAR("PROTON", "all")
 GETPROSOL
 STOREPAR("PULPROG", "zg")
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)
 STOREPAR("D 1", 1.0)
-// run optimisation
+// Run optimisation.
 XCMD("sendgui xpy poise p1cal -a bobyqa -q")
-// store optimised value of p1 in variable
+// POISE stores the optimised value in p1 after it's done. We can retrieve it
+// here. Don't try to get the *status* parameter, since that is not the
+// optimised value (it is the value used for the last function evaluation!)
 float p1opt;
-FETCHPAR("P 1", &p1opt)   // don't get status parameter!!
+FETCHPAR("P 1", &p1opt)
 p1opt = p1opt/4;
-// move back to old dataset and set p1 to optimised value
+// Move back to old dataset and set p1 to optimised value.
 DATASET(name, old_expno, procno, disk, user)
 VIEWDATA_SAMEWIN  // not strictly necessary, just re-focuses the original spectrum
 STOREPAR("P 1", p1opt)
-// (optional) run acquisition
+Proc_err(INFO_OPT, "Optimised value of p1: %.3f", p1opt);
+// (Optional) Run acquisition.
 ZG
 QUIT

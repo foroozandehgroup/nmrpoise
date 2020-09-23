@@ -11,34 +11,13 @@ To incorporate POISE in an AU programme, you can use the syntax::
 
 inside the AU script.
 
-Here's an example of how the ``p1`` optimisation (shown in `routines`) can be incorporated into an AU script:
+Here's an example of how the ``p1`` optimisation (shown in `routines`) can be incorporated into an AU script (download from `here <https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/au/poisecal>`_).
+This AU script performs a very similar task to the existing ``pulsecal`` script: it finds the best value of ``p1`` and plugs it back into the current experiment.
+Here we use the ``-q`` flag to suppress the final output message of POISE (which would display the optimised 360° pulse length), as it may be confusing to users.
 
-.. code-block:: c
-
-   // use current dataset but change expno to 99999
-   GETCURDATA
-   int old_expno = expno;
-   DATASET(name, 99999, procno, disk, user)
-   // set some key params
-   RPAR("PROTON", "all")
-   GETPROSOL
-   STOREPAR("PULPROG", "zg")
-   STOREPAR("NS", 1)
-   STOREPAR("DS", 0)
-   STOREPAR("D 1", 1.0)
-   // run optimisation
-   XCMD("sendgui xpy poise p1cal -a bobyqa -q")
-   // store optimised value of p1 in variable
-   float p1opt;
-   FETCHPAR("P 1", &p1opt)   // don't get status parameter!!
-   p1opt = p1opt/4;
-   // move back to old dataset and set p1 to optimised value
-   DATASET(name, old_expno, procno, disk, user)
-   VIEWDATA_SAMEWIN  // not strictly necessary, just re-focuses the original spectrum
-   STOREPAR("P 1", p1opt)
-   // (optional) run acquisition
-   ZG
-   QUIT
+.. literalinclude:: ../nmrpoise/au/poisecal
+   :language: c
+   :lines: 12-
 
 Note that all six lines underneath "set some key params" can be collapsed to one line if an appropriate parameter set is set up beforehand.
 
@@ -48,29 +27,9 @@ The corresponding syntax for running an optimisation would be::
    XCMD("xpy poise <routine_name> -q [options]")
 
 As you can see, it is the same except that ``sendgui`` isn't needed.
-Here's the Python equivalent of the AU programme above::
+Here's the Python equivalent of the AU programme above (download from `here <https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/py/poisecalpy.py>`_):
 
-   # use current dataset but change expno to 99999
-   old_dataset = CURDATA()
-   opt_dataset = CURDATA()
-   opt_dataset[1] = "99999"
-   # create and move to dataset
-   NEWDATASET(opt_dataset, None, "PROTON")
-   RE(opt_dataset)
-   # set some key params
-   XCMD("getprosol")
-   PUTPAR("PULPROG", "zg")
-   PUTPAR("NS", "1")
-   PUTPAR("DS", "0")
-   PUTPAR("D 1", "1")
-   # run optimisation
-   XCMD("poise p1cal -a bobyqa -q")
-   # store optimised value of p1 in variable
-   p1opt = float(GETPAR("P 1"))/4   # don't get status parameter!
-   # move back to old dataset and set p1 to optimised value
-   RE(old_dataset)
-   PUTPAR("P 1", str(p1opt))
-   # (optional) run acquisition
-   ZG()
+.. literalinclude:: ../nmrpoise/py/poisecalpy.py
+   :lines: 12-
 
 The paper (technically the SI) has an example of a slightly more involved Python script, used for DOSY optimisations.
