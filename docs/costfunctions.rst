@@ -17,20 +17,21 @@ These largely mirror those that are in TopSpin's native ``popt`` screen.
 minabsint
 =========
 
-Seeks to minimise the intensity of the magnitude-mode spectrum.
-Equivalent to ``MAGMIN`` in ``popt``.
+Seeks to minimise the intensity of the magnitude-mode spectrum. The intensity is measured by integration of the entire spectral region, i.e. summation of every point.
+
+Note that this is different from the ``MAGMIN`` criterion in ``popt``, which (from what the Bruker documentation suggests) seeks to minimise the highest point in the magnitude-mode spectrum.
 
 
 maxabsint
 =========
 
-Seeks to maximise the intensity of the magnitude-mode spectrum (equivalent to ``MAGMAX``).
+Seeks to maximise the intensity of the magnitude-mode spectrum.
 
 
 minrealint
 ==========
 
-Seeks to minimise the intensity of the real spectrum (equivalent to ``NEGMAX``).
+Seeks to minimise the intensity of the real spectrum (this is probably equivalent to ``INTMIN`` in ``popt``).
 
 Note that this does *not* behave in the same way as ``minabsint``.
 Because the real spectrum can have negative peaks, this essentially tries to maximise the intensity of negative peaks.
@@ -39,7 +40,7 @@ Because the real spectrum can have negative peaks, this essentially tries to max
 maxrealint
 ==========
 
-Seeks to maximise the intensity of the real spectrum (equivalent to ``POSMAX``).
+Seeks to maximise the intensity of the real spectrum (equivalent to ``INTMAX``).
 
 
 zerorealint
