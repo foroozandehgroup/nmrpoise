@@ -260,7 +260,7 @@ def main(args):
         s = s + "These values have been set in the current experiment.\n"
     s = s + "Detailed information can be found at: {}".format(p_optlog)
     if not args.quiet:
-        MSG(s)
+        MSG_nonmodal(s, "POISE optimisation complete")
     EXIT()
 
 
@@ -278,6 +278,32 @@ class cst:
     params_with_space = ["CNST", "D", "P", "PLW", "PLDB", "PCPD",
                          "GPX", "GPY", "GPZ", "SPW", "SPDB", "SPOFFS",
                          "SPOAL", "L", "IN", "INP", "PHCOR"]
+
+
+def MSG_nonmodal(msg, title=""):
+    """
+    Non-modal version of MSG().
+
+    For some reason TopSpin forces MSG() to be modal and if you want a
+    non-modal message you have to use ERRMSG(), which has a scary-looking error
+    sign, not exactly what I want people to see when they finish an
+    optimisation!
+
+    Well, it turns out you can reverse engineer their source code quite easily
+    using inspect.getsource(), so this was born...
+
+    Parameters
+    ----------
+    msg : str
+        Message to be displayed.
+    title : str, optional
+        Title of the dialog box.
+    """
+    dialog = mfw.BInfo()
+    dialog.setMessage(msg)
+    dialog.setTitle(title)
+    dialog.setBlocking(0)  # in ordinary MSG() this is 1
+    dialog.show()
 
 
 def err_exit(error, log=False):

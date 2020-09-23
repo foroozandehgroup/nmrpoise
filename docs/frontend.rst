@@ -66,7 +66,7 @@ However, it is probably almost impossible to run into that hard limit.
 ``-q, --quiet``
 
 Don't display the final popup at the end of the optimisation informing the user that the optimisation is done.
-Adding this flag is necessary when running POISE under automation, since the popup will block any subsequent actions until it is dismissed.
+This is mostly a matter of taste, as the final popup does not block any subsequent commands from being executed.
 
 
 ``-s, --separate``

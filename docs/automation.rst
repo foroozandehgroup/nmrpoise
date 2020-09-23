@@ -7,11 +7,9 @@ For example, if POISE is used inside an AU programme, then set the the ``AUNM`` 
 
 To incorporate POISE in an AU programme, you can use the syntax::
 
-    XCMD("sendgui xpy poise <routine_name> -q [options]")
+    XCMD("sendgui xpy poise <routine_name> [options]")
 
 inside the AU script.
-The ``-q`` flag ensures that POISE does not show the final popup informing the user.
-If you don't disable this, then this popup has to be dismissed by clicking on 'OK' before anything else, like acquisition, can be done.
 
 Here's an example of how the ``p1`` optimisation (shown in `routines`) can be incorporated into an AU script:
 
