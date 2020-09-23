@@ -1,0 +1,24 @@
+// use current dataset but change expno to 99999
+GETCURDATA
+int old_expno = expno;
+DATASET(name, 99999, procno, disk, user)
+// set some key params
+RPAR("PROTON", "all")
+GETPROSOL
+STOREPAR("PULPROG", "zg")
+STOREPAR("NS", 1)
+STOREPAR("DS", 0)
+STOREPAR("D 1", 1.0)
+// run optimisation
+XCMD("sendgui xpy poise p1cal -a bobyqa -q")
+// store optimised value of p1 in variable
+float p1opt;
+FETCHPAR("P 1", &p1opt)   // don't get status parameter!!
+p1opt = p1opt/4;
+// move back to old dataset and set p1 to optimised value
+DATASET(name, old_expno, procno, disk, user)
+VIEWDATA_SAMEWIN  // not strictly necessary, just re-focuses the original spectrum
+STOREPAR("P 1", p1opt)
+// (optional) run acquisition
+ZG
+QUIT

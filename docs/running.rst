@@ -10,7 +10,10 @@ You should use the pulse programme ``zg`` (not ``zg30`` or ``zg60``!).
 Set the other experimental parameters, such as the spectral width ``SW``, relaxation delay ``d1``, etc. as desired for your compound of interest.
 
 All these steps can in principle be done most easily by loading a parameter set (``rpar``).
-On Bruker systems, there should already be a default ``PROTON`` parameter set; or there might be one that has been set up by a member of the NMR staff.
+On Bruker systems, there should already be a builtin ``PROTON`` parameter set.
+After loading this parameter set you will have to run ``getprosol``, then change the pulse programme to ``zg``.
+Alternatively, there might be a different parameter set that has been set up by a member of the NMR staff for simple proton spectra.
+As long as you make sure the pulse programme is ``zg`` the optimisation will work fine.
 
 .. image:: images/running1.png
    :align: center
@@ -18,7 +21,8 @@ On Bruker systems, there should already be a default ``PROTON`` parameter set; o
 .. note::
    Apart from the pulse programme, basically every other parameter can be set to whatever you like.
    However, to reduce the overall time taken, it's generally a good idea to try to make each experiment as short as possible.
-   In this case, even with very dilute samples, 1 scan will suffice.
+   In this case, even with very dilute samples, 1 scan (``NS=1``) will suffice.
+   We find that dummy scans are not needed to obtain accurate results, so it is permissible to set ``DS=0`` (although see next paragraph for a caveat).
    You could cut this even further by lowering ``TD`` to 8192 (for a given ``SW``, this translates to a shorter acquisition time ``AQ``).
 
    **For routine usage we recommend using at least 1 dummy scan.** This (``p1cal``) is the only optimisation example in which we have used 0 dummy scans.
@@ -36,38 +40,6 @@ You should get a result in 1–2 minutes.
    :align: center
 
 The best value(s) will automatically be stored in the corresponding parameter so that any subsequent acquisition will use the optimised parameters.
-
-
-Running under automation
-========================
-
-It is possible to run POISE under automation, by incorporating it into an acquisition AU programme (the ``AUNM`` parameter in TopSpin).
-To do so, you can use the syntax::
-
-    XCMD("sendgui xpy poise <routine_name> -q [options]")
-
-inside the AU script.
-(Yes, this creates an AU script which runs a Python script which runs an AU script.)
-The ``-q`` flag (or equivalently ``--quiet``) ensures that POISE does not show the final popup informing the user (this popup has to be dismissed before anything else can be done).
-
-Here's an example of how the ``p1`` optimisation above can be incorporated into an AU script:
-
-.. code-block:: c
-
-   #include <stdio.h>
-
-   int main (int argc, **char argv)
-   {
-       printf("Hello, world.");
-       return 0;
-   }
-
-You can also incorporate POISE into other Python scripts in TopSpin.
-The paper has an example of such a Python script used for DOSY optimisations.
-The Python equivalent of the AU script above would be::
-
-   print("Hello, world.")
-
 
 Parsing the log
 ===============

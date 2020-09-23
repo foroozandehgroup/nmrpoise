@@ -119,10 +119,12 @@ def install_addons():
     python_scripts = [
         "make_double_saltire.py",
         "dosy_opt.py",
+        "poisecalpy.py",
     ]
     au_scripts = [
         "poise_psyche",
         "poise_2pdosy",
+        "poisecal",
     ]
     pulse_programmes = [
         "asaphsqc_jy",

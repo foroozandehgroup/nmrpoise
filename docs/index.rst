@@ -22,6 +22,7 @@ For example, if somebody else has already set up POISE for you, you can probably
    routines
    running
    frontend
+   automation
    costfunctions
    au
    customcf

@@ -1,0 +1,22 @@
+# use current dataset but change expno to 99999
+old_dataset = CURDATA()
+opt_dataset = CURDATA()
+opt_dataset[1] = "99999"
+# create and move to dataset
+NEWDATASET(opt_dataset, None, "PROTON")
+RE(opt_dataset)
+# set some key params
+XCMD("getprosol")
+PUTPAR("PULPROG", "zg")
+PUTPAR("NS", "1")
+PUTPAR("DS", "0")
+PUTPAR("D 1", "1")
+# run optimisation
+XCMD("poise p1cal -a bobyqa -q")
+# store optimised value of p1 in variable
+p1opt = float(GETPAR("P 1"))/4   # don't get status parameter!
+# move back to old dataset and set p1 to optimised value
+RE(old_dataset)
+PUTPAR("P 1", str(p1opt))
+# (optional) run acquisition
+ZG()
