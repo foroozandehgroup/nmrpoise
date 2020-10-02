@@ -1,5 +1,5 @@
-ZG
-XFB
-XCMD("apk2d")
-ABS2
+ZG             // acquire
+XFB            // 2D Fourier transform
+XCMD("apk2d")  // automatic phase correction
+ABS2           // f2 baseline correction
 QUIT
