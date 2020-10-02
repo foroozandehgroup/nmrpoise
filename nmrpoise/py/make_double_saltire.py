@@ -2,6 +2,8 @@
 make_double_saltire.py
 ----------------------
 
+Download from: https://git.io/JUHOZ
+
 This script reads in a pulse duration (stored in us as P40) and bandwidth
 (stored in Hz as CNST21), then creates a double saltire shaped file called
 "auto_double_saltire" which can be directly used as the shaped file in

@@ -2,6 +2,8 @@
 dosy_opt.py
 -----------
 
+Download from: https://git.io/JUHOY
+
 Script that optimises parameters for a diffusion experiment. Currently only
 works with oneshot DOSY (Pelta et al., Magn. Reson. Chem. 2002, 40 (13),
 S147–S152, DOI: 10.1002/mrc.1107).

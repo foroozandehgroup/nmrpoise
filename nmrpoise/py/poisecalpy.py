@@ -2,6 +2,8 @@
 poisecalpy.py
 -------------
 
+Download from: https://git.io/JUHOU
+
 Python script which automates p1 optimisation using POISE. Behaves similarly to
 pulsecal: optimises the value of p1 in expno 99999, then sets the optimised
 value to the current dataset and shows a message.
