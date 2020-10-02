@@ -1,16 +1,19 @@
 ;doneshot_2d_jy
+;
+;download from: https://git.io/JUHOX
+;
 ;Jonathan Yong - University of Oxford - 26 Aug 2020
 ;minor modifications to original oneshot DOSY sequence to make it play better with TopSpin.
 ;
-; modified from:
-; Ralph Adams, Juan Aguilar, Robert Evans, Mathias Nilsson and Gareth Morris
-; University of Manchester
-; Release 1.0c (27Mar2012)
-; Source citation:
-; M.D. Pelta, G.A. Morris, M.J. Stchedroff, S.J. Hammond, Magn. Reson. Chem. 40 (2002) S147-S152.
+;modified from:
+;Ralph Adams, Juan Aguilar, Robert Evans, Mathias Nilsson and Gareth Morris
+;University of Manchester
+;Release 1.0c (27Mar2012)
+;Source citation:
+;M.D. Pelta, G.A. Morris, M.J. Stchedroff, S.J. Hammond, Magn. Reson. Chem. 40 (2002) S147-S152.
 ;
-; Other relevant papers that could be of use include:
-; A. Botana, J.A. Aguilar, M. Nilsson, G.A. Morris, J. Magn. Reson. 208 (2011) 270-278.
+;Other relevant papers that could be of use include:
+;A. Botana, J.A. Aguilar, M. Nilsson, G.A. Morris, J. Magn. Reson. 208 (2011) 270-278.
 ; 
 ;MN 30Nov11 Changed CTP gradients to gp2 and neatened up the comments  
 ;MN 21Mar12 Sorted out the magnitude of cnst17 and cnst18

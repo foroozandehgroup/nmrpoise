@@ -1,4 +1,7 @@
 ;asaphsqc_jy
+;
+;download from: https://git.io/JUHOo
+;
 ;modified from version by Luy et al. to include internal power calculations for
 ;DIPSI-2 mixing, as well as URPs
 ;order of gradients also switched round to correct frequencies
