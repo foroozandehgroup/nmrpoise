@@ -2,7 +2,12 @@
 costfunctions.py
 ----------------
 
-Contains default (and user-defined) cost functions.
+Contains default cost functions. Custom cost functions should be added in
+costfunctions_user.py (using the same format).
+
+You can add custom cost functions in here (they will work), but they will be
+shadowed by any similarly named cost functions in costfunctions_user.py. Also,
+this file will be overwritten if POISE is reinstalled.
 
 SPDX-License-Identifier: GPL-3.0-or-later
 """
@@ -80,14 +85,26 @@ def maxabsint():
 
 
 def minrealint():
+    """
+    Minimises the intensity of the real part of the spectrum. If the spectrum
+    has negative peaks this cost function will try to maximise those.
+    """
     return np.sum(get1d_real())
 
 
 def maxrealint():
+    """
+    Maximises the intensity of the real part of the spectrum.
+    """
     return -np.sum(get1d_real())
 
 
 def zerorealint():
+    """
+    Tries to get the intensity of the real spectrum to be as close to zero as
+    possible. This works by summation, so dispersion-mode peaks will not
+    contribute to this cost function (as they add to zero).
+    """
     return np.abs(np.sum(get1d_real()))
 
 
@@ -125,11 +142,14 @@ def psyche():
     reference spectrum with EXPNO 1 and PROCNO 1.
     """
     # We can construct the path to the reference spectrum using make_p_spec().
-    # Unfortunately, this means that the reference spectrum *always* has to be
-    # EXPNO 1 and PROCNO 1. In theory we could make this more flexible by
-    # allowing the user to pass more parameters, but this would make it
-    # substantially more complicated.
     reference_path = make_p_spec(expno=1, procno=1)
+    # The way this is currently coded, the reference spectrum has to be placed
+    # in EXPNO 1 and PROCNO 1. In theory, this can be specified using a TopSpin
+    # parameter in the optimisation dataset, for example "cnst30" (or any other
+    # random cnst). In order to use this, just add:
+    #     expno = # int(getpar("cnst30"))
+    # and then after that you can use
+    #     make_p_spec(expno=expno, procno=1)
     # Then we can get the reference, or 'target', spectrum as a numpy array.
     # Note that this will respect the F1P/F2P parameters, *not* of the
     # reference spectrum, but of the spectrum being optimised. This is because
@@ -170,16 +190,24 @@ def dosy():
     return np.abs(np.sum(spec)/np.sum(target) - 0.25)
 '''
 
+'''
+def dosy_aux():
+    """
+    Non-absolute value of dosy(). To be used in the first stage of dosy_opt.
+    """
+    reference_path = make_p_spec(expno=99998, procno=1)
+    target = get1d_real(p_spec=reference_path)
+    spec = get1d_real()
+    return np.sum(spec)/np.sum(target) - 0.25
+'''
 
-# def dosy_aux():
-#     reference_path = make_p_spec(expno=99998, procno=1)
-#     target = get1d_real(p_spec=reference_path)
-#     spec = get1d_real()
-#     return np.sum(spec)/np.sum(target) - 0.25
-
-
-# def dosy_2p():
-#     reference_path = make_p_spec(expno=99998, procno=1)
-#     target = get1d_real(p_spec=reference_path)
-#     spec = get1d_real()
-#     return np.abs(np.sum(spec)/np.sum(target) - 0.25) + getpar("D20")
+'''
+def dosy_2p():
+    """
+    Two-parameter DOSY optimisation.
+    """
+    reference_path = make_p_spec(expno=99998, procno=1)
+    target = get1d_real(p_spec=reference_path)
+    spec = get1d_real()
+    return np.abs(np.sum(spec)/np.sum(target) - 0.25) + getpar("D20")
+'''

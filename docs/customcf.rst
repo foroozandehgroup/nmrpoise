@@ -1,16 +1,18 @@
 Custom cost functions
 ---------------------
 
-All cost functions are stored inside the file::
+All user-defined cost functions are stored inside the file::
 
-    $TS/exp/stan/nmr/py/user/poise_backend/costfunctions.py
+    $TS/exp/stan/nmr/py/user/poise_backend/costfunctions_user.py
 
 where ``$TS`` is your TopSpin installation path.
 In order to modify or add cost functions, you will need to edit this file (with your favourite text editor or IDE).
 
-.. note::
-   Reinstalling POISE with ``pip`` will restore this file to the default.
-   If you have cost functions that are very complicated, it's a good idea to back this up before reinstalling.
+The corresponding file containing builtin cost functions is ``costfunctions.py``.
+You *can* edit this file directly: if you add a cost function there, it will work.
+However, there are two risks with this.
+Firstly, if you ever reinstall POISE, this file will be reset to the default (whereas ``costfunctions_user.py`` will not).
+Secondly, any cost functions defined in ``costfunctions_user.py`` will shadow (i.e. take priority over) the cost functions defined in ``costfunctions.py`` if they have the same name.
 
 
 The rules for cost functions

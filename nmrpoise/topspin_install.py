@@ -9,9 +9,31 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 import os
 import sys
+from shutil import copy2 as cp
 import platform
 from pathlib import Path
 from glob import glob
+
+
+def cp_r(src, dest):
+    """
+    Recursively copies src to dest.
+
+    This is a reimplementation of shutil.copytree(dirs_exist_ok=True), because
+    the dirs_exist_ok keyword argument is not available in Python <=3.7. The
+    ignore pattern is hardcoded.
+
+    Modified from https://stackoverflow.com/a/15824216/7115316.
+    """
+    if os.path.isdir(src):
+        if not os.path.isdir(dest):
+            os.makedirs(dest)
+        files = os.listdir(src)
+        for f in files:
+            if f not in ["costfunctions_user.py"]:
+                cp_r(os.path.join(src, f), os.path.join(dest, f))
+    else:
+        cp(src, dest)
 
 
 def get_ostype():
@@ -57,19 +79,6 @@ def main():
     ostype = get_ostype()
     ts_paths = get_topspin_path(ostype)
 
-    # Figure out the appropriate functions to use. (See #62.)
-    # cp(src, dst) == copy; cp_r(src, dst) == recursively copy
-    if sys.version_info.minor >= 8:  # >=3.8
-        import shutil
-        from functools import partial
-        cp = shutil.copy2
-        cp_r = partial(shutil.copytree, dirs_exist_ok=True)
-    else:
-        from distutils.dir_util import copy_tree
-        from distutils.file_util import copy_file
-        cp = copy_file
-        cp_r = copy_tree
-
     # Set path to Python executable in poise.py
     poise_py = dirname / "poise.py"
     poise_backend = dirname / "poise_backend"
@@ -92,9 +101,15 @@ def main():
     for ts_path in ts_paths:
         ts_user_path = ts_path / "py" / "user"
         ts_backend_path = ts_path / "py" / "user" / "poise_backend"
-        # Copy files to TopSpin path.
+        # Copy poise.py and poise_backend/ to TopSpin path, except for
+        # costfunctions_user.py (which is hardcoded as an exception in cp_r()).
         cp(str(poise_py), str(ts_user_path))
         cp_r(str(poise_backend), str(ts_backend_path))
+        # Copy costfunctions_user.py but only if it's not found.
+        cf_user_path = poise_backend / "costfunctions_user.py"
+        ts_cf_user_path = ts_backend_path / "costfunctions_user.py"
+        if not ts_cf_user_path.exists():
+            cp(str(cf_user_path), str(ts_cf_user_path))
         # Copy core AU scripts over. The others can be installed with
         # poise_addons.
         ts_au_user_path = ts_path / "au" / "src" / "user"

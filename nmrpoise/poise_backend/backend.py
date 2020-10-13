@@ -30,16 +30,12 @@ if __name__ == "__main__" and __package__ is None:
     sys.path.insert(1, str(Path(__file__).parents[1].resolve()))
     __import__(__package__)
 
-# TODO remove this try/except -- we're just using it for temporary debugging
-try:
-    from .optpoise import (scale, unscale, deco_count,
-                           nelder_mead, multid_search, pybobyqa_interface)
-    from .shared import _g
-    from .cfhelpers import *
-    from . import costfunctions
-except Exception as e:
-    print(f"Backend exception: {type(e).__name__}({repr(e.args)})")
-    sys.exit()
+from .optpoise import (scale, unscale, deco_count,
+                       nelder_mead, multid_search, pybobyqa_interface)
+from .shared import _g
+from .cfhelpers import *
+from . import costfunctions
+from . import costfunctions_user
 
 Routine = namedtuple("Routine", "name pars lb ub init tol cf au")
 
@@ -209,11 +205,14 @@ def get_routine_cf(routine_id, p_routine_dir=None):
     with open(p_routine_dir / (routine_id + ".json"), "rb") as f:
         routine = Routine(**json.load(f))
 
-    # Load the cost function
-    try:
-        cost_function = getattr(costfunctions, routine.cf)
-    except AttributeError:
-        raise AttributeError("No such cost function {routine.cf}.")
+    # Load the cost function. Try to get from user first.
+    cost_function = getattr(costfunctions_user, routine.cf, None)
+    # If it failed, get from system.
+    if cost_function is None:
+        cost_function = getattr(costfunctions, routine.cf, None)
+    # If that failed too, then error out.
+    if cost_function is None:
+        raise AttributeError(f"No such cost function {routine.cf}.")
     return routine, cost_function
 
 
