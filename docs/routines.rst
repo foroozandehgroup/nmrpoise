@@ -18,10 +18,10 @@ The ingredients of a routine are:
  - The name of an AU programme for acquisition and processing
 
 We will now walk through how to set a routine up, elaborating on each of these ingredients as we come to them.
-To get this process started, type ``poise --setup`` into the TopSpin command line (the ``--setup`` flag allows us to create a routine without actually running the optimisation).
+To get this process started, type ``poise`` into the TopSpin command line.
 
 .. note::
-   If you're interested in finding out what all these command-line options do, ``poise -h`` will give you a short summary of each of them.
+   POISE has a number of command-line options. If you're interested in finding out more about these, ``poise -h`` will give you a short summary of each of them, and `frontend` has additional info.
 
 ---------------
 

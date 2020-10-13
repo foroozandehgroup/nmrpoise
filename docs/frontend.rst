@@ -34,12 +34,6 @@ or on Unix systems::
 List all available routines and their parameters, then exit.
 
 
-``--setup``
-
-Set up a new routine without running the optimisation.
-By default, just running ``poise`` and creating a new routine will run the routine after you finish creating it.
-
-
 Options for running optimisations
 =================================
 

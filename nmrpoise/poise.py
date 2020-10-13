@@ -46,31 +46,6 @@ def main(args):
     -------
     None
     """
-    if not args.setup:
-        # Make sure user has opened a dataset
-        if CURDATA() is None:
-            err_exit("Please select a dataset!")
-
-        # Keep track of the currently active dataset. We want to make sure that
-        # it is _the_ active dataset every time the AU programme starts, or
-        # else we risk running `zg` on a different dataset --> overwriting
-        # other data!!
-        current_dataset = CURDATA()
-
-        # Construct the path to the folder of the current spectrum.
-        p_spectrum = make_p_spectrum()
-        # Generate the path to the log file. The log file belongs to the folder
-        # containing the first expno.
-        p_optlog = os.path.normpath(os.path.join(current_dataset[3],
-                                                 current_dataset[0],
-                                                 current_dataset[1],
-                                                 "poise.log"))
-        # Issue a warning if dataset is > 2D
-        if GETACQUDIM() > 2:
-            MSG("Warning: poise is only designed for 1D and 2D data.\n"
-                "If you are sure you want to use it on this {}D dataset, press"
-                " OK to dismiss this warning.".format(GETACQUDIM()))
-
     # Check that the folders are valid
     for folder in [p_poise, p_routines]:
         if not os.path.isdir(folder):
@@ -81,21 +56,15 @@ def main(args):
         err_exit("No cost functions were found. Please define a cost function "
                  ", or reinstall poise to obtain the defaults.")
 
-    # Check for the setup flag. If it's present, get a new routine, serialise
-    # it, then quit.
-    if args.setup:
-        routine = get_new_routine()
-        with open(os.path.join(p_routines, routine.name + ".json"), "wb") as f:
-            json.dump(routine._asdict(), f)
-        EXIT()
-
-    # Otherwise, we can proceed with selecting an optimisation routine.
+    # Select an optimisation routine.
     saved_routines = list_files(p_routines, ext=".json")
     # If routine was specified on command-line, check that there actually is a
     # routine with that name.
     if args.routine is not None:
         if args.routine in saved_routines:
             routine_id = args.routine
+            routine = load_routine(routine_id)
+            prompt_run = False
         else:
             err_exit("The routine '{}' was not found. Use 'poise --list' to "
                      "see all available routines.".format(args.routine))
@@ -105,6 +74,8 @@ def main(args):
 
     # If get_routine_id() returns None, then a new routine was requested.
     if routine_id is None:
+        # Prompt the user later whether they want to run it after creating it.
+        prompt_run = True
         # Get the Routine object.
         routine = get_new_routine()
         # Store the routine for future usage
@@ -114,6 +85,40 @@ def main(args):
     # Otherwise, load a saved routine.
     else:
         routine = load_routine(routine_id)
+        prompt_run = False
+
+    # Prompt the user whether they want to run it now, but only if they created
+    # a new routine from scratch. If they entered an existing routine (either
+    # via command-line, or in a dialog box), then we assume they want to run it
+    # now.
+    if prompt_run and not run_now():
+        EXIT()
+
+    # If they do want to run it, then we can carry on.
+    # Make sure user has opened a dataset
+    if CURDATA() is None:
+        err_exit("Please select a dataset!")
+
+    # Keep track of the currently active dataset. We want to make sure that
+    # it is _the_ active dataset every time the AU programme starts, or
+    # else we risk running `zg` on a different dataset --> overwriting
+    # other data!!
+    current_dataset = CURDATA()
+
+    # Construct the path to the folder of the current spectrum.
+    p_spectrum = make_p_spectrum()
+    # Generate the path to the log file. The log file belongs to the folder
+    # containing the first expno.
+    p_optlog = os.path.normpath(os.path.join(current_dataset[3],
+                                             current_dataset[0],
+                                             current_dataset[1],
+                                             "poise.log"))
+
+    # Issue a warning if dataset is > 2D
+    if GETACQUDIM() > 2:
+        MSG("Warning: poise is only designed for 1D and 2D data.\n"
+            "If you are sure you want to use it on this {}D dataset,"
+            " please press OK to continue.".format(GETACQUDIM()))
 
     # Check that the Routine object is valid
     check_routine(routine)
@@ -135,7 +140,7 @@ def main(args):
     # Before we start the main loop, we need to kill off any other backend
     # processes that are still alive. (We don't do it too early, otherwise we
     # could accidentally terminate a POISE run by running something innocuous
-    # like poise --setup or poise -l.)
+    # like poise -l.)
     kill_remaining_backends()
 
     # We need to catch java.lang.Error throughout the main loop so that cleanup
@@ -374,6 +379,25 @@ def list_files(path, ext="", with_ext=False):
         return []
 
 
+def run_now():
+    """
+    Asks the user whether they want to run an optimisation now, or just set up
+    a new routine.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    bool : True if user wants to run an optimisation now.
+    """
+    x = SELECT(title="poise",
+               message=("Do you want to run the optimisation now?"),
+               buttons=["Yes", "No"])
+    return x in [0, cst.ENTER]
+
+
 def get_routine_id():
     """
     Interactively prompts the user to choose a routine, using dialog boxes in
@@ -410,7 +434,7 @@ def get_routine_id():
             s = "\n".join(saved_routines)
             # Prompt the user to choose one
             y = INPUT_DIALOG(title="poise: available routines",
-                             header="Available routines:\n\n" + s,
+                             header="Available routines:\n" + s,
                              items=["Routine:"])
             if y is None:  # User closed the dialog
                 EXIT()
@@ -1001,12 +1025,6 @@ if __name__ == "__main__":
         action="store_true",
         help=("Use separate expnos for each function evaluation. (default: "
               "off)")
-    )
-    me_group.add_argument(
-        "--setup",
-        action="store_true",
-        help=("Create a new routine only. Don't run the optimisation. "
-              "(default: off)")
     )
     args = parser.parse_args()
 
