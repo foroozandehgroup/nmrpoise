@@ -17,7 +17,7 @@ Here we use the ``-q`` flag to suppress the final output message of POISE (which
 
 .. literalinclude:: ../nmrpoise/au/poisecal
    :language: c
-   :lines: 12-
+   :lines: 14-
 
 Note that all six lines underneath "set some key params" can be collapsed to one line if an appropriate parameter set is set up beforehand.
 
@@ -30,6 +30,6 @@ As you can see, it is the same except that ``sendgui`` isn't needed.
 Here's the Python equivalent of the AU programme above (download from `here <https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/py/poisecalpy.py>`_):
 
 .. literalinclude:: ../nmrpoise/py/poisecalpy.py
-   :lines: 12-
+   :lines: 14-
 
 The paper (technically the SI) has an example of a slightly more involved Python script, used for DOSY optimisations.

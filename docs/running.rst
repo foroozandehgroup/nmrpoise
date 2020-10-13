@@ -40,6 +40,8 @@ You should get a result in 1–2 minutes.
    :align: center
 
 The best value(s) will automatically be stored in the corresponding parameter so that any subsequent acquisition will use the optimised parameters.
+Don't forget that for this particular optimisation, you will have to divide the optimised value by 4 to get back the 90° pulse.
+
 
 Parsing the log
 ===============

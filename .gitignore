@@ -3,7 +3,7 @@ __pycache__
 **/.DS_Store
 build/
 dist/
-docs/_build/
+docs/dirhtml/
 docs/_static/
 docs/_templates/
 docs/latex/
