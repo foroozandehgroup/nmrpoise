@@ -9,8 +9,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 import os
 import sys
-from distutils.dir_util import copy_tree
-from distutils.file_util import copy_file
 import platform
 from pathlib import Path
 from glob import glob
@@ -59,6 +57,19 @@ def main():
     ostype = get_ostype()
     ts_paths = get_topspin_path(ostype)
 
+    # Figure out the appropriate functions to use. (See #62.)
+    # cp(src, dst) == copy; cp_r(src, dst) == recursively copy
+    if sys.version_info.minor >= 8:  # >=3.8
+        import shutil
+        from functools import partial
+        cp = shutil.copy2
+        cp_r = partial(shutil.copytree, dirs_exist_ok=True)
+    else:
+        from distutils.dir_util import copy_tree
+        from distutils.file_util import copy_file
+        cp = copy_file
+        cp_r = copy_tree
+
     # Set path to Python executable in poise.py
     poise_py = dirname / "poise.py"
     poise_backend = dirname / "poise_backend"
@@ -74,16 +85,16 @@ def main():
             # Use rstrip() to remove extra newlines since print() already
             # includes one for us.
             print(line.rstrip(), file=outfile)
-    # Replace the old file with the new file.
-    copy_file(str(poise_py_out), str(poise_py))
+    # Copy the new file over the old file.
+    cp(str(poise_py_out), str(poise_py))
 
     # Copy the files to TopSpin's directories.
     for ts_path in ts_paths:
         ts_user_path = ts_path / "py" / "user"
         ts_backend_path = ts_path / "py" / "user" / "poise_backend"
         # Copy files to TopSpin path.
-        copy_file(str(poise_py), str(ts_user_path))
-        copy_tree(str(poise_backend), str(ts_backend_path))
+        cp(str(poise_py), str(ts_user_path))
+        cp_r(str(poise_backend), str(ts_backend_path))
         # Copy core AU scripts over. The others can be installed with
         # poise_addons.
         ts_au_user_path = ts_path / "au" / "src" / "user"
@@ -91,7 +102,7 @@ def main():
         for auscript in core_au_scripts:
             src = dirname / "au" / auscript
             dest = ts_au_user_path / auscript
-            copy_file(str(src), str(dest))
+            cp(str(src), str(dest))
     print("topspin_install.py: completed")
 
 
@@ -141,19 +152,19 @@ def install_addons():
         for pyscript in python_scripts:
             src = dirname / "py" / pyscript
             dest = ts_py_user_path / pyscript
-            copy_file(str(src), str(dest))
+            cp(str(src), str(dest))
         # AU scripts next
         ts_au_user_path = ts_path / "au" / "src" / "user"
         for auscript in au_scripts:
             src = dirname / "au" / auscript
             dest = ts_au_user_path / auscript
-            copy_file(str(src), str(dest))
+            cp(str(src), str(dest))
         # Pulse programmes finally
         pp_user_path = ts_path / "lists" / "pp" / "user"
         for pulprog in pulse_programmes:
             src = dirname / "pp" / pulprog
             dest = pp_user_path / pulprog
-            copy_file(str(src), str(dest))
+            cp(str(src), str(dest))
     print("install_addons: complete")
 
 
