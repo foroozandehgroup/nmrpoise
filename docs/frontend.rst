@@ -9,6 +9,12 @@ You can also access short descriptions of these by typing ``poise -h`` in TopSpi
 General options
 ===============
 
+``--delete DELETE``
+
+Delete a named routine. For example, run ``poise --delete p1cal`` to delete a routine named ``p1cal``.
+
+If you want to edit a routine, you can just re-create a new routine with the same name: the old one will be overwritten.
+
 ``-h, --help``
 
 Show a help message then exit.

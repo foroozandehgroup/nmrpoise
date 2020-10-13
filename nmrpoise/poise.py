@@ -989,6 +989,29 @@ def kill_pid(pid):
         subprocess.call(["kill", "-9", str(pid)])
 
 
+def delete_routine(name):
+    """
+    Deletes a routine .json file.
+
+    Parameters
+    ----------
+    name : str
+        Name of the routine to be deleted.
+
+    Returns
+    -------
+    None
+    """
+    # Check whether said routine really exists
+    saved_routines = list_files(p_routines, ext=".json")
+    if name not in saved_routines:
+        err_exit("The routine {} was not found.".format(name))
+    else:
+        os.remove(os.path.join(p_routines, name + ".json"))
+        MSG_nonmodal("Routine {} deleted.".format(name))
+        EXIT()
+
+
 class TSArgumentParser(argparse.ArgumentParser):
     """
     Custom ArgumentParser class which shows a TopSpin dialog box with errors
@@ -1035,6 +1058,11 @@ if __name__ == "__main__":
         help="Optimisation algorithm to use. (default: 'nm')"
     )
     me_group.add_argument(
+        "--delete",
+        type=str,
+        help=("Delete an existing POISE routine.")
+    )
+    me_group.add_argument(
         "--kill",
         action="store_true",
         help=("Kill POISE backends that may still be running.")
@@ -1071,6 +1099,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # List
+    if args.delete:
+        delete_routine(args.delete)
     if args.list:
         list_routines_cfs()
     elif args.kill:
