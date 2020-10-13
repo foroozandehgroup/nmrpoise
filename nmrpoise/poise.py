@@ -120,8 +120,28 @@ def main(args):
             "If you are sure you want to use it on this {}D dataset,"
             " please press OK to continue.".format(GETACQUDIM()))
 
-    # Check that the Routine object is valid
+    # Check that the Routine object itself is valid (i.e. has all the correct
+    # keys).
     check_routine(routine)
+    # Check that the cost function exists
+    saved_cfs = detect_costfunctions().keys()
+    if routine.cf not in saved_cfs:
+        err_exit("The associated cost function {} could not be"
+                 " found.".format(routine.cf))
+    # If the AU programme is blank, set it to poise_nd.
+    if routine.au == "":
+        dim = GETACQUDIM()
+        if dim == 1:
+            # Namedtuples are immutable, so we need the _replace method.
+            routine = routine._replace(au="poise_1d")
+        elif dim == 2:
+            routine = routine._replace(au="poise_2d")
+        else:
+            err_exit("You must specify an AU programme when using POISE with"
+                     " >2D experiments.")
+    # Check that the AU programme exists.
+    if not au_exists(routine.au):
+        err_exit("The AU programme {} was not found.".format(routine.au))
 
     # Make sure that Python 3 executable can be found
     check_python3path()
@@ -536,10 +556,10 @@ def get_new_routine():
                  "your own cost function based on the documentation.")
     else:
         s = ", ".join(saved_cfs)
-        x = INPUT_DIALOG(title=("poise: choose a cost function and "
-                                "AU programme..."),
+        x = INPUT_DIALOG(title=("poise: choose a cost function and"
+                                " (optionally) an AU programme..."),
                          header="Available cost functions: " + s,
-                         items=["Cost function:", "AU programme:"])
+                         items=["Cost function:", "AU programme (optional):"])
         if x is None:  # user closed the dialog
             EXIT()
         elif x[0] in saved_cfs:
@@ -873,6 +893,28 @@ def acqu_done():
             return False
     # OK, looks like the acquisition did complete
     return True
+
+
+def au_exists(au):
+    """
+    Checks for the existence of a named AU programme.
+
+    Parameters
+    ----------
+    au : str
+        Name of the AU programme.
+
+    Returns
+    -------
+    bool : Whether the AU programme exists.
+    """
+    # Undocumented TopSpin function. Fun.
+    au_folders = getParfileDirs(2)
+    # Just check whether it exists in each of the folders.
+    for folder in au_folders:
+        if os.path.exists(os.path.join(folder, au)):
+            return True
+    return False
 
 
 def pulprog_contains_wvm():

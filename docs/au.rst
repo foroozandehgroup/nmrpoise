@@ -5,6 +5,8 @@ POISE is bundled with two basic AU programmes for 1D and 2D spectra respectively
 These are mostly self-explanatory, so the text is just given below.
 Of course, you can write your own AU programmes to be used with POISE routines.
 
+These are the "default" AU programmes that POISE uses (for 1D and 2D spectra respectively) if an AU programme is not specified with the routine.
+
 
 poise_1d
 ========

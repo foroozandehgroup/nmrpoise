@@ -15,7 +15,7 @@ The ingredients of a routine are:
 
  - A cost function which determines the 'badness' of a spectrum
 
- - The name of an AU programme for acquisition and processing
+ - *(Optional)* The name of an AU programme for acquisition and processing
 
 We will now walk through how to set a routine up, elaborating on each of these ingredients as we come to them.
 To get this process started, type ``poise`` into the TopSpin command line.
@@ -61,13 +61,11 @@ However, it doesn't have to be *too* precise: as long as you aren't off by an or
    POISE also allows you to specify units using the suffixes 'u', 'm', and 's' for microseconds, milliseconds, and seconds respectively. This is designed to mimic TopSpin's parameter settings, where ``30m`` means 30 ms (for example). So you can enter ``48u`` in this screen as well, or indeed ``0.048m``.
 
 
-Finally, we have to choose a **cost function**, as well as an **AU programme**.
-Both of these depend on exactly *how* we are going to evaluate whether the value of ``p1`` is good or not.
-In our case, we will use the ``zg`` pulse programme — a simple proton pulse-acquire.
+Finally, we have to choose a **cost function**, as well as (optionally) an **AU programme**.
 
 The cost function is a Python function which reads the spectrum and returns a *'cost'*, i.e. how bad the spectrum is.
 All optimisations in POISE seek to minimise the cost function.
-In our case, the best value of ``p1`` is one for which the spectral intensity is minimised (i.e. magnetisation is returned to the positive *z*-axis).
+In our case, the best value of ``p1`` is one for which the intensity of a pulse-acquire spectrum (``zg``) is minimised, i.e. magnetisation is returned to the positive *z*-axis.
 So, we can conveniently use the intensity of the magnitude-mode spectrum as the cost function.
 This cost function is also bundled with POISE, and is called ``minabsint``.
 (For those who are familiar with TopSpin's built-in ``popt``, this is equivalent to the ``MAGMIN`` criterion.)
@@ -75,8 +73,10 @@ This cost function is also bundled with POISE, and is called ``minabsint``.
 .. note::
    For more information about the built-in cost functions, check out `costfunctions`.
 
-The corresponding AU programme simply needs to acquire the spectrum, then process using Fourier transform, phase correction, and baseline correction.
-POISE is bundled with one such AU programme, called ``poise_1d``, which performs all this.
+The AU programme controls spectrum acquisition and processing, and can be left blank in this case.
+All we need to do for this routine is to acquire the spectrum, Fourier transform, then perform phase and baseline correction.
+For 1D and 2D datasets, if the AU programme option is left blank, POISE will automatically do exactly these steps.
+Therefore, there is no need to specify an AU programme unless you want to customise this process.
 
 .. image:: images/routine4.png
    :align: center
