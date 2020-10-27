@@ -191,10 +191,24 @@ def _get_1d(spec_fname, bounds="", p_spec=None):
     nc_proc = int(getpar("NC_proc", p_spec))
     spec = spec * (2 ** nc_proc)
 
+    # Here, _g.spec_f1p and _g.spec_f2p can be ndarrays in a VERY special case.
+    # The spectrum must appear to be 2D before the optimisation is started
+    # (i.e. when backend.py initialises these values), and then must be changed
+    # to 1D after the first acquisition. This happens, for example, in
+    # dosy_opt.py. In ordinary cases, these conditionals will never occur so
+    # they won't hurt.
+    if isinstance(_g.spec_f1p, np.ndarray):
+        _g.spec_f1p = _g.spec_f1p[1]
+    if isinstance(_g.spec_f2p, np.ndarray):
+        _g.spec_f2p = _g.spec_f2p[1]
+    # We don't need to check if they're equal to zero. If they are, then
+    # backend.py will already have set the variables in _g to be None.
+    # OK now we can proceed as normal.
     if bounds == "":
         if _g.spec_f1p is None and _g.spec_f2p is None:  # DPL not used
             return spec
         else:
+            # set the bounds to F1P and F2P if they are not None.
             left, right = _g.spec_f1p, _g.spec_f2p
     else:
         right, left = _parse_bounds(bounds)
