@@ -1,14 +1,14 @@
-##TITLE= Parameter file, TopSpin 4.0.9
+##TITLE= Parameter file, TopSpin 3.6.2
 ##JCAMPDX= 5.0
 ##DATATYPE= Parameter Values
-##NPOINTS= 3	$$ modification sequence number
+##NPOINTS= 634	$$ modification sequence number
 ##ORIGIN= Bruker BioSpin GmbH
 ##OWNER= nmr-user
-$$ 2020-10-27 20:30:44.569 +0000  yongrenjie@Empoleon.local
-$$ /Users/yongrenjie/nmrpoise/tests/test_data/6/pdata/1/procs
-$$ process /opt/topspin4.0.9/prog/mod/proc1d
-##$ABSF1= 8.9987
-##$ABSF2= -0.9987001
+$$ 2020-07-21 16:56:28.251 +0800  CHEM\nmr-user@CUTTLEFISH-CRL
+$$ C:\NMR\data\mfgroup\nmr/jy-200720-poptpy-3fpba-noesy/3/pdata/1/procs
+$$ process C:\Bruker\TopSpin3.6.2\prog\mod\proc1d.exe
+##$ABSF1= 12.97205
+##$ABSF2= -2.972055
 ##$ABSG= 5
 ##$ABSL= 3
 ##$ALPHA= 0
@@ -17,7 +17,7 @@ $$ process /opt/topspin4.0.9/prog/mod/proc1d
 ##$ASSFACI= 0
 ##$ASSFACX= 0
 ##$ASSWID= 0
-##$AUNMP= <proc_1d_crl_np>
+##$AUNMP= <proc_1d>
 ##$AXLEFT= 0
 ##$AXNAME= <>
 ##$AXNUC= <1H>
@@ -78,17 +78,17 @@ $$ process /opt/topspin4.0.9/prog/mod/proc1d
 ##$Mdd_LrZF= 0
 ##$Mdd_mod= 0
 ##$NCOEF= 0
-##$NC_proc= -10
+##$NC_proc= -12
 ##$NLEV= 6
 ##$NOISF1= 0
 ##$NOISF2= 0
 ##$NSP= 0
 ##$NTH_PI= 0
 ##$NZP= 0
-##$OFFSET= 8.9987
+##$OFFSET= 12.97205
 ##$PC= 1
-##$PHC0= 280.7148
-##$PHC1= -5.719492
+##$PHC0= 110.8583
+##$PHC1= -93.18753
 ##$PH_mod= 1
 ##$PKNL= yes
 ##$PPARMOD= 0
@@ -105,11 +105,11 @@ $$ process /opt/topspin4.0.9/prog/mod/proc1d
 ##$RDINT= 0
 ##$RDPOS= 0
 ##$REVERSE= no
-##$SF= 500.13
+##$SF= 699.99
 ##$SI= 65536
 ##$SIGF1= 0
 ##$SIGF2= 0
-##$SINO= 0
+##$SINO= 400
 ##$SIOLD= 65536
 ##$SPECTYP= <>
 ##$SREF_mod= 1
@@ -117,7 +117,7 @@ $$ process /opt/topspin4.0.9/prog/mod/proc1d
 ##$SSB= 0
 ##$STSI= 65536
 ##$STSR= 0
-##$SW_p= 5000
+##$SW_p= 11160.7142857143
 ##$SYMM= 0
 ##$S_DEV= 0
 ##$TDeff= 32768
@@ -127,13 +127,13 @@ $$ process /opt/topspin4.0.9/prog/mod/proc1d
 ##$TM1= 0
 ##$TM2= 0
 ##$TOPLEV= 0
-##$USERP1= <>
-##$USERP2= <>
-##$USERP3= <>
-##$USERP4= <>
-##$USERP5= <>
+##$USERP1= <user>
+##$USERP2= <user>
+##$USERP3= <user>
+##$USERP4= <user>
+##$USERP5= <user>
 ##$WDW= 1
 ##$XDIM= 0
-##$YMAX_p= 414606258
-##$YMIN_p= -3566414
+##$YMAX_p= 354421305
+##$YMIN_p= -78958972
 ##END=
