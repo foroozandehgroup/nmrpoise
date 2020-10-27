@@ -25,6 +25,7 @@ PUTPAR("PULPROG", "zg")
 PUTPAR("NS", "1")
 PUTPAR("DS", "0")
 PUTPAR("D 1", "1")
+PUTPAR("RG", "1")
 # Run optimisation.
 XCMD("poise p1cal -a bobyqa -q")
 # POISE stores the optimised value in p1 after it's done. We can retrieve it

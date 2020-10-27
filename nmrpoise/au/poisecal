@@ -23,6 +23,7 @@ STOREPAR("PULPROG", "zg")
 STOREPAR("NS", 1)
 STOREPAR("DS", 0)
 STOREPAR("D 1", 1.0)
+STOREPAR("RG", 1)
 // Run optimisation.
 XCMD("sendgui xpy poise p1cal -a bobyqa -q")
 // POISE stores the optimised value in p1 after it's done. We can retrieve it
