@@ -158,7 +158,6 @@ def install_addons():
         "doneshot_2d_jy",
         "psyche_1dopt_jy",
         "spfgsenoezs2.1_jy",
-        "zg",
     ]
     # Copy them to TopSpin's directories.
     for ts_path in ts_paths:
