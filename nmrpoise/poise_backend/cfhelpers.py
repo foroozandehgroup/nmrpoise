@@ -552,12 +552,11 @@ def getpar(par, p_spec=None):
     # Figure out the number of dimensions.
     ndim = getndim(p_spec=p_spec)
     if ndim == 1:
-        # This part can be expressed very succinctly with logical short
-        # circuiting. Try to get acquisition parameter first (and return it).
-        # Then try to get a processing parameter. If we don't get anything,
-        # _get_proc_par() will return None, which we will pass on.
-        return (_get_acqu_par(par, p_spec.parents[1] / "acqus") or
-                _get_proc_par(par, p_spec / "procs"))
+        acq = _get_acqu_par(par, p_spec.parents[1] / "acqus")
+        if acq is not None:
+            return acq
+        else:
+            return _get_proc_par(par, p_spec / "procs")
     elif ndim == 2:
         # Try to get acquisition parameters first.
         acq_f1 = _get_acqu_par(par, p_spec.parents[1] / "acqu2s")
