@@ -45,7 +45,10 @@ def make_p_spec(path=None, expno=None, procno=None):
         default_expno = int(_g.p_spectrum.parents[1].name)
         default_path = _g.p_spectrum.parents[2]
     # overwrite defaults with user-passed parameters
-    path = Path(path) or default_path
+    if path is not None:
+        path = Path(path)
+    else:
+        path = default_path
     expno = expno or default_expno
     procno = procno or default_procno
     return path / str(expno) / "pdata" / str(procno)
