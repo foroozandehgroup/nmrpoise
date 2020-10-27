@@ -32,9 +32,6 @@ The algorithm is as follows:
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-import time
-import os
-
 # Dictionary of DOSY pulse programmes, to be entered in the form
 #    "2d_pulprog": ["1d_pulprog", "GRAD_AMPLITUDE_PARAM", "DIFF_DELAY_PARAM"]
 # In more detail:
@@ -99,25 +96,7 @@ PUTPAR("PPARMOD", "1D")
 PUTPAR(gpzparam, "80")
 XCMD("sendgui browse_update_tree")
 
-# Before we can run POISE, we need to delete the acqu2s and proc2s files from
-# both ref. and opt. datasets (they are there because are inherited from the 2D
-# parameter set we set the experiments up with). If we don't do this, then
-# POISE gets very confused as it looks at the file structure and thinks that
-# they are 2D spectra.
-ref_expnof = os.path.join(reference_dataset[3],
-                          reference_dataset[0],
-                          reference_dataset[1])
-opt_expnof = os.path.join(optimisation_dataset[3],
-                          optimisation_dataset[0],
-                          optimisation_dataset[1])
-for f in (os.path.join(ref_expnof, "acqu2s"),
-          os.path.join(opt_expnof, "acqu2s"),
-          os.path.join(ref_expnof, "pdata", reference_dataset[2], "proc2s"),
-          os.path.join(opt_expnof, "pdata", optimisation_dataset[2], "proc2s")
-          ):
-    if os.path.isfile(f):
-        os.remove(f)
-
+# Optimise the diffusion delay first.
 while True:
     # Here we use the `--maxfev 1` trick to evaluate a cost function at 80%
     # gradient. The cost function is stored as the `TI` parameter after the
@@ -160,6 +139,3 @@ PUTPAR(dparam, best_d20)
 PUTPAR(gpzparam, "100")
 # Generate Difframp, etc. and then run the AU programme.
 XCMD("xau dosy 10 {} 16 l y".format(best_gpz))
-
-y = time.time()
-MSG(str(y - x))
