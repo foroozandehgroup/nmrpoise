@@ -168,6 +168,8 @@ def get1d_fid(p_spec=None):
         Complex-valued array containing the FID.
     """
     p_spec = p_spec or _g.p_spectrum
+    if getndim(p_spec=p_spec) != 1:
+        raise ValueError("get1d_fid(): current spectrum is not 1D")
     p_fid = p_spec.parents[1] / "fid"
     fid = np.fromfile(p_fid, dtype=np.int32)
     td = fid.size
@@ -258,6 +260,8 @@ def get1d_real(bounds="", p_spec=None):
         Array containing the spectrum or the desired section of it (if bounds
         were specified).
     """
+    if getndim(p_spec=p_spec) != 1:
+        raise ValueError("get1d_real(): current spectrum is not 1D")
     return _get_1d(spec_fname="1r", bounds=bounds, p_spec=p_spec)
 
 
@@ -265,6 +269,8 @@ def get1d_imag(bounds="", p_spec=None):
     """
     Same as `get1d_real`, except that it reads the imaginary spectrum.
     """
+    if getndim(p_spec=p_spec) != 1:
+        raise ValueError("get1d_imag(): current spectrum is not 1D")
     return _get_1d(spec_fname="1i", bounds=bounds, p_spec=p_spec)
 
 
@@ -364,6 +370,8 @@ def get2d_rr(f1_bounds="", f2_bounds="", p_spec=None):
         2D array containing the spectrum or the desired section of it (if
         *f1_bounds* or *f2_bounds* were specified).
     """
+    if getndim(p_spec=p_spec) != 2:
+        raise ValueError("get2d_rr(): current spectrum is not 2D")
     return _get_2d(spec_fname="2rr",
                    f1_bounds=f1_bounds,
                    f2_bounds=f2_bounds,
@@ -374,6 +382,8 @@ def get2d_ri(f1_bounds="", f2_bounds="", p_spec=None):
     """
     Same as `get2d_rr`, except that it reads the '2ri' file.
     """
+    if getndim(p_spec=p_spec) != 2:
+        raise ValueError("get2d_ri(): current spectrum is not 2D")
     return _get_2d(spec_fname="2ri",
                    f1_bounds=f1_bounds,
                    f2_bounds=f2_bounds,
@@ -384,6 +394,8 @@ def get2d_ir(f1_bounds="", f2_bounds="", p_spec=None):
     """
     Same as `get2d_rr`, except that it reads the '2ir' file.
     """
+    if getndim(p_spec=p_spec) != 2:
+        raise ValueError("get2d_ir(): current spectrum is not 2D")
     return _get_2d(spec_fname="2ir",
                    f1_bounds=f1_bounds,
                    f2_bounds=f2_bounds,
@@ -394,6 +406,8 @@ def get2d_ii(f1_bounds="", f2_bounds="", p_spec=None):
     """
     Same as `get2d_rr`, except that it reads the '2ii' file.
     """
+    if getndim(p_spec=p_spec) != 2:
+        raise ValueError("get2d_ii(): current spectrum is not 2D")
     return _get_2d(spec_fname="2ii",
                    f1_bounds=f1_bounds,
                    f2_bounds=f2_bounds,
