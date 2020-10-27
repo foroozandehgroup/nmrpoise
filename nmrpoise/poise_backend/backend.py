@@ -52,7 +52,8 @@ def pidfile():
     try:
         yield
     finally:
-        pid_fname.unlink(missing_ok=True)
+        if pid_fname.exists():
+            pid_fname.unlink()
 
 
 def main_wrapper():
