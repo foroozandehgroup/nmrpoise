@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 import nmrpoise.poise_backend.cfhelpers as cfh
+from nmrpoise.poise_backend.shared import _g
 from nmrpoise.poise_backend.backend import (Routine, scale, unscale)
 
 
@@ -12,6 +13,28 @@ def test_make_p_spec():
                          expno=1, procno=1)
     assert ps == (Path(__file__).parent / "test_data" / "1"
                   / "pdata" / "1")
+    # Check that it's reading _g.p_spectrum correctly
+    _g.p_spectrum = ps
+    assert cfh.make_p_spec() == ps
+
+
+def test_parse_bounds():
+    assert cfh._parse_bounds((3, 4)) == (3, 4)
+    assert cfh._parse_bounds("3..4") == (3, 4)
+    assert cfh._parse_bounds("3.1..4.1") == (3.1, 4.1)
+    assert cfh._parse_bounds("-3.1..4.1") == (-3.1, 4.1)
+    assert cfh._parse_bounds("-3.1..") == (-3.1, None)
+    assert cfh._parse_bounds("..4") == (None, 4)
+    with pytest.raises(ValueError, match="Invalid value"):
+        cfh._parse_bounds("hello_there")
+    with pytest.raises(ValueError, match="Invalid value"):
+        cfh._parse_bounds("general..kenobi")
+    with pytest.raises(ValueError, match="Invalid value"):
+        cfh._parse_bounds(("a", "b"))
+    with pytest.raises(ValueError, match="Invalid value"):
+        cfh._parse_bounds((1, 2, 3, 4))
+    with pytest.raises(ValueError, match="Invalid value"):
+        cfh._parse_bounds(1)
 
 
 def makep(expno, procno):
@@ -114,6 +137,27 @@ def test_get1d_real():
     subarray = cfh.get1d_real(bounds=(6, None), p_spec=p_spec)
     assert np.array_equal(subarray, npff[0:rpoint + 1] * (2 ** -8))
 
+    # Check that it respects _g.spec_f1p and _g.spec_f2p
+    _g.spec_f1p, _g.spec_f2p = (4, 3)
+    using_fnp = cfh.get1d_real(p_spec=p_spec)
+    using_bounds = cfh.get1d_real(bounds=(3, 4), p_spec=p_spec)
+    assert np.array_equal(using_fnp, using_bounds)
+    _g.spec_f1p, _g.spec_f2p = (None, None)  # reset for future tests
+
+    # Check pathological corner case where spec_fnp's are initialised to 2D
+    # arrays (i.e. if s PARMODE = 2D when the backend is first fired up, before
+    # there is a chance to reset it to 1D by acquiring a spectrum)
+    _g.spec_f1p, _g.spec_f2p = (np.array([0, 8]), np.array([0, 4.5]))
+    using_fnp = cfh.get1d_real(p_spec=p_spec)
+    using_bounds = cfh.get1d_real(bounds=(4.5, 8), p_spec=p_spec)
+    assert np.array_equal(using_fnp, using_bounds)
+    _g.spec_f1p, _g.spec_f2p = (None, None)  # reset for future tests
+
+    # Check that it throws an error when asked to read 2D spectra
+    p_spec = makep(101, 1)  # this is a 2D spectrum
+    with pytest.raises(ValueError, match="not 1D"):
+        fid = cfh.get1d_real(p_spec=p_spec)
+
 
 def test_get1d_imag():
     p_spec = makep(1, 1)
@@ -141,24 +185,93 @@ def test_get1d_imag():
     subarray = cfh.get1d_imag(bounds="6..", p_spec=p_spec)
     assert np.array_equal(subarray, npff[0:rpoint + 1] * (2 ** -8))
 
+    # Check that it respects _g.spec_f1p and _g.spec_f2p
+    _g.spec_f1p, _g.spec_f2p = (4, 3)
+    using_fnp = cfh.get1d_imag(p_spec=p_spec)
+    using_bounds = cfh.get1d_imag(bounds=(3, 4), p_spec=p_spec)
+    assert np.array_equal(using_fnp, using_bounds)
+    _g.spec_f1p, _g.spec_f2p = (None, None)  # reset for future tests
+
+    # Check that it throws an error when asked to read 2D spectra
+    p_spec = makep(101, 1)  # this is a 2D spectrum
+    with pytest.raises(ValueError, match="not 1D"):
+        fid = cfh.get1d_imag(p_spec=p_spec)
+
 
 def test_get1d_fid():
     p_spec = makep(1, 1)
     fid = cfh.get1d_fid(p_spec)
-
     npff = np.fromfile(p_spec.parents[1] / "fid", dtype=np.int32)
-
     assert np.array_equal(np.real(fid), npff[0::2])
     assert np.array_equal(np.imag(fid), npff[1::2])
 
+    p_spec = makep(101, 1)  # this is a 2D spectrum
+    with pytest.raises(ValueError, match="not 1D"):
+        fid = cfh.get1d_fid(p_spec=p_spec)
 
-def test_get2d_rr():
+
+def _test_get2d(spectype):
+    if spectype == "rr":
+        get2d_func = cfh.get2d_rr
+    elif spectype == "ri":
+        get2d_func = cfh.get2d_ri
+    elif spectype == "ir":
+        get2d_func = cfh.get2d_ir
+    elif spectype == "ii":
+        get2d_func = cfh.get2d_ii
+    else:
+        raise ValueError("_test_get2d(): invalid type")
+
     p_spec = makep(101, 1)
-    spec = cfh.get2d_rr(p_spec=p_spec)
+    spec = get2d_func(p_spec=p_spec)
     assert spec.shape == (1024, 1024)
 
-    spec = cfh.get2d_rr(f1_bounds="", f2_bounds="6..8", p_spec=p_spec)
+    spec = get2d_func(f1_bounds="", f2_bounds="6..8", p_spec=p_spec)
     assert spec.shape == (1024, 205)
 
-    spec = cfh.get2d_rr(f1_bounds="", f2_bounds=(6, 8), p_spec=p_spec)
+    spec = get2d_func(f1_bounds="", f2_bounds=(6, 8), p_spec=p_spec)
     assert spec.shape == (1024, 205)
+
+    # Check that it respects _g.spec_f1p and _g.spec_f2p
+    _g.spec_f1p, _g.spec_f2p = (np.array([140, 6]), np.array([110, 4]))
+    using_fnp = get2d_func(p_spec=p_spec)
+    using_bounds = get2d_func(f1_bounds="110..140", f2_bounds="4..6",
+                              p_spec=p_spec)
+    assert np.array_equal(using_fnp, using_bounds)
+    _g.spec_f1p, _g.spec_f2p = (None, None)  # reset for future tests
+
+    # Check that it throws an error when asked to read 1D spectra
+    p_spec = makep(2, 1)  # this is a 1D spectrum
+    with pytest.raises(ValueError, match="not 2D"):
+        fid = get2d_func(p_spec)
+
+
+def test_get2d_rr():
+    _test_get2d("rr")
+
+
+def test_get2d_ri():
+    _test_get2d("ri")
+
+
+def test_get2d_ir():
+    _test_get2d("ir")
+
+
+def test_get2d_ii():
+    _test_get2d("ii")
+
+
+def test_log():
+    _g.p_optlog = Path(__file__).resolve().parent / "testlog.txt"
+    # delete it first just in case
+    if _g.p_optlog.exists():
+        _g.p_optlog.unlink()
+    cfh.log("hello")
+    cfh.log("there")
+    cfh.log(123)
+    with open(_g.p_optlog, 'r') as fp:
+        text = fp.read()
+    assert text == "hello\nthere\n123\n"
+    # delete it
+    _g.p_optlog.unlink()

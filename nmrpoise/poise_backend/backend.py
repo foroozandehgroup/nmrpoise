@@ -43,9 +43,8 @@ Routine = namedtuple("Routine", "name pars lb ub init tol cf au")
 @contextmanager
 def pidfile():
     """
-    Context manager that creates a 'pid.log' file inside the poise_backend
-    directory and writes the backend's PID to the file. Deletes the file once
-    the backend exits.
+    Context manager that creates a '.pid<PID>' file inside the poise_backend
+    directory. Deletes the file once the backend exits.
     """
     pid = os.getpid()
     pid_fname = Path(__file__).resolve().expanduser().parent / f".pid{pid}"

@@ -92,7 +92,7 @@ def _parse_bounds(b):
             upper = float(b[1]) if b[1] is not None else None
             return lower, upper
     except (ValueError, TypeError):
-        raise ValueError(f"Invalid value {b} provided for bounds.")
+        raise ValueError(f"Invalid value {b} provided for bounds.") from None
 
 
 def _ppm_to_point(shift, axis=None, p_spec=None):
@@ -575,7 +575,9 @@ def getpar(par, p_spec=None):
         # If both were found, return them as an nparray
         if proc_f1 is not None and proc_f2 is not None:
             return np.array([proc_f1, proc_f2])
-        # If only f2 value was found, return it
+        # If only f2 value was found, return it. In fact, based on the test
+        # data, this will never be the case: every parameter inside procs is
+        # also found inside proc2s. So this code is technically unreachable.
         elif proc_f2 is not None:
             return proc_f2
         # If reached here, neither were found, so return None.

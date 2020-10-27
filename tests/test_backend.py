@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import numpy as np
@@ -58,3 +59,17 @@ def test_get_routine_cf():
     assert routine.tol == [0.2]
     assert routine.cf == "minabsint"
     assert routine.au == "poise_1d"
+
+
+def test_pidfile():
+    pid = os.getpid()
+    # We need to be careful with this. pidfile() creates itself in the
+    # same directory as backend.py, wherever it is. Since tox testing uses
+    # the local copy, we need to check the poise_backend directory.
+    pid_fname = (Path(__file__).parents[1] / "nmrpoise" / "poise_backend"
+                 / (".pid" + str(pid)))
+    # Check that the file exists inside the context manager block.
+    with be.pidfile() as _:
+        assert pid_fname.exists()
+    # Check that it is deleted.
+    assert not pid_fname.exists()
