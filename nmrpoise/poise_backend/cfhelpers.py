@@ -495,7 +495,7 @@ def getpar(par, p_spec=None):
     """
     Obtains the value of a numeric (acquisition or processing) parameter.
     Non-numeric parameters (i.e. strings) are not currently accessible! Works
-    for both 1D and 2D spectra (see return type below).
+    for both 1D and 2D spectra (see return type below), but nothing higher.
 
     Parameters
     ----------
@@ -518,35 +518,66 @@ def getpar(par, p_spec=None):
     """
     p_spec = p_spec or _g.p_spectrum
 
-    # Try to get acquisition parameter first.
-    # Check indirect dimension
+    # Figure out the number of dimensions.
+    ndim = getndim(p_spec=p_spec)
+    if ndim == 1:
+        # This part can be expressed very succinctly with logical short
+        # circuiting. Try to get acquisition parameter first (and return it).
+        # Then try to get a processing parameter. If we don't get anything,
+        # _get_proc_par() will return None, which we will pass on.
+        return (_get_acqu_par(par, p_spec.parents[1] / "acqus") or
+                _get_proc_par(par, p_spec / "procs"))
+    elif ndim == 2:
+        # Try to get acquisition parameters first.
+        acq_f1 = _get_acqu_par(par, p_spec.parents[1] / "acqu2s")
+        acq_f2 = _get_acqu_par(par, p_spec.parents[1] / "acqus")
+        # If both were found, return them as an nparray
+        if acq_f1 is not None and acq_f2 is not None:
+            return np.array([acq_f1, acq_f2])
+        # If only f2 value was found, return it
+        elif acq_f2 is not None:
+            return acq_f2
+        # If reached here, then means that acquisition parameter was not found.
+        # Try to get processing parameters.
+        proc_f1 = _get_proc_par(par, p_spec / "proc2s")
+        proc_f2 = _get_proc_par(par, p_spec / "procs")
+        # If both were found, return them as an nparray
+        if proc_f1 is not None and proc_f2 is not None:
+            return np.array([proc_f1, proc_f2])
+        # If only f2 value was found, return it
+        elif proc_f2 is not None:
+            return proc_f2
+        # If reached here, neither were found, so return None.
+        return None
+    else:
+        raise ValueError("getpar() only works for 1D and 2D spectra.")
+
+
+def getndim(p_spec=None):
+    """
+    Obtains the dimensionality of the spectrum, i.e. the status value of
+    PARMODE. Note that Bruker uses PARMODE=n for (n+1)D spectra, whereas this
+    function simply returns (n+1) (as an int).
+
+    Note that we call _get_acqu_par() instead of getpar() to avoid an infinite
+    loop.
+
+    Parameters
+    ----------
+    p_spec : |Path|, optional
+        Path to the procno folder of interest. Leave blank to use the currently
+        active spectrum (i.e. _g.p_spectrum).
+
+    Returns
+    -------
+    int
+        Dimensionality of the spectrum.
+    """
+    p_spec = p_spec or _g.p_spectrum
     p_acqus = p_spec.parents[1] / "acqus"
-    p_acqu2s = p_spec.parents[1] / "acqu2s"
-    v1, v2 = None, None
-    if p_acqu2s.exists():
-        v1 = _get_acqu_par(par, p_acqu2s)
-    v2 = _get_acqu_par(par, p_acqus)
-    if v1 is not None and v2 is not None:
-        return np.array([v1, v2])
-    elif v2 is not None:
-        return v2
-
-    # If reached here, means that acquisition parameter was not found
-    # Try to get processing parameter
-    # Check indirect dimension
-    p_procs = p_spec / "procs"
-    p_proc2s = p_spec / "proc2s"
-    v1, v2 = None, None
-    if p_proc2s.exists():
-        v1 = _get_proc_par(par, p_proc2s)
-    v2 = _get_proc_par(par, p_procs)
-    if v1 is not None and v2 is not None:
-        return np.array([v1, v2])
-    elif v2 is not None:
-        return v2
-
-    # If reached here, neither was found
-    return None
+    # for (n+1)D, bruker_ndim = n
+    bruker_ndim = _get_acqu_par("PARMODE", p_acqus)
+    return int(bruker_ndim) + 1
 
 
 def log(s):

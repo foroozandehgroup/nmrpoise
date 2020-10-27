@@ -73,6 +73,15 @@ def test_getpar():
     assert round(cfh.getpar("SW", p_spec=p_spec)[1], 4) == 10.0130
 
 
+def test_getndim():
+    # 1D
+    p_spec = makep(5, 1)
+    assert cfh.getndim(p_spec=p_spec) == 1
+    # 2D
+    p_spec = makep(101, 1)
+    assert cfh.getndim(p_spec=p_spec) == 2
+
+
 def test_get1d_real():
     p_spec = makep(1, 1)
     real = cfh.get1d_real(p_spec=p_spec)
