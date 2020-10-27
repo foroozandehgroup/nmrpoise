@@ -152,9 +152,9 @@ def main():
     # Set up optimisation arguments
     optimargs = (cost_function, routine)
     # Carry out the optimisation
-    opt_result = optimfn(acquire_nmr, scaled_x0, scaled_xtol, optimargs,
-                         scaled_lb=scaled_lb, scaled_ub=scaled_ub,
-                         maxfev=_g.maxfev)
+    opt_result = optimfn(acquire_nmr, scaled_x0, scaled_xtol,
+                         scaled_lb, scaled_ub,
+                         args=optimargs, maxfev=_g.maxfev)
 
     # Tell frontend script that the optimisation is done
     best_values = unscale(opt_result.xbest, routine.lb,

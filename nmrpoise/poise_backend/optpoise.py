@@ -12,6 +12,11 @@ from functools import wraps
 import numpy as np
 import pybobyqa as pb
 
+# Magic constant which tells us how much to scale each tolerance to when
+# scaling by tols. It is basically arbitrarily chosen, but should not have an
+# effect on the actual optimisation.
+MAGIC_TOL = 0.03
+
 
 def scale(val, lb, ub, tol, scaleby="bounds"):
     """
@@ -22,7 +27,7 @@ def scale(val, lb, ub, tol, scaleby="bounds"):
     As of the current version it's no longer being used.
 
     For scaleby="tols", scales a set of values such that the tolerances for all
-    variables are 0.03.
+    variables are MAGIC_TOL.
 
     Parameters
     ----------
@@ -62,10 +67,10 @@ def scale(val, lb, ub, tol, scaleby="bounds"):
         scaled_ub = (ub - lb)/(ub - lb)  # all 1's
         scaled_tol = tol/(ub - lb)
     elif scaleby == "tols":
-        scaled_val = (val - lb) * 0.03 / tol
-        scaled_lb = (lb - lb) * 0.03 / tol   # all 0's
-        scaled_ub = (ub - lb) * 0.03 / tol
-        scaled_tol = tol * 0.03 / tol        # all 0.03's
+        scaled_val = (val - lb) * MAGIC_TOL / tol
+        scaled_lb = (lb - lb) * MAGIC_TOL / tol   # all 0's
+        scaled_ub = (ub - lb) * MAGIC_TOL / tol
+        scaled_tol = tol * MAGIC_TOL / tol        # all MAGIC_TOL's
     return scaled_val, scaled_lb, scaled_ub, scaled_tol
 
 
@@ -100,14 +105,14 @@ def unscale(scaled_val, orig_lb, orig_ub, orig_tol, scaleby="bounds"):
     if scaleby == "bounds":
         return orig_lb + (scaled_val * (orig_ub - orig_lb))
     elif scaleby == "tols":
-        return (scaled_val * orig_tol / 0.03) + orig_lb
+        return (scaled_val * orig_tol / MAGIC_TOL) + orig_lb
 
 
 class Simplex():
     """
     Simplex class.
     """
-    def __init__(self, x0, method="spendley", length=0.3):
+    def __init__(self, x0, method="spendley", length=MAGIC_TOL * 10):
         """
         Initialises a Simplex object.
 
@@ -125,9 +130,9 @@ class Simplex():
                 - "random"   : Every point is randomly generated in [0,1].
                                Don't recommend using this.
         length : float, optional
-            A measure of the size of the initial simplex. Defaults to 0.3,
-            because that's 10 times the tolerances after the problem is scaled
-            by tols.
+            A measure of the size of the initial simplex. Defaults to
+            MAGIC_TOL * 10, because that's 10 times the tolerances after the
+            problem is scaled by tols.
         """
         self.x0 = np.ravel(np.asfarray(x0))
         self.N = np.size(self.x0)
@@ -268,8 +273,8 @@ class OptResult:
         return str(self.__dict__)
 
 
-def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
-                scaled_lb=None, scaled_ub=None, maxfev=0):
+def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
+                args=(), maxfev=0, simplex_method="spendley"):
     """
     Nelder-Mead optimiser, as described in Section 8.1 of Kelley, "Iterative
     Methods for Optimization".
@@ -282,21 +287,22 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
         function. The cost function *must* be decorated with deco_count() (for
         POISE, this is already done).
     x0 : ndarray or list
-        Initial point for optimisation.
+        Initial point for optimisation. This should already be scaled.
     xtol : ndarray or list
-        Tolerances for each optimisation dimension.
-    args : tuple, optional
-        A tuple of arguments to pass to the cost function.
-    simplex_method : str, optional
-        Method for generation of initial simplex.
-    scaled_lb : ndarray, optional
+        Tolerances for each optimisation dimension. This should already be
+        scaled.
+    scaled_lb : ndarray
         Scaled lower bounds for the optimisation.
-    scaled_ub : ndarray, optional
+    scaled_ub : ndarray
         Scaled upper bounds for the optimisation. This is used to place an
         upper bound on the simplex size.
+    args : tuple, optional
+        A tuple of arguments to pass to the cost function.
     maxfev : int, optional
         Maximum function evaluations to use. Defaults to 500 times the number
         of parameters.
+    simplex_method : str, optional
+        Method for generation of initial simplex.
 
     Returns
     -------
@@ -340,15 +346,8 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
     if len(x0) != len(xtol):
         raise ValueError("Nelder-Mead: x0 and xtol have incompatible lengths")
 
-    # If scaled_lb and scaled_ub are given, then we need to make sure that the
-    # simplex length is not larger than the smallest ub.
-    if scaled_ub is not None:
-        min_ub = np.amin(scaled_ub)
-        length = min(min_ub, 0.3)
-    else:
-        length = 0.3
     # Create and initialise simplex object.
-    sim = Simplex(x0, method=simplex_method, length=length)
+    sim = Simplex(x0, method=simplex_method, length=MAGIC_TOL * 10)
     # Number of iterations. Function evaluations are stored as cf.calls.
     niter = 0
 
@@ -486,8 +485,8 @@ def nelder_mead(cf, x0, xtol, args=(), simplex_method="spendley",
                      message=message)
 
 
-def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
-                  scaled_lb=None, scaled_ub=None, maxfev=0):
+def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
+                  args=(), maxfev=0, simplex_method="spendley"):
     """
     Multidimensional search optimiser, as described in Secion 8.2 of Kelley,
     "Iterative Methods for Optimization".
@@ -500,21 +499,22 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
         function. The cost function *must* be decorated with deco_count() (for
         POISE, this is already done).
     x0 : ndarray or list
-        Initial point for optimisation.
+        Initial point for optimisation. This should already be scaled.
     xtol : ndarray or list
-        Tolerances for each optimisation dimension.
-    args : tuple, optional
-        A tuple of arguments to pass to the cost function.
-    simplex_method : str, optional
-        Method for generation of initial simplex.
-    scaled_lb : ndarray, optional
+        Tolerances for each optimisation dimension. This should already be
+        scaled.
+    scaled_lb : ndarray
         Scaled lower bounds for the optimisation.
-    scaled_ub : ndarray, optional
+    scaled_ub : ndarray
         Scaled upper bounds for the optimisation. This is used to place an
         upper bound on the simplex size.
+    args : tuple, optional
+        A tuple of arguments to pass to the cost function.
     maxfev : int, optional
         Maximum function evaluations to use. Defaults to 500 times the number
         of parameters.
+    simplex_method : str, optional
+        Method for generation of initial simplex.
 
     Returns
     -------
@@ -551,15 +551,8 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
         raise ValueError("Multidimensional search: x0 and xtol have "
                          "incompatible lengths")
 
-    # If scaled_lb and scaled_ub are given, then we need to make sure that the
-    # simplex length is not larger than the smallest ub.
-    if scaled_ub is not None:
-        min_ub = np.amin(scaled_ub)
-        length = min(min_ub, 0.3)
-    else:
-        length = 0.3
     # Create and initialise simplex object.
-    sim = Simplex(x0, method=simplex_method, length=length)
+    sim = Simplex(x0, method=simplex_method, length=MAGIC_TOL * 10)
     # Number of iterations. Function evaluations are stored as cf.calls.
     niter = 0
 
@@ -665,8 +658,8 @@ def multid_search(cf, x0, xtol, args=(), simplex_method="spendley",
                      message=message)
 
 
-def pybobyqa_interface(cf, x0, xtol, args=(),
-                       scaled_lb=None, scaled_ub=None, maxfev=0):
+def pybobyqa_interface(cf, x0, xtol, scaled_lb, scaled_ub,
+                       args=(), maxfev=0):
     """
     Interface to pybobyqa.solve() which takes similar arguments to the other
     two optimisation functions and returns an OptResult object.
@@ -678,9 +671,11 @@ def pybobyqa_interface(cf, x0, xtol, args=(),
         user-defined cost function. However in general, this can be any cost
         function.
     x0 : ndarray or list
-        Initial point for optimisation.
+        Initial point for optimisation. This must already be scaled by tols.
     xtol : ndarray or list
-        Tolerances for each optimisation dimension.
+        Tolerances for each optimisation dimension. This is actually not used
+        at all and is only here so that there is a unified interface for all
+        three optimisers.
     args : tuple, optional
         A tuple of arguments to pass to the cost function.
     simplex_method : str, optional
@@ -713,13 +708,11 @@ def pybobyqa_interface(cf, x0, xtol, args=(),
     if maxfev <= 0:
         maxfev = 500 * N
     # Run the optimisation, using PyBOBYQA's bounds keyword arguments.
-    if scaled_lb is None and scaled_ub is None:
-        bounds = None
-    else:
-        bounds = (scaled_lb, scaled_ub)
+    bounds = (scaled_lb, scaled_ub)
     min_ub = np.min(scaled_ub)
     pb_sol = pb.solve(cf, x0, args=args,
-                      rhobeg=min(0.3, min_ub * 0.499), rhoend=0.03,
+                      rhobeg=min(MAGIC_TOL * 10, min_ub * 0.499),
+                      rhoend=MAGIC_TOL,
                       maxfun=maxfev,
                       bounds=bounds, objfun_has_noise=True,
                       user_params={'restarts.use_restarts': False})
