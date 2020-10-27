@@ -33,13 +33,15 @@
 
 define list<gradient> diff=<Difframp>
 
-"cnst17=(2*p1+d16+p30)*0.000001"; Dtau
+;JY - alpha is hardcoded as 0.2
+"cnst14=0.2"
 
+"cnst17=(2*p1+d16+p30)*0.000001"; Dtau
 ;Assuming square gradient pulses
 ;"cnst18=0.000001*p30*2*0.000001*p30*2*(d20+(0.000001*p30/3)*(cnst14*cnst14-2)+((cnst17)/2)*(cnst14*cnst14-1))" ; Dosytimecubed
-
 ;Assuming half-sine gradient pulses [most common on Bruker systems]
 "cnst18=0.000001*p30*2*0.000001*p30*2*(d20 - (2*0.000001*p30*(5-3*cnst14*cnst14)/16) - (cnst17*(1-cnst14*cnst14)/2) )" ; Dosytimecubed
+
 "cnst15=1+cnst14"  ; 1 + alpha
 "cnst16=1-cnst14"  ; 1 - alpha
 "p2=p1*2"
