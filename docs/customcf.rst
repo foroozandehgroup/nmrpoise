@@ -85,6 +85,10 @@ The ones you are likely to use are the following:
 
 |v|
 
+.. autofunction:: getndim
+
+|v|
+
 .. autofunction:: log
 
 |v|
