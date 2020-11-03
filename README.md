@@ -4,11 +4,18 @@
 [![Travis CI Build Status](https://travis-ci.com/foroozandehgroup/nmrpoise.svg?branch=master)](https://travis-ci.com/github/foroozandehgroup/nmrpoise)
 [![PyPI version](https://badge.fury.io/py/nmrpoise.svg)](https://badge.fury.io/py/nmrpoise)
 
-POISE is a Python package for the numerical optimisation of NMR parameters.
-The frontend runs in Bruker's TopSpin software, and is connected to a Python 3 backend.
+Jonathan Yong and Mohammadali Foroozandeh, University of Oxford
 
-POISE can be installed using ``pip``:
+---------
+
+POISE is a Python package for the numerical optimisation of NMR parameters.
+It works by iteratively acquiring NMR spectra with different parameters and using a cost function to determine the optimal point.
+
+The frontend runs in Bruker's TopSpin software, and is connected to a Python 3 backend.
+You will need a system installation of Python 3.6 or later.
+With that, POISE can be installed using ``pip``:
 
     pip install nmrpoise
 
-Documentation is hosted at https://nmrpoise.readthedocs.io/.
+The documentation (far more thorough than this humble README) is hosted at https://nmrpoise.readthedocs.io/.
+It contains complete instructions on how to set POISE up and use it.
