@@ -38,5 +38,5 @@ VIEWDATA_SAMEWIN  // not strictly necessary, just re-focuses the original spectr
 STOREPAR("P 1", p1opt)
 Proc_err(INFO_OPT, "Optimised value of p1: %.3f", p1opt);
 // (Optional) Run acquisition.
-ZG
+// ZG
 QUIT

@@ -40,4 +40,4 @@ ERRMSG("Optimised value of p1: {:.3f}".format(p1opt))
 # "OK". You can use ERRMSG(), as is done here. There are other ways around
 # this, see MSG_nonmodal() in the POISE frontend script.
 # (Optional) Run acquisition.
-ZG()
+# ZG()
