@@ -43,8 +43,10 @@ Here we are just optimising one parameter, ``p1``.
 
 At this stage, you will be prompted to enter the **bounds**, **initial value**, and **tolerances**.
 The lower and upper bounds simply reflect a range within which the optimum can reasonably be assumed to lie within, and the initial value should be your best guess at where the optimum is.
+
 On the spectrometer we're currently using, the Prosol value for a 90° pulse is 12 µs, so we'll go ahead and set the initial guess for the 360° pulse to be 48 µs.
-The lower and initial bounds can be 40 and 56 µs respectively (corresponding to a 90° pulse of between 10 and 14 µs).
+*(If your Prosol value differs, you should adjust these values accordingly.)*
+The lower and initial bounds can be 40 and 56 µs respectively, corresponding to a 90° pulse of between 10 and 14 µs.
 The tolerance, on the other hand, roughly reflects the degree of accuracy that you want in the answer. Here we've used a value of 0.2 µs.
 
 .. image:: images/routine3.png

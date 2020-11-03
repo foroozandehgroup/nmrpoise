@@ -14,7 +14,7 @@ The source code is quite thoroughly commented.
 
 There are two main things to point out.
 Probably the most important thing worth mentioning is the location of the relevant files.
-The backend script is always ran from ``$TS/py/user/poise_backend`` (putting it here allows the frontend to access itmuch more easily).
+The backend script is always ran from ``$TS/py/user/poise_backend`` (putting it here allows the frontend to access it much more easily).
 The entire ``$TS/py/user/poise_backend`` folder is treated as if it is a Python package, by virtue of some code near the top of ``poise_backend.py``::
 
     if __name__ == "__main__" and __package__ is None:
@@ -59,4 +59,4 @@ To build the Sphinx documentation, use::
 
    tox -e docs
 
-The HTML documentation will be built in ``docs/_build``, and the PDF documentation in ``docs/latex`` (this assumes you have a working installation of ``pdflatex`` on your system).
+The HTML documentation will be built in ``docs/dirhtml``, and the PDF documentation in ``docs/latex`` (this assumes you have a working installation of ``pdflatex`` on your system).
