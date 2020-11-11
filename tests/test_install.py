@@ -69,3 +69,39 @@ def test_topspin_installation(tmpdir):
     assert (py_user_path / "poise_backend" / "routines").exists()
     assert (au_src_user_path / "poise_1d").exists()
     assert (au_src_user_path / "poise_2d").exists()
+
+
+@pytest.mark.skipif(all(host not in platform.node()
+                        for host in hostname_to_tspath.keys()),
+                    reason=f"Testing on {hostname} is not supported.")
+def test_poise_install_subcommand(tmpdir):
+    # Path to TopSpin py/user, and /au/src/user.
+    for host in hostname_to_tspath.keys():
+        if host in platform.node():
+            py_user_path = hostname_to_tspath[host] / "py" / "user"
+            au_src_user_path = hostname_to_tspath[host] / "au" / "src" / "user"
+    # Check that the install script exists (it should, after the previous
+    # installation test)
+    poise_install_script_path = (py_user_path
+                                 / "poise_backend"
+                                 / "_poise_install"
+                                 / "_poise_install.py")
+    assert poise_install_script_path.exists()
+    # Check poise --install p1
+    poisecal_path = au_src_user_path / "poisecal"
+    delete_file_force(poisecal_path)
+    assert not poisecal_path.exists()
+    subprocess.run(["python3", str(poise_install_script_path), "p1"])
+    assert poisecal_path.exists()
+    # Check poise --install dosy
+    dosy_opt_path = py_user_path / "dosy_opt.py"
+    dosy_routine_path = (py_user_path / "poise_backend"
+                         / "routines" / "dosy.json")
+    dosy_aux_routine_path = (py_user_path / "poise_backend"
+                             / "routines" / "dosy_aux.json")
+    for path in [dosy_opt_path, dosy_routine_path, dosy_aux_routine_path]:
+        delete_file_force(path)
+    assert not path.exists()
+    subprocess.run(["python3", str(poise_install_script_path), "dosy"])
+    for path in [dosy_opt_path, dosy_routine_path, dosy_aux_routine_path]:
+        assert path.exists()

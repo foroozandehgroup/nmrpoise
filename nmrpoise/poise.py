@@ -1012,6 +1012,39 @@ def delete_routine(name):
         EXIT()
 
 
+def subinstall(target):
+    """
+    Installs the necessary AU scripts / Python scripts / routines for p1 and
+    DOSY optimisations. This simply invokes a Python 3 script which does all
+    the real work.
+
+    Parameters
+    ----------
+    target : str from {"p1", "dosy"}
+        The set of scripts/routines to install.
+         - For "p1", installs the poisecal AU programme only. The routine is
+           set up by the user according to the instructions in the
+           documentation.
+         - For "dosy", installs the dosy_opt Python programme as well as the
+           dosy and dosy_aux routines required to run that optimisation.
+        In both cases, the cost functions are already pre-installed with POISE.
+
+    Returns
+    -------
+    None
+    """
+    if target not in ["p1", "dosy"]:
+        err_exit("poise --install only takes the arguments 'p1' or 'dosy'.")
+    else:
+        # Delegate to external script.
+        p_poise_install = os.path.join(p_poise,
+                                       "_poise_install",
+                                       "_poise_install.py")
+        subprocess.Popen([p_python3, p_poise_install, target])
+        MSG_nonmodal("poise --install {}: done\n".format(target))
+        EXIT()
+
+
 class TSArgumentParser(argparse.ArgumentParser):
     """
     Custom ArgumentParser class which shows a TopSpin dialog box with errors
@@ -1063,6 +1096,11 @@ if __name__ == "__main__":
         help=("Delete an existing POISE routine.")
     )
     me_group.add_argument(
+        "--install",
+        choices=["p1", "dosy"],
+        help=("Ultraquick installation. Refer to documentation for more info.")
+    )
+    me_group.add_argument(
         "--kill",
         action="store_true",
         help=("Kill POISE backends that may still be running.")
@@ -1101,7 +1139,9 @@ if __name__ == "__main__":
     # List
     if args.delete:
         delete_routine(args.delete)
-    if args.list:
+    elif args.install:
+        subinstall(args.install)
+    elif args.list:
         list_routines_cfs()
     elif args.kill:
         kill_remaining_backends()

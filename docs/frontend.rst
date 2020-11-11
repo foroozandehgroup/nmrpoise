@@ -19,6 +19,10 @@ If you want to edit a routine, you can just re-create a new routine with the sam
 
 Show a help message then exit.
 
+``--install``
+
+For ultra-quick installation of p1 or DOSY optimisation scripts (see `index`). Should not be otherwise used.
+
 ``--kill``
 
 Kill POISE backends that may still be running.

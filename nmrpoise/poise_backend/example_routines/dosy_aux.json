@@ -1,0 +1,1 @@
+{"name": "dosy_aux", "pars": ["gpz1"], "lb": [79.0], "ub": [81.0], "init": [80.0], "tol": [0.01], "cf": "dosy_aux", "au": "poise_1d"}
