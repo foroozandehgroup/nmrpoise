@@ -95,13 +95,7 @@ def test_poise_install_subcommand(tmpdir):
     assert poisecal_path.exists()
     # Check poise --install dosy
     dosy_opt_path = py_user_path / "dosy_opt.py"
-    dosy_routine_path = (py_user_path / "poise_backend"
-                         / "routines" / "dosy.json")
-    dosy_aux_routine_path = (py_user_path / "poise_backend"
-                             / "routines" / "dosy_aux.json")
-    for path in [dosy_opt_path, dosy_routine_path, dosy_aux_routine_path]:
-        delete_file_force(path)
-    assert not path.exists()
+    delete_file_force(dosy_opt_path)
+    assert not dosy_opt_path.exists()
     subprocess.run(["python3", str(poise_install_script_path), "dosy"])
-    for path in [dosy_opt_path, dosy_routine_path, dosy_aux_routine_path]:
-        assert path.exists()
+    assert dosy_opt_path.exists()

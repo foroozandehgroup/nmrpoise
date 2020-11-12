@@ -64,6 +64,15 @@ def main():
             " be added in the dosy_opt.py script.")
         EXIT()
 
+    # Create new routines. We need to do this within this script since the
+    # routine depends on the GPZ parameter being optimised; we can't hardcode
+    # that in a predefined routine.
+    gpzparam_short = gpzparam.replace(" ", "").lower()
+    XCMD("poise --create dosy {} 20 80 50 2"
+         " dosy poise_1d".format(gpzparam_short))
+    XCMD("poise --create dosy_aux {} 79 81 80 0.1"
+         " dosy_aux poise_1d".format(gpzparam_short))
+
     # Get the expno of the 2D dataset, and store the parameter set. This is
     # important because we want the optimisation to inherit most parameters,
     # e.g.  D1, SW, etc. from the parent experiment (which has presumably been

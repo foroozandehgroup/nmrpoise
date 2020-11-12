@@ -9,6 +9,10 @@ You can also access short descriptions of these by typing ``poise -h`` in TopSpi
 General options
 ===============
 
+``--create NAME PARAM MIN MAX INIT TOL CF AU``
+
+Create a new named routine. This can only handle one-parameter routines; if you want a multiple-parameter routine, please use the GUI. The AU programme must be specified, it can't be left blank like in the GUI. Also, short forms such as ``4u`` for 4 µs are not allowed here.
+
 ``--delete DELETE``
 
 Delete a named routine. For example, run ``poise --delete p1cal`` to delete a routine named ``p1cal``.

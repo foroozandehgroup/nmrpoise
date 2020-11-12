@@ -989,6 +989,38 @@ def kill_pid(pid):
         subprocess.call(["kill", "-9", str(pid)])
 
 
+def create_routine(cli_args):
+    """
+    Creates a .json file for a one-parameter routine.
+
+    Parameters
+    ----------
+    cli_args : list of str
+        This list should contain 8 strings, namely: name, parameter, minimum
+        value, maximum value, initial value, tolerance, cost function, and AU
+        programme.
+
+    Returns
+    -------
+    None
+    """
+    name, param, minval, maxval, init, tol, cf, au = cli_args
+    try:
+        minval = float(minval)
+        maxval = float(maxval)
+        init = float(init)
+        tol = float(tol)
+    except ValueError:
+        err_exit("poise --create: invalid input")
+    if (minval > init) or (init > maxval) or (tol > (maxval - minval)):
+        err_exit("poise --create: invalid input")
+    # If we got here, the input is probably OK.
+    routine = Routine(name, [param], [minval], [maxval], [init], [tol], cf, au)
+    with open(os.path.join(p_routines, routine.name + ".json"), "wb") as f:
+        json.dump(routine._asdict(), f)
+    EXIT()
+
+
 def delete_routine(name):
     """
     Deletes a routine .json file.
@@ -1091,6 +1123,17 @@ if __name__ == "__main__":
         help="Optimisation algorithm to use. (default: 'nm')"
     )
     me_group.add_argument(
+        "--create",
+        type=str,
+        nargs=8,
+        help=("Create a new POISE routine for optimisation of one parameter."
+              " For multiple parameter optimisations, please use the GUI."
+              " Invoke using 'poise --create [NAME] [PARAM] [MINVAL] [MAXVAL]"
+              " [INITVAL] [TOLS] [CF] [AU]. Note that unlike in the GUI, the"
+              " AU programme must be specified here. Also, shorthand notation"
+              " such as 'u' or 'm' for units are not allowed here.")
+    )
+    me_group.add_argument(
         "--delete",
         type=str,
         help=("Delete an existing POISE routine.")
@@ -1137,6 +1180,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # List
+    if args.create:
+        create_routine(args.create)
     if args.delete:
         delete_routine(args.delete)
     elif args.install:

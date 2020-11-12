@@ -13,5 +13,7 @@ def test_get_cfs(capsys):
                                  "maxabsint",
                                  "minrealint",
                                  "maxrealint",
-                                 "zerorealint"
+                                 "zerorealint",
+                                 "dosy",
+                                 "dosy_aux"
                                  }
