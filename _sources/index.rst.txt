@@ -6,8 +6,8 @@ POISE (*Parameter Optimisation by Iterative Spectral Evaluation*) is a Python pa
 <citation should be put here>
 
 The code is licensed under `the GNU General Public License v3 <https://www.gnu.org/licenses/gpl-3.0.en.html>`_ and can be found on `GitHub <https://github.com/foroozandehgroup/nmrpoise>`_.
-The latest HTML version of the documentation can always be found at https://nmrpoise.readthedocs.io.
-Likewise, the latest PDF version is always at https://nmrpoise.readthedocs.io/_/downloads/en/latest/pdf/.
+The latest HTML version of the documentation can always be found at https://foroozandehgroup.github.io/nmrpoise.
+Likewise, the latest PDF version is always at https://foroozandehgroup.github.io/nmrpoise/poise.pdf.
 
 In here you will find guides on setting POISE up and using it in routine NMR applications.
 This guide can largely be read in sequence.
