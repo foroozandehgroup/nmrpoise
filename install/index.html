@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Installation &#8212; poise  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Setting up a Routine" href="../routines/" />
+    <link rel="prev" title="POISE User Guide" href="../" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>POISE comprises a <em>frontend</em> script, which is accessible from within TopSpin itself, as well as a <em>backend</em> script, which has to be run using Python 3 (i.e. not TopSpin’s native Python interpreter).</p>
+<p>This means that Python 3 must be installed separately first.
+In particular, POISE requires a minimum version of <strong>Python 3.6.</strong>
+For Windows, your best bet is to download an installer from <a class="reference external" href="https://www.python.org/downloads/">the Python website</a>.
+For Unix machines, we suggest using a package manager to do so (such as Homebrew for macOS or <code class="docutils literal notranslate"><span class="pre">apt</span></code>/<code class="docutils literal notranslate"><span class="pre">yum</span></code> &amp; their equivalents on Linux), although the installers are also fine.</p>
+<p>Once that’s done, you can install POISE using <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">nmrpoise</span>
+</pre></div>
+</div>
+<p>The package requirements are <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, and <code class="docutils literal notranslate"><span class="pre">Py-BOBYQA</span></code>; these will be automatically downloaded if necessary.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span></code> tries to take care of installing the scripts to your TopSpin directory.
+To do so, it checks for TopSpin installations in standard directories (<code class="docutils literal notranslate"><span class="pre">/opt</span></code> on Unix and <code class="docutils literal notranslate"><span class="pre">C:\Bruker</span></code> on Windows).
+If <code class="docutils literal notranslate"><span class="pre">pip</span></code> exits without errors, this should have succeeded; you can test it by typing <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">-h</span></code> into TopSpin’s command-line, which should spawn a popup.
+If that is the case, congratulations — you can move on to the next chapter, <a class="reference internal" href="../routines/"><span class="doc">Setting up a Routine</span></a>.</p>
+<div class="section" id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<p>The installation can occasionally fail if TopSpin is installed to a non-standard location.
+To solve this issue, you can specify the TopSpin installation directory as an environment variable <code class="docutils literal notranslate"><span class="pre">TSDIR</span></code> before installing POISE.
+The way to do this depends on what operating system (and shell) you use.</p>
+<p>On Windows PowerShell, run the following command:</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="nv">$env:TSDIR</span> <span class="p">=</span> <span class="s2">&quot;C:\Bruker\TopSpinX.Y.Z\exp\stan\nmr&quot;</span>
+</pre></div>
+</div>
+<p>replacing the part in quotes with your actual TopSpin installation directory (it must point to the <code class="docutils literal notranslate"><span class="pre">exp/stan/nmr</span></code> folder).</p>
+<p>On old-school Windows <code class="docutils literal notranslate"><span class="pre">cmd</span></code>, use:</p>
+<div class="highlight-batch notranslate"><div class="highlight"><pre><span></span><span class="k">set</span> <span class="nv">TSDIR</span><span class="p">=</span><span class="s2">&quot;C:\Bruker\TopSpinX.Y.Z\exp\stan\nmr&quot;</span>
+</pre></div>
+</div>
+<p>On Unix systems, use:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">TSDIR</span><span class="o">=</span><span class="s2">&quot;/opt/topspinX.Y.Z/exp/stan/nmr&quot;</span>
+</pre></div>
+</div>
+<p>(Unless you’re using <code class="docutils literal notranslate"><span class="pre">csh</span></code> or the like, in which case you use <code class="docutils literal notranslate"><span class="pre">setenv</span></code>, although you probably didn’t need to be told that!)</p>
+<p>After running the appropriate command for your operating system, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">nmrpoise</span></code> should be able to detect the <code class="docutils literal notranslate"><span class="pre">TSDIR</span></code> environment variable and install the scripts accordingly.</p>
+</div>
+<div class="section" id="from-source">
+<h2>From source<a class="headerlink" href="#from-source" title="Permalink to this headline">¶</a></h2>
+<p>If you obtained the source code (e.g. from <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code> or a <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/releases">GitHub release</a>) and want to install from there, simply <code class="docutils literal notranslate"><span class="pre">cd</span></code> into the top-level <code class="docutils literal notranslate"><span class="pre">nmrpoise</span></code> directory and run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>or equivalently:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>The installation to the TopSpin directory is subject to the same considerations as above.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">poise</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#from-source">From source</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../routines/">Setting up a Routine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running/">Running an optimisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frontend/">Frontend options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/">POISE under automation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../costfunctions/">Builtin cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../au/">Builtin AU programmes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../customcf/">Custom cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/">Developer notes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../" title="previous chapter">POISE User Guide</a></li>
+      <li>Next: <a href="../routines/" title="next chapter">Setting up a Routine</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Jonathan Yong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/install.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

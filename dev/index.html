@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Developer notes &#8212; poise  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="prev" title="Custom cost functions" href="../customcf/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="developer-notes">
+<h1>Developer notes<a class="headerlink" href="#developer-notes" title="Permalink to this headline">¶</a></h1>
+<p>POISE does not contain all that much code.
+However, if you are thinking of modifying it, it helps to have an understanding of the distinction between the <em>frontend</em> and the <em>backend</em>.
+This graphic (taken from an old presentation) is a slightly more technical description of the flowchart presented in the POISE paper, and shows which part is responsible for which step.
+It’s a good starting point for understanding how POISE works internally.</p>
+<img alt="../_images/devoverview.png" class="align-center" src="../_images/devoverview.png" />
+<p>Beyond this, we recommend reading the source code of POISE: start at the frontend script (<code class="docutils literal notranslate"><span class="pre">poise.py</span></code>, which is run from inside TopSpin), then go to the backend script (<code class="docutils literal notranslate"><span class="pre">poise_backend/backend.py</span></code>) at the appropriate time (when the frontend launches it as a subprocess).
+The source code is quite thoroughly commented.</p>
+<p>There are two main things to point out.
+Probably the most important thing worth mentioning is the location of the relevant files.
+The backend script is always ran from <code class="docutils literal notranslate"><span class="pre">$TS/py/user/poise_backend</span></code> (putting it here allows the frontend to access it much more easily).
+The entire <code class="docutils literal notranslate"><span class="pre">$TS/py/user/poise_backend</span></code> folder is treated as if it is a Python package, by virtue of some code near the top of <code class="docutils literal notranslate"><span class="pre">poise_backend.py</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="ow">and</span> <span class="n">__package__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+   <span class="n">__package__</span> <span class="o">=</span> <span class="s2">&quot;poise_backend&quot;</span>
+   <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">resolve</span><span class="p">()))</span>
+   <span class="nb">__import__</span><span class="p">(</span><span class="n">__package__</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This allows relative imports of the other files in the same directory, such as <code class="docutils literal notranslate"><span class="pre">costfunctions.py</span></code>, in which the user-defined cost functions reside.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These backend files <em>also</em> reside inside the Python 3 <code class="docutils literal notranslate"><span class="pre">site-packages</span></code> directory, where all packages are installed to. However, these files will <em>never</em> be used by POISE. So, there is nothing to be gained by modifying these at all.</p>
+<p>The only file inside the <code class="docutils literal notranslate"><span class="pre">site-packages</span></code> directory which has any effect is <code class="docutils literal notranslate"><span class="pre">nmrpoise/__init__.py</span></code>, where the <code class="docutils literal notranslate"><span class="pre">parse_log()</span></code> function is defined. This allows you to (for example) run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nmrpoise</span> <span class="kn">import</span> <span class="n">parse_log</span>
+</pre></div>
+</div>
+<p>Python will look inside the <code class="docutils literal notranslate"><span class="pre">site-packages</span></code> directory, <em>not</em> <code class="docutils literal notranslate"><span class="pre">$TS/py/user</span></code>, to find this function.</p>
+</div>
+<p>The second thing is that you should never, ever, do anything with the backend’s <code class="docutils literal notranslate"><span class="pre">stdin</span></code> and <code class="docutils literal notranslate"><span class="pre">stdout</span></code>, because these are exclusively reserved for communication with the frontend.
+So you should never print anything from the backend, since the frontend will just interpret that as an error.
+This applies to all files inside the <code class="docutils literal notranslate"><span class="pre">$TS/py/user/poise_backend</span></code> directory, including cost functions, which is why custom cost functions should always use POISE’s <a class="reference internal" href="../customcf/#nmrpoise.poise_backend.cfhelpers.log" title="nmrpoise.poise_backend.cfhelpers.log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">log</span></code></a> function instead of plain old <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">print</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you really just want to do some quick-and-dirty debugging, you <em>can</em> actually use this behaviour to your advantage. The frontend will echo any “invalid” message it receives from the backend, so if you print some unexpected text from the backend (on purpose), you should see it pop up as a TopSpin message when you run an optimisation. This is slightly less hassle than printing to a file and opening the file.</p>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>Tests are carried out using the excellent <a class="reference external" href="https://docs.pytest.org/en/stable/">pytest</a> and <a class="reference external" href="https://tox.readthedocs.io/en/latest/">tox</a> tools.
+To run all tests, simply run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tox</span>
+</pre></div>
+</div>
+<p>from anywhere inside the <code class="docutils literal notranslate"><span class="pre">nmrpoise</span></code> directory.
+This runs tests on Python 3.6, 3.7, and 3.8.
+If you only have one of these versions, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tox</span> <span class="o">-</span><span class="n">e</span> <span class="n">py38</span>   <span class="c1"># or py36 or py37</span>
+</pre></div>
+</div>
+<p>To build the Sphinx documentation, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tox</span> <span class="o">-</span><span class="n">e</span> <span class="n">docs</span>
+</pre></div>
+</div>
+<p>The HTML documentation will be built in <code class="docutils literal notranslate"><span class="pre">docs/dirhtml</span></code>, and the PDF documentation in <code class="docutils literal notranslate"><span class="pre">docs/latex</span></code> (this assumes you have a working installation of <code class="docutils literal notranslate"><span class="pre">pdflatex</span></code> on your system).</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">poise</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../routines/">Setting up a Routine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running/">Running an optimisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frontend/">Frontend options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/">POISE under automation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../costfunctions/">Builtin cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../au/">Builtin AU programmes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../customcf/">Custom cost functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../customcf/" title="previous chapter">Custom cost functions</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Jonathan Yong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/dev.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

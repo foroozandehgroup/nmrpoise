@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>POISE under automation &#8212; poise  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Builtin cost functions" href="../costfunctions/" />
+    <link rel="prev" title="Frontend options" href="../frontend/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="poise-under-automation">
+<h1>POISE under automation<a class="headerlink" href="#poise-under-automation" title="Permalink to this headline">¶</a></h1>
+<p>The command-line interface that POISE offers (see <a class="reference internal" href="../frontend/"><span class="doc">Frontend options</span></a>) allows us to wrap POISE within a larger script.
+Here we present some examples of how this can be accomplished: after this, the extension to automation is largely straightforward.
+For example, if POISE is used inside an AU programme, then set the the <code class="docutils literal notranslate"><span class="pre">AUNM</span></code> parameter in TopSpin appropriately.</p>
+<div class="section" id="basics">
+<h2>Basics<a class="headerlink" href="#basics" title="Permalink to this headline">¶</a></h2>
+<p>To incorporate POISE in an AU programme, you can use the syntax:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;sendgui xpy poise &lt;routine_name&gt; [options]&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>inside the AU script.</p>
+<p>(Optional: To suppress POISE’s final popup (telling the user that the optimum has been found), you can add the <code class="docutils literal notranslate"><span class="pre">-q</span></code> flag in the options.
+The popup won’t stop TopSpin from running whatever it was going to run, though, so it’s completely safe to show the message.)</p>
+<p>Alternatively, you can wrap POISE within a Python script, which is arguably easier to write.
+The corresponding syntax for running an optimisation would be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;xpy poise &lt;routine_name&gt; [options]&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As you can see, it is the same except that <code class="docutils literal notranslate"><span class="pre">sendgui</span></code> isn’t needed.</p>
+</div>
+<div class="section" id="a-simple-ish-example">
+<h2>A simple(ish) example<a class="headerlink" href="#a-simple-ish-example" title="Permalink to this headline">¶</a></h2>
+<p>Here’s an example of how the <code class="docutils literal notranslate"><span class="pre">p1</span></code> optimisation (shown in <a class="reference internal" href="../routines/"><span class="doc">Setting up a Routine</span></a>) can be incorporated into an AU script (download from <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/au/poisecal">here</a>).
+This AU script performs a very similar task to the existing <code class="docutils literal notranslate"><span class="pre">pulsecal</span></code> script: it finds the best value of <code class="docutils literal notranslate"><span class="pre">p1</span></code> and plugs it back into the current experiment.
+However, as we wrote in the paper, it tends to provide a much more accurate result.
+In practice, we’ve already used it many times to calibrate <code class="docutils literal notranslate"><span class="pre">p1</span></code> before running other experiments.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// Use EXPNO 99999 in the current folder for optimisation.</span>
+<span class="n">GETCURDATA</span>
+<span class="kt">int</span> <span class="n">old_expno</span> <span class="o">=</span> <span class="n">expno</span><span class="p">;</span>
+<span class="n">DATASET</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="mi">99999</span><span class="p">,</span> <span class="n">procno</span><span class="p">,</span> <span class="n">disk</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+<span class="c1">// Set some key parameters. Notice that these lines can be substantially cut</span>
+<span class="c1">// if an appropriate parameter set is set up beforehand.</span>
+<span class="n">RPAR</span><span class="p">(</span><span class="s">&quot;PROTON&quot;</span><span class="p">,</span> <span class="s">&quot;all&quot;</span><span class="p">)</span>
+<span class="n">GETPROSOL</span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;PULPROG&quot;</span><span class="p">,</span> <span class="s">&quot;zg&quot;</span><span class="p">)</span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;NS&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;DS&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;D 1&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;RG&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1">// Run optimisation.</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s">&quot;sendgui xpy poise p1cal -a bobyqa -q&quot;</span><span class="p">)</span>
+<span class="c1">// POISE stores the optimised value in p1 after it&#39;s done. We can retrieve it</span>
+<span class="c1">// here. Don&#39;t try to get the *status* parameter, since that is not the</span>
+<span class="c1">// optimised value (it is the value used for the last function evaluation!)</span>
+<span class="kt">float</span> <span class="n">p1opt</span><span class="p">;</span>
+<span class="n">FETCHPAR</span><span class="p">(</span><span class="s">&quot;P 1&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">p1opt</span><span class="p">)</span>
+<span class="n">p1opt</span> <span class="o">=</span> <span class="n">p1opt</span><span class="o">/</span><span class="mi">4</span><span class="p">;</span>
+<span class="c1">// Move back to old dataset and set p1 to optimised value.</span>
+<span class="n">DATASET</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">old_expno</span><span class="p">,</span> <span class="n">procno</span><span class="p">,</span> <span class="n">disk</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+<span class="n">VIEWDATA_SAMEWIN</span>  <span class="c1">// not strictly necessary, just re-focuses the original spectrum</span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;P 1&quot;</span><span class="p">,</span> <span class="n">p1opt</span><span class="p">)</span>
+<span class="n">Proc_err</span><span class="p">(</span><span class="n">INFO_OPT</span><span class="p">,</span> <span class="s">&quot;Optimised value of p1: %.3f&quot;</span><span class="p">,</span> <span class="n">p1opt</span><span class="p">);</span>
+<span class="c1">// (Optional) Run acquisition.</span>
+<span class="c1">// ZG</span>
+<span class="n">QUIT</span>
+</pre></div>
+</div>
+<p>Note that all six lines underneath “set some key params” can be collapsed to one line if an appropriate parameter set is set up beforehand.</p>
+<p>Here’s the Python equivalent of the AU programme above (download from <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/py/poisecalpy.py">here</a>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use EXPNO 99999 in the current folder for optimisation.</span>
+<span class="n">old_dataset</span> <span class="o">=</span> <span class="n">CURDATA</span><span class="p">()</span>
+<span class="n">opt_dataset</span> <span class="o">=</span> <span class="n">CURDATA</span><span class="p">()</span>
+<span class="n">opt_dataset</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;99999&quot;</span>
+<span class="c1"># Create new dataset and move to it.</span>
+<span class="n">NEWDATASET</span><span class="p">(</span><span class="n">opt_dataset</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;PROTON&quot;</span><span class="p">)</span>
+<span class="n">RE</span><span class="p">(</span><span class="n">opt_dataset</span><span class="p">)</span>
+<span class="c1"># Set some key parameters. Notice that these lines can be cut if an appropriate</span>
+<span class="c1"># parameter set is set up beforehand (and loaded using NEWDATASET()).</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;getprosol&quot;</span><span class="p">)</span>
+<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;PULPROG&quot;</span><span class="p">,</span> <span class="s2">&quot;zg&quot;</span><span class="p">)</span>
+<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;NS&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
+<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;DS&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">)</span>
+<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;D 1&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
+<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;RG&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
+<span class="c1"># Run optimisation.</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;poise p1cal -a bobyqa -q&quot;</span><span class="p">)</span>
+<span class="c1"># POISE stores the optimised value in p1 after it&#39;s done. We can retrieve it</span>
+<span class="c1"># here. Don&#39;t try to get the *status* parameter, since that is not the</span>
+<span class="c1"># optimised value (it is the value used for the last function evaluation!)</span>
+<span class="n">p1opt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">GETPAR</span><span class="p">(</span><span class="s2">&quot;P 1&quot;</span><span class="p">))</span><span class="o">/</span><span class="mi">4</span>
+<span class="c1"># Move back to old dataset and set p1 to optimised value.</span>
+<span class="n">RE</span><span class="p">(</span><span class="n">old_dataset</span><span class="p">)</span>
+<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;P 1&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p1opt</span><span class="p">))</span>
+<span class="n">ERRMSG</span><span class="p">(</span><span class="s2">&quot;Optimised value of p1: </span><span class="si">{:.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p1opt</span><span class="p">))</span>
+<span class="c1"># A TopSpin quirk: using MSG() will block subsequent commands until user hits</span>
+<span class="c1"># &quot;OK&quot;. You can use ERRMSG(), as is done here. There are other ways around</span>
+<span class="c1"># this, see MSG_nonmodal() in the POISE frontend script.</span>
+<span class="c1"># (Optional) Run acquisition.</span>
+<span class="c1"># ZG()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="a-helpful-trick">
+<h2>A helpful trick<a class="headerlink" href="#a-helpful-trick" title="Permalink to this headline">¶</a></h2>
+<p>POISE itself is a Python programme which calls an AU programme.
+When incorporating POISE inside another script, it can become <em>very</em> difficult to terminate the entire thing as there are several nested loops in which scripts are being run.
+So, for example, you can kill the top-level script using TopSpin’s <code class="docutils literal notranslate"><span class="pre">kill</span></code> command.
+However, that won’t kill POISE itself, and so it will keep acquiring spectra, etc.</p>
+<p>(If anybody has a better idea please let us know. As far as we can tell, this is a necessary limitation of the TopSpin ecosystem.)</p>
+<p>Anyway, we deal with this using a trick involving the <code class="docutils literal notranslate"><span class="pre">TI</span></code> TopSpin parameter, which can be any arbitrary string.
+POISE, upon successful function evaluation, will store the value of the cost function in the <code class="docutils literal notranslate"><span class="pre">TI</span></code> parameter.
+If it doesn’t successfully run (for example if a requested routine or cost function is not found, or some other error), then <code class="docutils literal notranslate"><span class="pre">TI</span></code> will be left untouched.</p>
+<p>In order to detect when POISE fails from the top-level script, we therefore:</p>
+<ol class="arabic simple">
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">TI</span></code> to be blank. Please read the note below.</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In an AU or Python programme, you have to set <code class="docutils literal notranslate"><span class="pre">TI</span></code> to be a non-empty string that contains only whitespace. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;TI&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>   <span class="c1"># this will work</span>
+<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;TI&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>    <span class="c1"># this will NOT work!</span>
+</pre></div>
+</div>
+<p>TopSpin mangles empty strings: instead of putting an empty string in, it puts the string <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code> in.
+On the other hand, if the string is not empty but contains whitespace, TopSpin automatically trims it to an empty string after it’s been put in.
+I don’t know why.
+The same applies to the <code class="docutils literal notranslate"><span class="pre">STOREPAR</span></code> macro in AU programmes.</p>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Run POISE.</p></li>
+<li><p>Check if <code class="docutils literal notranslate"><span class="pre">TI</span></code> is an empty string. If it is, then quit unceremoniously with an error message of your choice.</p></li>
+</ol>
+<p>You can see this strategy in action in the first part of the <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/py/dosy_opt.py">DOSY optimisation script</a> (where we optimise the diffusion delay):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">msg_nonmodal</span><span class="p">(</span><span class="s2">&quot;dosy_opt: optimising diffusion delay...&quot;</span><span class="p">)</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;poise_1d&quot;</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="n">WAIT_TILL_DONE</span><span class="p">)</span>
+
+<span class="c1"># Set up optimisation expno.</span>
+<span class="n">optimisation_expno</span> <span class="o">=</span> <span class="mi">99999</span>
+<span class="n">optimisation_dataset</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">original_2d_dataset</span><span class="p">)</span>   <span class="c1"># make a copy</span>
+<span class="n">optimisation_dataset</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">optimisation_expno</span><span class="p">)</span>
+<span class="n">NEWDATASET</span><span class="p">(</span><span class="n">optimisation_dataset</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;dosytemp&quot;</span><span class="p">)</span>
+<span class="n">RE</span><span class="p">(</span><span class="n">optimisation_dataset</span><span class="p">)</span>
+<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;PULPROG&quot;</span><span class="p">,</span> <span class="n">pp1d</span><span class="p">)</span>
+<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;PARMODE&quot;</span><span class="p">,</span> <span class="s2">&quot;1D&quot;</span><span class="p">)</span>
+<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;PPARMOD&quot;</span><span class="p">,</span> <span class="s2">&quot;1D&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You don’t actually have to set it to be blank, of course: it can be any sentinel value you like, as long as it cannot be confused with the value of a cost function.
+For example, you could set <code class="docutils literal notranslate"><span class="pre">TI</span></code> to be the string <code class="docutils literal notranslate"><span class="pre">&quot;ILoveTopSpin&quot;</span></code> before the optimisation, then after that check whether it is still <code class="docutils literal notranslate"><span class="pre">&quot;ILoveTopSpin&quot;</span></code>.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">poise</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../routines/">Setting up a Routine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running/">Running an optimisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frontend/">Frontend options</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">POISE under automation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basics">Basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-simple-ish-example">A simple(ish) example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-helpful-trick">A helpful trick</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../costfunctions/">Builtin cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../au/">Builtin AU programmes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../customcf/">Custom cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/">Developer notes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../frontend/" title="previous chapter">Frontend options</a></li>
+      <li>Next: <a href="../costfunctions/" title="next chapter">Builtin cost functions</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Jonathan Yong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/automation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

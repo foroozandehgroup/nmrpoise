@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Running an optimisation &#8212; poise  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Frontend options" href="../frontend/" />
+    <link rel="prev" title="Setting up a Routine" href="../routines/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="running-an-optimisation">
+<h1>Running an optimisation<a class="headerlink" href="#running-an-optimisation" title="Permalink to this headline">¶</a></h1>
+<p>Assuming you or someone else has already created a routine (see <a class="reference internal" href="../routines/"><span class="doc">Setting up a Routine</span></a> if not), this page will show you how to run the optimisation.
+We’ll use the same <code class="docutils literal notranslate"><span class="pre">p1</span></code> calibration routine that we described on that page, but the principles apply equally to all routines.</p>
+<p>The first thing to do is to set up the NMR experiment.
+Use <code class="docutils literal notranslate"><span class="pre">edc</span></code> or <code class="docutils literal notranslate"><span class="pre">new</span></code> to create a new proton pulse-acquire experiment.
+You should use the pulse programme <code class="docutils literal notranslate"><span class="pre">zg</span></code> (not <code class="docutils literal notranslate"><span class="pre">zg30</span></code> or <code class="docutils literal notranslate"><span class="pre">zg60</span></code>!).
+Set the other experimental parameters, such as the spectral width <code class="docutils literal notranslate"><span class="pre">SW</span></code>, relaxation delay <code class="docutils literal notranslate"><span class="pre">d1</span></code>, etc. as desired for your compound of interest.</p>
+<p>All these steps can in principle be done most easily by loading a parameter set (<code class="docutils literal notranslate"><span class="pre">rpar</span></code>).
+On Bruker systems, there should already be a builtin <code class="docutils literal notranslate"><span class="pre">PROTON</span></code> parameter set.
+After loading this parameter set you will have to run <code class="docutils literal notranslate"><span class="pre">getprosol</span></code>, then change the pulse programme to <code class="docutils literal notranslate"><span class="pre">zg</span></code>.
+Alternatively, there might be a different parameter set that has been set up by a member of the NMR staff for simple proton spectra.
+As long as you make sure the pulse programme is <code class="docutils literal notranslate"><span class="pre">zg</span></code> the optimisation will work fine.</p>
+<img alt="../_images/running1.png" class="align-center" src="../_images/running1.png" />
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Apart from the pulse programme, basically every other parameter can be set to whatever you like.
+However, to reduce the overall time taken, it’s generally a good idea to try to make each experiment as short as possible.
+In this case, even with very dilute samples, 1 scan (<code class="docutils literal notranslate"><span class="pre">NS=1</span></code>) will suffice.
+We find that dummy scans are not needed to obtain accurate results, so it is permissible to set <code class="docutils literal notranslate"><span class="pre">DS=0</span></code> (although see next paragraph for a caveat).
+You could cut this even further by lowering <code class="docutils literal notranslate"><span class="pre">TD</span></code> to 8192 (for a given <code class="docutils literal notranslate"><span class="pre">SW</span></code>, this translates to a shorter acquisition time <code class="docutils literal notranslate"><span class="pre">AQ</span></code>).</p>
+<p><strong>For routine usage we recommend using at least 1 dummy scan.</strong> This (<code class="docutils literal notranslate"><span class="pre">p1cal</span></code>) is the only optimisation example in which we have used 0 dummy scans.
+Skipping dummy scans altogether can lead to inaccuracies in the cost functions (as the system has not reached a steady state).</p>
+</div>
+<p>Lock, shim, and tune as usual (if you haven’t already).
+Once that’s done, simply enter into the TopSpin command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">poise</span> <span class="n">p1cal</span>
+</pre></div>
+</div>
+<p>Sit back and watch it run!
+You should get a result in 1–2 minutes.</p>
+<img alt="../_images/running2.png" class="align-center" src="../_images/running2.png" />
+<p>The best value(s) will automatically be stored in the corresponding parameter so that any subsequent acquisition will use the optimised parameters.
+Don’t forget that for this particular optimisation, you will have to divide the optimised value by 4 to get back the 90° pulse.</p>
+<div class="section" id="parsing-the-log">
+<h2>Parsing the log<a class="headerlink" href="#parsing-the-log" title="Permalink to this headline">¶</a></h2>
+<p>If you are interested in analysing data from (possibly multiple) optimisation runs, all information is logged in a <code class="docutils literal notranslate"><span class="pre">poise.log</span></code> file.
+This log file is stored inside the expno folder (the post-optimisation popup also tells you where it can be found — see above for an example).
+It can be parsed using a Python 3 script:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nmrpoise</span> <span class="kn">import</span> <span class="n">parse_log</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># pass it the path to poise.log, or to the directory containing it</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_log</span><span class="p">(</span><span class="s2">&quot;C:/NMR/data/mfgroup/nmr/poise_demo/1&quot;</span><span class="p">)</span>
+<span class="go">  routine  initial param    lb    ub  tol algorithm     costfn    auprog  optimum         fbest  nfev  time</span>
+<span class="go">0   p1cal     48.0  [p1]  40.0  56.0  0.2        nm  minabsint  poise_1d   48.125  6.849146e+06    10    77</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.1.4)"><code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> object which contains most of the information in the log file.
+However, this object does not include details of individual cost function evaluations (even though these are fully logged).
+If you want to analyse that data, you will have to write your own function!</p>
+<p>The full documentation for <a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> (which really doesn’t say much more than the previous example) is as follows:</p>
+<dl class="py function">
+<dt id="nmrpoise.parse_log">
+<code class="sig-prename descclassname">nmrpoise.</code><code class="sig-name descname">parse_log</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.parse_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a poise.log file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>fname</strong><span class="classifier">(optional) str or pathlib.Path or int</span></dt><dd><p>Path to poise.log file, or the folder containing it (this would be the
+TopSpin EXPNO folder). If not specified assumes the current working
+directory. If passed as an int, assumes “./&lt;fname&gt;” (i.e. expno X in
+the current working directory).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>log_df</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>Dataframe with rows corresponding to optimisations which successfully
+terminated. The time taken is given in seconds.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="errors">
+<h2>Errors<a class="headerlink" href="#errors" title="Permalink to this headline">¶</a></h2>
+<p>POISE tries its best to exit gracefully from errors, and often you won’t need to care about any of them.
+However, if something <em>does</em> go wrong during an optimisation, errors will be logged to the two files <code class="docutils literal notranslate"><span class="pre">poise_err_frontend.log</span></code> and <code class="docutils literal notranslate"><span class="pre">poise_err_backend.log</span></code>, depending on which script runs into an error.
+These files reside in the same folder as <code class="docutils literal notranslate"><span class="pre">poise.log</span></code>, i.e. the “expno folder”.
+We welcome bug reports — please <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/issues">submit an issue on GitHub</a> or drop us an email (addresses can be found on the paper).</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">poise</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../routines/">Setting up a Routine</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running an optimisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#parsing-the-log">Parsing the log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#errors">Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../frontend/">Frontend options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/">POISE under automation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../costfunctions/">Builtin cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../au/">Builtin AU programmes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../customcf/">Custom cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/">Developer notes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../routines/" title="previous chapter">Setting up a Routine</a></li>
+      <li>Next: <a href="../frontend/" title="next chapter">Frontend options</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Jonathan Yong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/running.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

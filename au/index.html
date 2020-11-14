@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Builtin AU programmes &#8212; poise  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Custom cost functions" href="../customcf/" />
+    <link rel="prev" title="Builtin cost functions" href="../costfunctions/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="builtin-au-programmes">
+<h1>Builtin AU programmes<a class="headerlink" href="#builtin-au-programmes" title="Permalink to this headline">¶</a></h1>
+<p>POISE is bundled with two basic AU programmes for 1D and 2D spectra respectively.
+These are mostly self-explanatory, so the text is just given below.
+Of course, you can write your own AU programmes to be used with POISE routines.</p>
+<p>These are the “default” AU programmes that POISE uses (for 1D and 2D spectra respectively) if an AU programme is not specified with the routine.</p>
+<div class="section" id="poise-1d">
+<h2>poise_1d<a class="headerlink" href="#poise-1d" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ZG</span>
+<span class="n">EFP</span>
+<span class="n">APBK</span>
+<span class="n">QUIT</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">APBK</span></code> command on older versions of TopSpin falls back to <code class="docutils literal notranslate"><span class="pre">APK</span></code> then <code class="docutils literal notranslate"><span class="pre">ABS</span></code>, so can be safely used.</p>
+</div>
+<div class="section" id="poise-2d">
+<h2>poise_2d<a class="headerlink" href="#poise-2d" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ZG</span>
+<span class="n">XFB</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;apk2d&quot;</span><span class="p">)</span>
+<span class="n">ABS2</span>
+<span class="n">QUIT</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">poise</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../routines/">Setting up a Routine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running/">Running an optimisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frontend/">Frontend options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/">POISE under automation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../costfunctions/">Builtin cost functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Builtin AU programmes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#poise-1d">poise_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#poise-2d">poise_2d</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../customcf/">Custom cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/">Developer notes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../costfunctions/" title="previous chapter">Builtin cost functions</a></li>
+      <li>Next: <a href="../customcf/" title="next chapter">Custom cost functions</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Jonathan Yong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/au.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

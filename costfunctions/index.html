@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Builtin cost functions &#8212; poise  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Builtin AU programmes" href="../au/" />
+    <link rel="prev" title="POISE under automation" href="../automation/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="builtin-cost-functions">
+<h1>Builtin cost functions<a class="headerlink" href="#builtin-cost-functions" title="Permalink to this headline">¶</a></h1>
+<p>POISE comes with a few, very basic, builtin cost functions.
+These largely mirror those that are in TopSpin’s native <code class="docutils literal notranslate"><span class="pre">popt</span></code> screen.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Just like in <code class="docutils literal notranslate"><span class="pre">popt</span></code>, it is possible to use the <code class="docutils literal notranslate"><span class="pre">dpl</span></code> command in TopSpin to select a <em>portion</em> of the spectrum to be optimised.
+This stores the left and right region of the currently active view to the parameters <code class="docutils literal notranslate"><span class="pre">F1P</span></code> and <code class="docutils literal notranslate"><span class="pre">F2P</span></code> respectively.
+This works for all the builtin cost functions except for <code class="docutils literal notranslate"><span class="pre">noe_1d</span></code>.</p>
+<p>More generally, any cost function that uses any of the <code class="docutils literal notranslate"><span class="pre">get1d</span></code> or <code class="docutils literal notranslate"><span class="pre">get2d</span></code> functions will respect the bounds placed in <code class="docutils literal notranslate"><span class="pre">F1P</span></code> and <code class="docutils literal notranslate"><span class="pre">F2P</span></code>.
+See <a class="reference internal" href="../customcf/"><span class="doc">Custom cost functions</span></a> for a more in-depth explanation.</p>
+</div>
+<hr class="docutils" />
+<div class="section" id="minabsint">
+<h2>minabsint<a class="headerlink" href="#minabsint" title="Permalink to this headline">¶</a></h2>
+<p>Seeks to minimise the intensity of the magnitude-mode spectrum. The intensity is measured by integration of the entire spectral region, i.e. summation of every point.</p>
+<p>Note that this is different from the <code class="docutils literal notranslate"><span class="pre">MAGMIN</span></code> criterion in <code class="docutils literal notranslate"><span class="pre">popt</span></code>, which (from what the Bruker documentation suggests) seeks to minimise the highest point in the magnitude-mode spectrum.</p>
+</div>
+<div class="section" id="maxabsint">
+<h2>maxabsint<a class="headerlink" href="#maxabsint" title="Permalink to this headline">¶</a></h2>
+<p>Seeks to maximise the intensity of the magnitude-mode spectrum.</p>
+</div>
+<div class="section" id="minrealint">
+<h2>minrealint<a class="headerlink" href="#minrealint" title="Permalink to this headline">¶</a></h2>
+<p>Seeks to minimise the intensity of the real spectrum (this is probably equivalent to <code class="docutils literal notranslate"><span class="pre">INTMIN</span></code> in <code class="docutils literal notranslate"><span class="pre">popt</span></code>).</p>
+<p>Note that this does <em>not</em> behave in the same way as <code class="docutils literal notranslate"><span class="pre">minabsint</span></code>.
+Because the real spectrum can have negative peaks, this essentially tries to maximise the intensity of negative peaks.</p>
+</div>
+<div class="section" id="maxrealint">
+<h2>maxrealint<a class="headerlink" href="#maxrealint" title="Permalink to this headline">¶</a></h2>
+<p>Seeks to maximise the intensity of the real spectrum (equivalent to <code class="docutils literal notranslate"><span class="pre">INTMAX</span></code>).</p>
+</div>
+<div class="section" id="zerorealint">
+<h2>zerorealint<a class="headerlink" href="#zerorealint" title="Permalink to this headline">¶</a></h2>
+<p>Seeks to make the intensity of the real spectrum as close as possible to zero (equivalent to <code class="docutils literal notranslate"><span class="pre">ZERO</span></code>).</p>
+</div>
+<div class="section" id="noe-1d">
+<h2>noe_1d<a class="headerlink" href="#noe-1d" title="Permalink to this headline">¶</a></h2>
+<p>Seeks to minimise the intensity of the spectrum, <em>except</em> for a region of 50 Hz centred on the parameter <code class="docutils literal notranslate"><span class="pre">SPOFFS2</span></code> (which corresponds to the frequency of the selective pulse).</p>
+<p>Since NOE crosspeaks are typically negative (and <code class="docutils literal notranslate"><span class="pre">apk</span></code> typically phases them to be so), this essentially seeks to maximise the intensity of the crosspeaks.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">poise</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../routines/">Setting up a Routine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running/">Running an optimisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frontend/">Frontend options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/">POISE under automation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Builtin cost functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#minabsint">minabsint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#maxabsint">maxabsint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#minrealint">minrealint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#maxrealint">maxrealint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#zerorealint">zerorealint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#noe-1d">noe_1d</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../au/">Builtin AU programmes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../customcf/">Custom cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/">Developer notes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../automation/" title="previous chapter">POISE under automation</a></li>
+      <li>Next: <a href="../au/" title="next chapter">Builtin AU programmes</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Jonathan Yong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/costfunctions.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

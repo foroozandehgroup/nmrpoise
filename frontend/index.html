@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frontend options &#8212; poise  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="POISE under automation" href="../automation/" />
+    <link rel="prev" title="Running an optimisation" href="../running/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="frontend-options">
+<h1>Frontend options<a class="headerlink" href="#frontend-options" title="Permalink to this headline">¶</a></h1>
+<p>The frontend script (i.e. the script which you run in TopSpin) has a variety of flags which control its behaviour.
+These are fully described here.
+You can also access short descriptions of these by typing <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">-h</span></code> in TopSpin.</p>
+<div class="section" id="general-options">
+<h2>General options<a class="headerlink" href="#general-options" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">--create</span> <span class="pre">NAME</span> <span class="pre">PARAM</span> <span class="pre">MIN</span> <span class="pre">MAX</span> <span class="pre">INIT</span> <span class="pre">TOL</span> <span class="pre">CF</span> <span class="pre">AU</span></code></p>
+<p>Create a new named routine. This can only handle one-parameter routines; if you want a multiple-parameter routine, please use the GUI. The AU programme must be specified, it can’t be left blank like in the GUI. Also, short forms such as <code class="docutils literal notranslate"><span class="pre">4u</span></code> for 4 µs are not allowed here.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--delete</span> <span class="pre">DELETE</span></code></p>
+<p>Delete a named routine. For example, run <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">--delete</span> <span class="pre">p1cal</span></code> to delete a routine named <code class="docutils literal notranslate"><span class="pre">p1cal</span></code>.</p>
+<p>If you want to edit a routine, you can just re-create a new routine with the same name: the old one will be overwritten.</p>
+<p><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></p>
+<p>Show a help message then exit.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--install</span></code></p>
+<p>For ultra-quick installation of p1 or DOSY optimisation scripts (see <a class="reference internal" href="../"><span class="doc">POISE User Guide</span></a>). Should not be otherwise used.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--kill</span></code></p>
+<p>Kill POISE backends that may still be running.</p>
+<p>Running <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">--kill</span></code> should be the first course of action if you find unusual behaviour after terminating a POISE optimisation (e.g. being unable to delete a log file as it is still in use).
+If this does not work, then you may need to manually kill the Python processes: for example, on Windows PowerShell, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Stop</span><span class="o">-</span><span class="n">Process</span> <span class="o">-</span><span class="n">name</span> <span class="n">python</span>
+</pre></div>
+</div>
+<p>or on Unix systems:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">killall</span> <span class="o">-</span><span class="mi">9</span> <span class="n">python</span>
+</pre></div>
+</div>
+<p>(replace <code class="docutils literal notranslate"><span class="pre">python</span></code> with <code class="docutils literal notranslate"><span class="pre">python3</span></code> as appropriate for your system).</p>
+<p><code class="docutils literal notranslate"><span class="pre">-l,</span> <span class="pre">--list</span></code></p>
+<p>List all available routines and their parameters, then exit.</p>
+</div>
+<div class="section" id="options-for-running-optimisations">
+<h2>Options for running optimisations<a class="headerlink" href="#options-for-running-optimisations" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">-a</span> <span class="pre">ALG,</span> <span class="pre">--algorithm</span> <span class="pre">ALG</span></code></p>
+<p>Use the algorithm ALG for the optimisation.
+ALG can be one of <code class="docutils literal notranslate"><span class="pre">nm</span></code> (for Nelder–Mead), <code class="docutils literal notranslate"><span class="pre">mds</span></code> (for multidirectional search), or <code class="docutils literal notranslate"><span class="pre">bobyqa</span></code> (for Py-BOBYQA).
+The default is <code class="docutils literal notranslate"><span class="pre">nm</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--maxfev</span> <span class="pre">MAXFEV</span></code></p>
+<p>Maximum function evaluations to allow (i.e. maximum number of spectra to acquire during the optimisation run).
+If the optimisation reaches the limit, it will terminate, reporting the best value so far as the ‘optimum’.</p>
+<p>This is useful for enforcing an upper limit on the time taken to perform an optimisation.
+Since by far the majority of the time is spent on acquiring the NMR spectra, <code class="docutils literal notranslate"><span class="pre">MAXFEV</span></code> evaluations will simply take roughly <code class="docutils literal notranslate"><span class="pre">MAXFEV</span> <span class="pre">*</span> <span class="pre">t</span></code> time to run (where <code class="docutils literal notranslate"><span class="pre">t</span></code> is the time taken for one spectrum — you can find this out using TopSpin’s <code class="docutils literal notranslate"><span class="pre">expt</span></code> command).</p>
+<p>If you don’t want to have a limit on function evaluations, just don’t use this flag, or pass the value of 0.
+Technically, there is always a hard limit on the number of function evaluations (which is 500 times the number of parameters being optimised).
+However, it is probably almost impossible to run into that hard limit.</p>
+<p><code class="docutils literal notranslate"><span class="pre">-q,</span> <span class="pre">--quiet</span></code></p>
+<p>Don’t display the final popup at the end of the optimisation informing the user that the optimisation is done.
+This is mostly a matter of taste, as the final popup does not block any subsequent commands from being executed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">-s,</span> <span class="pre">--separate</span></code></p>
+<p>Use a separate expno for each function evaluation.
+Note that if POISE runs into an expno which already exists, it will terminate with an error!</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">poise</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../routines/">Setting up a Routine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running/">Running an optimisation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Frontend options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#general-options">General options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#options-for-running-optimisations">Options for running optimisations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/">POISE under automation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../costfunctions/">Builtin cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../au/">Builtin AU programmes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../customcf/">Custom cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/">Developer notes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../running/" title="previous chapter">Running an optimisation</a></li>
+      <li>Next: <a href="../automation/" title="next chapter">POISE under automation</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Jonathan Yong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/frontend.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,447 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom cost functions &#8212; poise  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Developer notes" href="../dev/" />
+    <link rel="prev" title="Builtin AU programmes" href="../au/" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="custom-cost-functions">
+<h1>Custom cost functions<a class="headerlink" href="#custom-cost-functions" title="Permalink to this headline">¶</a></h1>
+<p>All user-defined cost functions are stored inside the file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$TS/exp/stan/nmr/py/user/poise_backend/costfunctions_user.py
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">$TS</span></code> is your TopSpin installation path.
+In order to modify or add cost functions, you will need to edit this file (with your favourite text editor or IDE).</p>
+<p>The corresponding file containing builtin cost functions is <code class="docutils literal notranslate"><span class="pre">costfunctions.py</span></code>.
+You <em>can</em> edit this file directly: if you add a cost function there, it will work.
+However, there are two risks with this.
+Firstly, if you ever reinstall POISE, this file will be reset to the default (whereas <code class="docutils literal notranslate"><span class="pre">costfunctions_user.py</span></code> will not).
+Secondly, any cost functions defined in <code class="docutils literal notranslate"><span class="pre">costfunctions_user.py</span></code> will shadow (i.e. take priority over) the cost functions defined in <code class="docutils literal notranslate"><span class="pre">costfunctions.py</span></code> if they have the same name.</p>
+<div class="section" id="the-rules-for-cost-functions">
+<h2>The rules for cost functions<a class="headerlink" href="#the-rules-for-cost-functions" title="Permalink to this headline">¶</a></h2>
+<p>Cost functions are defined as a standard Python 3 function which takes no parameters and returns a float (the value of the cost function).</p>
+<p>Do write a useful docstring if you can: this docstring will be shown to the user when they type <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">-l</span></code> (which lists all available cost functions and routines).</p>
+<p>Also, you should <em>never</em> print anything inside a cost function directly to <code class="docutils literal notranslate"><span class="pre">stdout</span></code>.
+That will cause the optimisation to stop.
+If you want to do some debugging, read on — there’s a function for that.</p>
+<p>That’s it!</p>
+<p>Of course, it’s quite useless saying that without telling you how to (for example) access the spectrum that’s being optimised.
+The way this is done is by using several variables inside the class <code class="docutils literal notranslate"><span class="pre">_g</span></code>, which is imported from <code class="docutils literal notranslate"><span class="pre">shared.py</span></code>.
+These global variables provide information about the current optimisation.
+For example, using <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code> you can find the path of the real spectrum, then parse the file to get the spectrum as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref any docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> (for example).</p>
+<dl class="py class">
+<dt id="nmrpoise.poise_backend.shared._g">
+<em class="property">class </em><code class="sig-prename descclassname">nmrpoise.poise_backend.shared.</code><code class="sig-name descname">_g</code><a class="headerlink" href="#nmrpoise.poise_backend.shared._g" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to store the “global” variables.</p>
+<dl class="field-list">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl>
+<dt><strong>optimiser</strong><span class="classifier">str from {‘nm’, ‘mds’, ‘bobyqa’}</span></dt><dd><p>The optimiser being used.</p>
+</dd>
+<dt><strong>routine_id</strong><span class="classifier">str</span></dt><dd><p>The name of the routine being used.</p>
+</dd>
+<dt><strong>p_spectrum</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the procno folder of the spectrum just acquired. (e.g.
+<code class="docutils literal notranslate"><span class="pre">/path/to/data/1/pdata/1</span></code>)</p>
+</dd>
+<dt><strong>p_optlog</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the currently active <code class="docutils literal notranslate"><span class="pre">poise.log</span></code> file.</p>
+</dd>
+<dt><strong>p_errlog</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the currently active <code class="docutils literal notranslate"><span class="pre">poise_err_backend.log</span></code> file.</p>
+</dd>
+<dt><strong>maxfev</strong><span class="classifier">int</span></dt><dd><p>The maximum number of function evaluations specified by the user. Can
+be zero, indicating no limit (beyond the hard limit of 500 times the
+number of parameters).</p>
+</dd>
+<dt><strong>p_poise</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the <code class="docutils literal notranslate"><span class="pre">$TS/exp/stan/nmr/py/user/poise_backend</span></code> folder.</p>
+</dd>
+<dt><strong>spec_f1p</strong><span class="classifier">float or tuple of float</span></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">F1P</span></code> parameter. For a 1D spectrum this is a float. For a 2D
+spectrum this is a tuple of floats (<code class="docutils literal notranslate"><span class="pre">indirect,</span> <span class="pre">direct</span></code>) corresponding
+to the values of <code class="docutils literal notranslate"><span class="pre">F1P</span></code> in both spectral dimensions.</p>
+</dd>
+<dt><strong>spec_f2p</strong><span class="classifier">float or tuple of float</span></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">F2P</span></code> parameter.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="helper-methods">
+<h2>Helper methods<a class="headerlink" href="#helper-methods" title="Permalink to this headline">¶</a></h2>
+<p>If you’ve looked inside the <code class="docutils literal notranslate"><span class="pre">costfunctions.py</span></code> file, you’ve probably realised that none of them actually use these variables directly.
+Instead, we have a bunch of helper methods that use these to get more useful information directly.
+All of these methods are stored inside <code class="docutils literal notranslate"><span class="pre">cfhelpers.py</span></code> and are already imported.</p>
+<p>The ones you are likely to use are the following:</p>
+<dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.make_p_spec">
+<code class="sig-prename descclassname">nmrpoise.poise_backend.cfhelpers.</code><code class="sig-name descname">make_p_spec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expno</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">procno</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.make_p_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a> object corresponding to the procno folder
+<code class="docutils literal notranslate"><span class="pre">&lt;path&gt;/&lt;expno&gt;/pdata/&lt;procno&gt;</span></code>. If parameters are not passed, they are
+inherited from the currently active spectrum (_g.p_spectrum).</p>
+<p>Thus, for example, <code class="docutils literal notranslate"><span class="pre">make_p_spec(expno=1,</span> <span class="pre">procno=1)</span></code> returns a path to the
+spectrum with EXPNO 1 and PROCNO 1, but with the same name as the currently
+active spectrum.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>path</strong><span class="classifier">str or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the main folder of the spectrum (one level above the expno
+folders).</p>
+</dd>
+<dt><strong>expno</strong><span class="classifier">int, optional</span></dt><dd></dd>
+<dt><strong>procno</strong><span class="classifier">int, optional</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>Path pointing to the requested spectrum.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<p><br /> </p>
+<dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.get1d_fid">
+<code class="sig-prename descclassname">nmrpoise.poise_backend.cfhelpers.</code><code class="sig-name descname">get1d_fid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p_spec</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_fid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the FID as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>.</p>
+<p>Note that this does <em>not</em> modify the “group delay” at the beginning of the
+FID.</p>
+<p>Also, Bruker spectrometers record real and imaginary points in a sequential
+fashion. Therefore, each imaginary point in the ndarray is actually
+measured <code class="docutils literal notranslate"><span class="pre">DW</span></code> <em>after</em> the corresponding real point. When Fourier
+transforming, this can be accounted for by using fftshift().</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. (The FID is taken from the expno
+folder two levels up.) Leave blank to use the currently active spectrum
+(i.e. _g.p_spectrum).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>Complex-valued array containing the FID.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<p><br /> </p>
+<dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.get1d_real">
+<code class="sig-prename descclassname">nmrpoise.poise_backend.cfhelpers.</code><code class="sig-name descname">get1d_real</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bounds</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">p_spec</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_real" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the real spectrum as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>. This function accounts for
+TopSpin’s <code class="docutils literal notranslate"><span class="pre">NC_PROC</span></code> variable, scaling the spectrum intensity accordingly.</p>
+<p>Note that this function only works for 1D spectra. It does <em>not</em> work for
+1D projections of 2D spectra. If you want to work with projections, you can
+use <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="nmrpoise.poise_backend.cfhelpers.get2d_rr"><code class="xref any py py-func docutils literal notranslate"><span class="pre">get2d_rr</span></code></a> to get the full 2D spectrum, then manipulate it using numpy
+functions as appropriate. Examples can be found in the docs.</p>
+<p>The <em>bounds</em> parameter may be specified in the following formats:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>between 5 and 8 ppm:  <code class="docutils literal notranslate"><span class="pre">bounds=&quot;5..8&quot;</span></code>  OR <code class="docutils literal notranslate"><span class="pre">bounds=(5,</span> <span class="pre">8)</span></code></p></li>
+<li><p>greater than 9.3 ppm: <code class="docutils literal notranslate"><span class="pre">bounds=&quot;9.3..&quot;</span></code> OR <code class="docutils literal notranslate"><span class="pre">bounds=(9.3,</span> <span class="pre">None)</span></code></p></li>
+<li><p>less than -2 ppm:     <code class="docutils literal notranslate"><span class="pre">bounds=&quot;..-2&quot;</span></code>  OR <code class="docutils literal notranslate"><span class="pre">bounds=(None,</span> <span class="pre">-2)</span></code></p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>bounds</strong><span class="classifier">str or tuple, optional</span></dt><dd><p>String or tuple describing the region of interest. See above for
+examples. If no bounds are provided, uses the <code class="docutils literal notranslate"><span class="pre">F1P</span></code> and <code class="docutils literal notranslate"><span class="pre">F2P</span></code>
+processing parameters, which can be specified via <code class="docutils literal notranslate"><span class="pre">dpl</span></code>. If these are
+not specified, defaults to the whole spectrum.</p>
+</dd>
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Leave blank to use the currently
+active spectrum (i.e. _g.p_spectrum).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>Array containing the spectrum or the desired section of it (if bounds
+were specified).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<p><br /> </p>
+<dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.get1d_imag">
+<code class="sig-prename descclassname">nmrpoise.poise_backend.cfhelpers.</code><code class="sig-name descname">get1d_imag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bounds</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">p_spec</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_imag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.get1d_real" title="nmrpoise.poise_backend.cfhelpers.get1d_real"><code class="xref any py py-func docutils literal notranslate"><span class="pre">get1d_real</span></code></a>, except that it reads the imaginary spectrum.</p>
+</dd></dl>
+
+<p><br /> </p>
+<dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.get2d_rr">
+<code class="sig-prename descclassname">nmrpoise.poise_backend.cfhelpers.</code><code class="sig-name descname">get2d_rr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f1_bounds</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">f2_bounds</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">p_spec</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the real part of the 2D spectrum (the “RR” quadrant) as a 2D
+<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>. This function takes into account the <code class="docutils literal notranslate"><span class="pre">NC_PROC</span></code> value in
+TopSpin’s processing parameters.</p>
+<p>The <em>f1_bounds</em> and <em>f2_bounds</em> parameters may be specified in the
+following formats:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>between 5 and 8 ppm:  <code class="docutils literal notranslate"><span class="pre">f1_bounds=&quot;5..8&quot;</span></code>  OR <code class="docutils literal notranslate"><span class="pre">f1_bounds=(5,</span> <span class="pre">8)</span></code></p></li>
+<li><p>greater than 9.3 ppm: <code class="docutils literal notranslate"><span class="pre">f1_bounds=&quot;9.3..&quot;</span></code> OR <code class="docutils literal notranslate"><span class="pre">f1_bounds=(9.3,</span> <span class="pre">None)</span></code></p></li>
+<li><p>less than -2 ppm:     <code class="docutils literal notranslate"><span class="pre">f1_bounds=&quot;..-2&quot;</span></code>  OR <code class="docutils literal notranslate"><span class="pre">f1_bounds=(None,</span> <span class="pre">-2)</span></code></p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>f1_bounds</strong><span class="classifier">str or tuple, optional</span></dt><dd><p>String or tuple describing the indirect-dimension region of interest.
+See above for examples. If no bounds are provided, uses the <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">F1P</span></code>
+and <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">F2P</span></code> processing parameters, which can be specified via
+<code class="docutils literal notranslate"><span class="pre">dpl</span></code>. If these are not specified, defaults to the whole spectrum.</p>
+</dd>
+<dt><strong>f2_bounds</strong><span class="classifier">str or tuple, optional</span></dt><dd><p>String or tuple describing the direct-dimension region of interest. See
+above for examples. If no bounds are provided, uses the <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">F1P</span></code> and
+<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">F2P</span></code> processing parameters, which can be specified via <code class="docutils literal notranslate"><span class="pre">dpl</span></code>. If
+these are not specified, defaults to the whole spectrum.</p>
+</dd>
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Leave blank to use the currently
+active spectrum (i.e. _g.p_spectrum).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>2D array containing the spectrum or the desired section of it (if
+<em>f1_bounds</em> or <em>f2_bounds</em> were specified).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<p><br /> </p>
+<dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.get2d_ri">
+<code class="sig-prename descclassname">nmrpoise.poise_backend.cfhelpers.</code><code class="sig-name descname">get2d_ri</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f1_bounds</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">f2_bounds</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">p_spec</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_ri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="nmrpoise.poise_backend.cfhelpers.get2d_rr"><code class="xref any py py-func docutils literal notranslate"><span class="pre">get2d_rr</span></code></a>, except that it reads the ‘2ri’ file.</p>
+</dd></dl>
+
+<p><br /> </p>
+<dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.get2d_ir">
+<code class="sig-prename descclassname">nmrpoise.poise_backend.cfhelpers.</code><code class="sig-name descname">get2d_ir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f1_bounds</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">f2_bounds</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">p_spec</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_ir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="nmrpoise.poise_backend.cfhelpers.get2d_rr"><code class="xref any py py-func docutils literal notranslate"><span class="pre">get2d_rr</span></code></a>, except that it reads the ‘2ir’ file.</p>
+</dd></dl>
+
+<p><br /> </p>
+<dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.get2d_ii">
+<code class="sig-prename descclassname">nmrpoise.poise_backend.cfhelpers.</code><code class="sig-name descname">get2d_ii</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f1_bounds</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">f2_bounds</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">p_spec</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_ii" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="nmrpoise.poise_backend.cfhelpers.get2d_rr"><code class="xref any py py-func docutils literal notranslate"><span class="pre">get2d_rr</span></code></a>, except that it reads the ‘2ii’ file.</p>
+</dd></dl>
+
+<p><br /> </p>
+<dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.getpar">
+<code class="sig-prename descclassname">nmrpoise.poise_backend.cfhelpers.</code><code class="sig-name descname">getpar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">par</span></em>, <em class="sig-param"><span class="n">p_spec</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.getpar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtains the value of a numeric (acquisition or processing) parameter.
+Non-numeric parameters (i.e. strings) are not currently accessible! Works
+for both 1D and 2D spectra (see return type below), but nothing higher.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>par</strong><span class="classifier">str</span></dt><dd><p>Name of the parameter.</p>
+</dd>
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Leave blank to use the currently
+active spectrum (i.e. _g.p_spectrum).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt>float or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>Value(s) of the requested parameter. None if the given parameter was
+not found.</p>
+<p>For parameters that exist for both dimensions of 2D spectra, getpar()
+returns an ndarray consisting of (f1_value, f2_value).  Otherwise (for
+1D spectra, or for 2D parameters which only apply to the direct
+dimension), getpar() returns a float.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<p><br /> </p>
+<dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.getndim">
+<code class="sig-prename descclassname">nmrpoise.poise_backend.cfhelpers.</code><code class="sig-name descname">getndim</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p_spec</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.getndim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtains the dimensionality of the spectrum, i.e. the status value of
+PARMODE. Note that Bruker uses PARMODE=n for (n+1)D spectra, whereas this
+function simply returns (n+1) (as an int).</p>
+<p>Note that we call _get_acqu_par() instead of getpar() to avoid an infinite
+loop.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Leave blank to use the currently
+active spectrum (i.e. _g.p_spectrum).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>int</dt><dd><p>Dimensionality of the spectrum.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<p><br /> </p>
+<dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.log">
+<code class="sig-prename descclassname">nmrpoise.poise_backend.cfhelpers.</code><code class="sig-name descname">log</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a string to the poise.log file. If this is called from inside a cost
+function, the text is printed <em>before</em> the cost function is evaluated, so
+will appear above the corresponding function evaluation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>s</strong><span class="classifier">object</span></dt><dd><p>The object to be printed. Typically a string, but since this is just
+passed directly to print(), anything with a __str__() method can be
+used.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>None</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<p><br /> </p>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>There are a number of cost functions which ship with POISE.
+These can all be found inside the <code class="docutils literal notranslate"><span class="pre">costfunctions.py</span></code> file referred to above.
+This file also contains a number of more specialised cost functions, which were used for the examples in the POISE paper.
+(Instead of opening the file, you can also find the <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/poise_backend/costfunctions.py">source code on GitHub</a>.)</p>
+<p>A number of these are thoroughly commented with detailed explanations; do consider checking these out if you want more guidance on how to write your own cost function.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../">poise</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../routines/">Setting up a Routine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running/">Running an optimisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frontend/">Frontend options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/">POISE under automation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../costfunctions/">Builtin cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../au/">Builtin AU programmes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Custom cost functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-rules-for-cost-functions">The rules for cost functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#helper-methods">Helper methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/">Developer notes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../">Documentation overview</a><ul>
+      <li>Previous: <a href="../au/" title="previous chapter">Builtin AU programmes</a></li>
+      <li>Next: <a href="../dev/" title="next chapter">Developer notes</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Jonathan Yong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/customcf.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

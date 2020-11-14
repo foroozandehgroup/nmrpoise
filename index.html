@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>POISE User Guide &#8212; poise  documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="#" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex/" />
+    <link rel="search" title="Search" href="search/" />
+    <link rel="next" title="Installation" href="install/" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="poise-user-guide">
+<h1>POISE User Guide<a class="headerlink" href="#poise-user-guide" title="Permalink to this headline">¶</a></h1>
+<p>POISE (<em>Parameter Optimisation by Iterative Spectral Evaluation</em>) is a Python package for on-the-fly optimisation of NMR parameters in Bruker’s TopSpin software.</p>
+<p>&lt;citation should be put here&gt;</p>
+<p>The code is licensed under <a class="reference external" href="https://www.gnu.org/licenses/gpl-3.0.en.html">the GNU General Public License v3</a> and can be found on <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise">GitHub</a>.
+The latest HTML version of the documentation can always be found at <a class="reference external" href="https://nmrpoise.readthedocs.io">https://nmrpoise.readthedocs.io</a>.
+Likewise, the latest PDF version is always at <a class="reference external" href="https://nmrpoise.readthedocs.io/_/downloads/en/latest/pdf/">https://nmrpoise.readthedocs.io/_/downloads/en/latest/pdf/</a>.</p>
+<p>In here you will find guides on setting POISE up and using it in routine NMR applications.
+This guide can largely be read in sequence.
+However, depending on your level of interaction with the software, you may not need to read all of it.
+For example, if somebody else has already set up POISE for you, you can probably skip to <a class="reference internal" href="running/"><span class="doc">Running an optimisation</span></a>.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install/">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install/#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/#from-source">From source</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="routines/">Setting up a Routine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running/">Running an optimisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="running/#parsing-the-log">Parsing the log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="running/#errors">Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="frontend/">Frontend options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="frontend/#general-options">General options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frontend/#options-for-running-optimisations">Options for running optimisations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="automation/">POISE under automation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="automation/#basics">Basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automation/#a-simple-ish-example">A simple(ish) example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automation/#a-helpful-trick">A helpful trick</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="costfunctions/">Builtin cost functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="costfunctions/#minabsint">minabsint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="costfunctions/#maxabsint">maxabsint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="costfunctions/#minrealint">minrealint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="costfunctions/#maxrealint">maxrealint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="costfunctions/#zerorealint">zerorealint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="costfunctions/#noe-1d">noe_1d</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="au/">Builtin AU programmes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="au/#poise-1d">poise_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="au/#poise-2d">poise_2d</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="customcf/">Custom cost functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="customcf/#the-rules-for-cost-functions">The rules for cost functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="customcf/#helper-methods">Helper methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="customcf/#examples">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev/">Developer notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev/#testing">Testing</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">poise</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install/">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routines/">Setting up a Routine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running/">Running an optimisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frontend/">Frontend options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="automation/">POISE under automation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="costfunctions/">Builtin cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="au/">Builtin AU programmes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="customcf/">Custom cost functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/">Developer notes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="install/" title="next chapter">Installation</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Jonathan Yong.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
