@@ -1,6 +1,5 @@
 # Parameter Optimisation by Iterative Spectral Evaluation
 
-[![Documentation Status](https://readthedocs.org/projects/nmrpoise/badge/?version=latest)](https://nmrpoise.readthedocs.io/en/latest/?badge=latest)
 [![Travis CI Build Status](https://travis-ci.com/foroozandehgroup/nmrpoise.svg?branch=master)](https://travis-ci.com/github/foroozandehgroup/nmrpoise)
 [![PyPI version](https://badge.fury.io/py/nmrpoise.svg)](https://badge.fury.io/py/nmrpoise)
 
@@ -17,5 +16,5 @@ With that, POISE can be installed using ``pip``:
 
     pip install nmrpoise
 
-The documentation (far more thorough than this humble README) is hosted at https://nmrpoise.readthedocs.io/.
+The documentation (far more thorough than this humble README) is hosted at https://foroozandehgroup.github.io/nmrpoise.
 It contains complete instructions on how to set POISE up and use it.
