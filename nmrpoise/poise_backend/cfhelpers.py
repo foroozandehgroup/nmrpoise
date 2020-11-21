@@ -444,10 +444,14 @@ def _get_acqu_par(par, p_acqus):
     # Split par into number-less bit and number bit
     parl = par.rstrip("1234567890")
     parr = par[len(parl):]
-    params_with_space = ["CNST", "D", "P", "PLW", "PCPD", "GPX", "GPY", "GPZ",
-                         "SPW", "SPOAL", "SPOFFS", "L", "IN", "INP", "PHCOR"]
+    list_params = ("AMP AMPCOIL BWFAC CAGPARS CNST CPDPRG D FCUCHAN"
+                   " FN_INDIRECT FS GPNAM GPX GPY GPZ HGAIN HPMOD IN INF INP"
+                   " INTEGFAC L MULEXPNO P PACOIL PCPD PEXSEL PHCOR PL PLW"
+                   " PLWMAX PRECHAN PROBINPUTS RECCHAN RECPRE RECPRFX RECSEL"
+                   " RSEL S SELREC SP SPNAM SPOAL SPOFFS SPPEX SPW SUBNAM"
+                   " SWIBOX TD_INDIRECT TE_STAB TL TOTROT XGAIN").split()
     # Get the parameter
-    if (parr != "") and (parl in params_with_space):  # e.g. cnst2
+    if (parr != "") and (parl in list_params):  # e.g. cnst2
         with open(p_acqus, "r") as file:
             # Read up to the line declaring the parameters
             for line in file:
