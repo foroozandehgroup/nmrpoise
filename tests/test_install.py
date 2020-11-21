@@ -66,7 +66,7 @@ def test_topspin_installation(tmpdir):
     assert (py_user_path / "poise_backend" / "optpoise.py").exists()
     assert (py_user_path / "poise_backend" / "costfunctions.py").exists()
     assert (py_user_path / "poise_backend" / "cfhelpers.py").exists()
-    assert (py_user_path / "poise_backend" / "routines").exists()
+    assert (py_user_path / "poise_backend" / "example_routines").exists()
     assert (au_src_user_path / "poise_1d").exists()
     assert (au_src_user_path / "poise_2d").exists()
 
