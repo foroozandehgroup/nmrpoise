@@ -47,6 +47,7 @@ Testing
 Tests are carried out using the excellent `pytest <https://docs.pytest.org/en/stable/>`_ and `tox <https://tox.readthedocs.io/en/latest/>`_ tools.
 To run all tests, simply run::
 
+   pip install tox
    tox
 
 from anywhere inside the ``nmrpoise`` directory.
