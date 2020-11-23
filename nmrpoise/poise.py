@@ -258,6 +258,8 @@ def main(args):
                                    "information.".format(line))
     # Cleanup code if anything goes wrong.
     except (Error, RuntimeError) as e:
+        # Reset TI to empty string
+        PUTPAR("TI", " ")
         # For some really silly reason, I can't just call
         # kill_remaining_backends() here, or else if the *original* POISE is
         # killed (using TopSpin's `kill`), it throws a
