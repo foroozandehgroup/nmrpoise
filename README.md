@@ -1,6 +1,7 @@
 # Parameter Optimisation by Iterative Spectral Evaluation
 
-[![Travis CI Build Status](https://travis-ci.com/foroozandehgroup/nmrpoise.svg?branch=master)](https://travis-ci.com/github/foroozandehgroup/nmrpoise)
+[![GitHub Actions Build Status](https://github.com/foroozandehgroup/nmrpoise/workflows/build/badge.svg)](https://github.com/foroozandehgroup/nmrpoise/actions?query=workflow%3Abuild)
+[![GitHub Actions Documentation Status](https://github.com/foroozandehgroup/nmrpoise/workflows/docs/badge.svg)](https://github.com/foroozandehgroup/nmrpoise/actions?query=workflow%3Adocs)
 [![PyPI version](https://badge.fury.io/py/nmrpoise.svg)](https://badge.fury.io/py/nmrpoise)
 
 Jonathan Yong and Mohammadali Foroozandeh, University of Oxford
