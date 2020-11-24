@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('../nmrpoise'))
 # -- Project information -----------------------------------------------------
 
 project = 'poise'
-copyright = '2020, Jonathan Yong'
-author = 'Jonathan Yong'
+copyright = '2020, Jonathan Yong & Mohammadali Foroozandeh'
+author = 'Jonathan Yong & Mohammadali Foroozandeh'
 
 
 # -- General configuration ---------------------------------------------------
