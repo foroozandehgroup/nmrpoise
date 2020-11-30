@@ -11,6 +11,9 @@ value to the current dataset and shows a message.
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+# Read in F1P and F2P from current dataset.
+f1p = GETPAR("F1P")
+f2p = GETPAR("F2P")
 # Use EXPNO 99999 in the current folder for optimisation.
 old_dataset = CURDATA()
 opt_dataset = CURDATA()
@@ -26,6 +29,8 @@ PUTPAR("NS", "1")
 PUTPAR("DS", "0")
 PUTPAR("D 1", "1")
 PUTPAR("RG", "1")
+PUTPAR("F1P", f1p)
+PUTPAR("F2P", f2p)
 # Run optimisation.
 XCMD("poise p1cal -a bobyqa -q")
 # POISE stores the optimised value in p1 after it's done. We can retrieve it

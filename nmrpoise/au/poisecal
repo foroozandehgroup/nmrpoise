@@ -11,9 +11,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  *****************************************************************************/
 
-// Use EXPNO 99999 in the current folder for optimisation.
+// Read in F1P and F2P from current dataset. 
 GETCURDATA
 int old_expno = expno;
+double f1p, f2p;
+FETCHPAR("F1P", &f1p)
+FETCHPAR("F2P", &f2p)
+// Use EXPNO 99999 in the current folder for optimisation.
 DATASET(name, 99999, procno, disk, user)
 // Set some key parameters. Notice that these lines can be substantially cut
 // if an appropriate parameter set is set up beforehand.
@@ -24,6 +28,8 @@ STOREPAR("NS", 1)
 STOREPAR("DS", 0)
 STOREPAR("D 1", 1.0)
 STOREPAR("RG", 1)
+STOREPAR("F1P", f1p)
+STOREPAR("F2P", f2p)
 // Run optimisation.
 XCMD("sendgui xpy poise p1cal -a bobyqa -q")
 // POISE stores the optimised value in p1 after it's done. We can retrieve it
