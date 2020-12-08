@@ -30,6 +30,8 @@ STOREPAR("D 1", 1.0)
 STOREPAR("RG", 1)
 STOREPAR("F1P", f1p)
 STOREPAR("F2P", f2p)
+STOREPARS("F1P", f1p)
+STOREPARS("F2P", f2p)
 // Run optimisation.
 XCMD("sendgui xpy poise p1cal -a bobyqa -q")
 // POISE stores the optimised value in p1 after it's done. We can retrieve it

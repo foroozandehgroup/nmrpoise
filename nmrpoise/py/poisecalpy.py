@@ -29,8 +29,8 @@ PUTPAR("NS", "1")
 PUTPAR("DS", "0")
 PUTPAR("D 1", "1")
 PUTPAR("RG", "1")
-PUTPAR("F1P", f1p)
-PUTPAR("F2P", f2p)
+XCMD("s f1p {}".format(f1p))  # PUTPAR("status F1P") doesn't work.
+XCMD("s f2p {}".format(f2p))  # Even though the documentation says it should.
 # Run optimisation.
 XCMD("poise p1cal -a bobyqa -q")
 # POISE stores the optimised value in p1 after it's done. We can retrieve it
