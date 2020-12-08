@@ -8,6 +8,13 @@ Python script which automates p1 optimisation using POISE. Behaves similarly to
 pulsecal: optimises the value of p1 in expno 99999, then sets the optimised
 value to the current dataset and shows a message.
 
+This does not have the command-line argument functionality of the poisecal AU
+programme, and tends to suffer from some edge-case bugs which are not present
+in poisecal. This is generally a result of TopSpin's Python programmes being
+more buggy than AU programmes. Nonetheless, as a result of this, we recommend
+using the poisecal AU programme instead of this (which is retained mainly to
+serve as a illustrative example in the documentation).
+
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
