@@ -8,7 +8,7 @@ In particular, POISE requires a minimum version of **Python 3.6.**
 For Windows, your best bet is to download an installer from `the Python website <https://www.python.org/downloads/>`_.
 For Unix machines, we suggest using a package manager to do so (such as Homebrew for macOS or ``apt``/``yum`` & their equivalents on Linux), although the installers are also fine.
 
-Once that's done, you can install POISE using ``pip``::
+Once that's done, you can install POISE using ``pip`` (or ``pip3``)::
 
     pip install nmrpoise
 
@@ -62,3 +62,31 @@ or equivalently::
    python setup.py install
 
 The installation to the TopSpin directory is subject to the same considerations as above.
+
+
+Without an internet connection
+------------------------------
+
+If your spectrometer does not have an Internet connection, then the installation becomes a bit more protracted.
+On a computer that *does* have an Internet connection:
+
+1. Make a new folder.
+2. Download the CPython installer for the spectrometer operating system. Place it in that folder.
+3. ``cd`` to the folder and run these commands::
+
+      pip download Py-BOBYQA nmrpoise --no-deps --no-binary=:all:
+      pip download numpy pandas scipy --only-binary=:all: --platform <PLATFORM>
+
+   where ``<PLATFORM>`` should be one of ``win32``, ``macosx_10_9_x86_64``, or ``manylinux1_x86_64`` depending on the spectrometer operating system.
+4. Copy the whole folder over to your spectrometer. It should contain a bunch of ``.whl`` files and two ``.tar.gz`` files.
+
+Now, on the spectrometer:
+
+1. Install CPython with the installer.
+2. ``cd`` to the folder and run ::
+    
+      pip install ./nmrpoise-<VERSION>.tar.gz --no-index --find-links .
+
+   (replace ``<VERSION>`` with whichever version you downloaded).
+
+It should then install properly, unless your TopSpin installation location is non-standard: in that case, set the ``$TSDIR`` environment variable (described above) before retrying Step 2.
