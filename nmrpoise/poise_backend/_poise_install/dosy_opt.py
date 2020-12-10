@@ -4,9 +4,10 @@ dosy_opt.py
 
 Download from: https://git.io/JUHOY
 
-Script that optimises parameters for a diffusion experiment. Currently only
-works with oneshot DOSY (Pelta et al., Magn. Reson. Chem. 2002, 40 (13),
-S147-S152, DOI: 10.1002/mrc.1107).
+Script that optimises parameters for a diffusion experiment. Currently works
+with oneshot DOSY (Pelta et al., Magn. Reson. Chem. 2002, 40 (13), S147-S152,
+DOI: 10.1002/mrc.1107), as well as the stegp1s and ledgp2s DOSY variants which
+are standard TopSpin pulse programmes.
 
 This is meant to be called from the TopSpin command line on a 2D diffusion
 experiment.
@@ -49,7 +50,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
 # Other DOSY variants can be entered here to "register" them and make them
 # available for use with this script.
 pulprog_dict = {
+    # doneshot_nd_jy can be downloaded from https://git.io/JUHOX and
+    # https://git.io/JUHOP.
     "doneshot_2d_jy": ["doneshot_1d_jy", "GPZ 1", "D 20"],
+    # the following two entries are Bruker standard sequences and already come
+    # with TopSpin.
+    "stegp1s": ["stegp1s1d", "GPZ 6", "D 20"],
+    "ledgp2s": ["ledgp2s1d", "GPZ 6", "D 20"],
 }
 
 
