@@ -84,5 +84,13 @@ html_theme_options = {
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
-    "preamble": r"\setkeys{Gin}{width=0.6\linewidth}"
+    "fontpkg": "",
+    "fncychap": "",
+    "preamble": r"""
+        \setkeys{Gin}{width=0.6\linewidth}
+        \usepackage{charter}
+        \usepackage[defaultsans]{lato}
+        \usepackage{inconsolata}
+        """,
+    "extraclassoptions": "openany",
 }
