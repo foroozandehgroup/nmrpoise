@@ -275,6 +275,10 @@ def main(args):
         err_exit("Error during acquisition loop:\n{}".format(e.message),
                  log=True)
 
+    # TODO: Check the message that the optimiser returns.
+    # If it's not "optimisation completed successfully", then we need to
+    # reflect this.
+
     # Store the optima in the (final) dataset, and show a message to the user
     # if not in quiet mode.
     RE(current_dataset)

@@ -7,6 +7,7 @@ from nmrpoise.poise_backend.optpoise import (nelder_mead,
                                              deco_count,
                                              scale,
                                              unscale)
+from nmrpoise.poise_backend.cfhelpers import CostFunctionError
 
 
 def test_scale_unscale():
@@ -88,6 +89,19 @@ def quadratic(x):
     return np.sum(x ** 2)
 
 
+@deco_count
+def quadratic_with_error(x):
+    """
+    This is the same as quadratic() but raises an error when the cost function
+    gets close to 0. We just use it to test what happens.
+    """
+    cf_val = np.sum(x ** 2)
+    if cf_val < 0.3:
+        raise CostFunctionError("Cost function is below 0.3")
+    else:
+        return cf_val
+
+
 # This xtol is extremely large, but more closely parallels the
 # real-life situations we are likely to face.
 lb = np.array([-5, -5, -5, -5, -5])
@@ -117,7 +131,7 @@ def test_errors():
 
 
 def test_NM_accuracy():
-    for method, nexpt in nm_simplex_methods_nexpts.items():
+    for method, _ in nm_simplex_methods_nexpts.items():
         quadratic.calls = 0  # reset fevals
         optResult = nelder_mead(cf=quadratic, x0=x0, xtol=xtol,
                                 scaled_lb=lb, scaled_ub=ub,
@@ -167,7 +181,7 @@ mds_simplex_methods_nexpts = {
 
 
 def test_MDS_accuracy():
-    for method, nexpt in mds_simplex_methods_nexpts.items():
+    for method, _ in mds_simplex_methods_nexpts.items():
         quadratic.calls = 0  # reset fevals
         optResult = multid_search(cf=quadratic, x0=x0, xtol=xtol,
                                   scaled_lb=lb, scaled_ub=ub,
@@ -222,3 +236,20 @@ def test_maxfevals_reached():
     optResult = multid_search(cf=quadratic, x0=x0, xtol=([1e-6] * len(x0)),
                               scaled_lb=lb, scaled_ub=ub, maxfev=10)
     assert optResult.message == "Maximum function evaluations reached."
+
+
+def test_CostFunctionError():
+    for method, _ in nm_simplex_methods_nexpts.items():
+        quadratic_with_error.calls = 0  # reset fevals
+        optResult = nelder_mead(cf=quadratic_with_error, x0=x0, xtol=xtol,
+                                scaled_lb=lb, scaled_ub=ub,
+                                simplex_method=method)
+        assert optResult.message == "Cost function is below 0.3"
+        assert optResult.fbest >= 0.3
+    for method, _ in mds_simplex_methods_nexpts.items():
+        quadratic_with_error.calls = 0  # reset fevals
+        optResult = multid_search(cf=quadratic_with_error, x0=x0, xtol=xtol,
+                                  scaled_lb=lb, scaled_ub=ub,
+                                  simplex_method=method)
+        assert optResult.message == "Cost function is below 0.3"
+        assert optResult.fbest >= 0.3

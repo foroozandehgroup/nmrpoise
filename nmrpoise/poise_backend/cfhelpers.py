@@ -15,6 +15,31 @@ import numpy as np
 from .shared import _g
 
 
+class CostFunctionError(Exception):
+    """
+    Custom exception class which can be raised *inside* a cost function in
+    order to stop the optimisation immediately.
+
+    For the Nelder-Mead and MDS optimisers, the optimisation will still return
+    the best value found so far. For the BOBYQA optimiser, no value will be
+    returned.
+
+    Examples
+    --------
+    To terminate the optimisation immediately if a cost function is negative,
+    write a cost function with the following structure:
+
+    >>>def cost_function():
+    >>>    cost_fn_value = foo()   # whatever calculation you want here
+    >>>    if cost_fn_value < 0:
+    >>>       raise CostFunctionError("Cost function was negative.")
+    >>>    return cost_fn_value
+    """
+    def __init__(self, message=("A CostFunctionError was thrown inside the"
+                                " cost function.")):
+        self.message = message
+
+
 def make_p_spec(path=None, expno=None, procno=None):
     """
     Constructs a |Path| object corresponding to the procno folder

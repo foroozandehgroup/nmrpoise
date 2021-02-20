@@ -7,6 +7,8 @@ Module containing optimisation functions.
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
+from .cfhelpers import CostFunctionError
+
 from functools import wraps
 
 import numpy as np
@@ -468,6 +470,8 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
         message = "Maximum iterations reached."
     except MaxFevalsReached:
         message = "Maximum function evaluations reached."
+    except CostFunctionError as e:
+        message = e.message
     else:
         message = "Optimisation terminated successfully."
 
@@ -641,6 +645,8 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
         message = "Maximum iterations reached."
     except MaxFevalsReached:
         message = "Maximum function evaluations reached."
+    except CostFunctionError as e:
+        message = e.message
     else:
         message = "Optimisation terminated successfully."
 
@@ -710,13 +716,20 @@ def pybobyqa_interface(cf, x0, xtol, scaled_lb, scaled_ub,
     # Run the optimisation, using PyBOBYQA's bounds keyword arguments.
     bounds = (scaled_lb, scaled_ub)
     min_ub = np.min(scaled_ub)
-    pb_sol = pb.solve(cf, x0, args=args,
-                      rhobeg=min(MAGIC_TOL * 10, min_ub * 0.499),
-                      rhoend=MAGIC_TOL,
-                      maxfun=maxfev,
-                      bounds=bounds, objfun_has_noise=True,
-                      user_params={'restarts.use_restarts': False})
-    # Catch Py-BOBYQA complaints.
+    try:
+        pb_sol = pb.solve(cf, x0, args=args,
+                          rhobeg=min(MAGIC_TOL * 10, min_ub * 0.499),
+                          rhoend=MAGIC_TOL,
+                          maxfun=maxfev,
+                          bounds=bounds, objfun_has_noise=True,
+                          user_params={'restarts.use_restarts': False})
+    except CostFunctionError as e:
+        # Catch user-thrown errors. Because the BOBYQA optimiser is opaque,
+        # there's no way we can return any useful info to the user, so we just
+        # convert it into a RuntimeError which will be passed on to the
+        # frontend.
+        raise RuntimeError(e.message) from None
+    # Catch Py-BOBYQA complaints if the optimiser exited with failure.
     if pb_sol.flag in [pb_sol.EXIT_INPUT_ERROR,
                        pb_sol.EXIT_TR_INCREASE_ERROR,
                        pb_sol.EXIT_LINALG_ERROR]:

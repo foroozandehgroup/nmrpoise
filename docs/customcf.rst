@@ -20,30 +20,28 @@ The rules for cost functions
 
 Cost functions are defined as a standard Python 3 function which takes no parameters and returns a float (the value of the cost function).
 
-Do write a useful docstring if you can: this docstring will be shown to the user when they type ``poise -l`` (which lists all available cost functions and routines).
+1. **Do write a useful docstring if possible**: this docstring will be shown to the user when they type ``poise -l`` into TopSpin (which lists all available cost functions and routines).
 
-Also, you should *never* print anything inside a cost function directly to ``stdout``.
-That will cause the optimisation to stop.
-If you want to do some debugging, read on — there's a function for that.
+2. **The spectrum under optimisation, as well as acquisition parameters, can be accessed via helper functions.** These are described more fully below.
 
-That's it!
+3. **Never print anything inside a cost function directly to stdout**. This will cause the optimisation to stop. If you want to perform debugging, use the `log` function described below.
 
-Of course, it's quite useless saying that without telling you how to (for example) access the spectrum that's being optimised.
-The way this is done is by using several variables inside the class ``_g``, which is imported from ``shared.py``.
-These global variables provide information about the current optimisation.
-For example, using ``_g.p_spectrum`` you can find the path of the real spectrum, then parse the file to get the spectrum as a `numpy.ndarray` (for example).
+4. **To terminate the optimisation prematurely, raise CostFunctionError().** See below for more information.
+
+
+Accessing spectra and parameters
+================================
+
+The most primitive way of accessing "outside" information is through the class ``_g``, which is imported from ``shared.py`` and contains a series of global variables reflecting the current optimisation.
+For example, ``_g.p_spectrum`` is the path to the procno folder: you can read and parse the ``1r`` file inside this to get the real spectrum as a `numpy.ndarray` (for example).
 
 .. currentmodule:: nmrpoise.poise_backend.shared
 
 .. autoclass:: _g
 
-
-Helper methods
-==============
-
-If you've looked inside the ``costfunctions.py`` file, you've probably realised that none of them actually use these variables directly.
-Instead, we have a bunch of helper methods that use these to get more useful information directly.
-All of these methods are stored inside ``cfhelpers.py`` and are already imported.
+However, this is quite tedious and error-prone, so there are a number of helper methods which use these primitives.
+All the existing cost functions (inside ``costfunctions.py``) only use these helper methods.
+All of these methods are stored inside ``cfhelpers.py`` and are already imported by default.
 
 The ones you are likely to use are the following:
 
@@ -87,11 +85,37 @@ The ones you are likely to use are the following:
 
 .. autofunction:: getndim
 
-|v|
+
+Logging
+=======
+
+As noted above, printing anything to stdout will cause the optimisation to crash. Please use `log()` instead, which will print to the ``poise.log`` file in the expno folder.
+
+I'm not entirely sure what printing to stderr does (I suspect it is lost; or it's possible that it will be printed to the terminal window used to open TopSpin on Windows/Linux systems).
 
 .. autofunction:: log
 
-|v|
+
+Premature termination
+=====================
+
+In order to terminate an optimisation prematurely, you can raise any exception you like: this will be propagated through the backend and to the frontend.
+
+However, most exceptions will *not* preserve any information from the function evaluations performed so far. If you want to (for example) terminate *and* return the best point found so far, please:
+
+ 1. Use the Nelder–Mead or MDS optimisers. (This behaviour is not possible with BOBYQA as the optimiser is provided by an external package, not built into POISE.)
+
+ 2. Raise a ``CostFunctionError`` instead of any other exception (such as ``ValueError``).
+
+For example, if you want to terminate the optimisation if a cost function is negative, write a cost function with the following structure::
+
+    def cost_function():
+        cost_fn_value = foo()   # whatever calculation you want here
+        if cost_fn_value < 0:
+           raise CostFunctionError("Cost function was negative.")
+        return cost_fn_value
+
+The string that is returned will be displayed to the user, so it is possible to show the user helpful information (further steps to take, or the value of the cost function, for example).
 
 
 Examples
