@@ -12,7 +12,6 @@
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex/" />
     <link rel="search" title="Search" href="../search/" />
     <link rel="next" title="Frontend options" href="../frontend/" />
@@ -79,13 +78,13 @@ It can be parsed using a Python 3 script:</p>
 <span class="go">0   p1cal     48.0  [p1]  40.0  56.0  0.2        nm  minabsint  poise_1d   48.125  6.849146e+06    10    77</span>
 </pre></div>
 </div>
-<p><a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.1.4)"><code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> object which contains most of the information in the log file.
+<p><a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.2.2)"><code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> object which contains most of the information in the log file.
 However, this object does not include details of individual cost function evaluations (even though these are fully logged).
 If you want to analyse that data, you will have to write your own function!</p>
 <p>The full documentation for <a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> (which really doesn’t say much more than the previous example) is as follows:</p>
 <dl class="py function">
 <dt id="nmrpoise.parse_log">
-<code class="sig-prename descclassname">nmrpoise.</code><code class="sig-name descname">parse_log</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span><span class="o">=</span><span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.parse_log" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">nmrpoise.</span></code><code class="sig-name descname"><span class="pre">parse_log</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.parse_log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a poise.log file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -182,10 +181,10 @@ We welcome bug reports — please <a class="reference external" href="https://gi
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Jonathan Yong.
+      &copy;2020, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

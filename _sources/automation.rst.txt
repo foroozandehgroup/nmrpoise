@@ -33,16 +33,18 @@ This AU script performs a very similar task to the existing ``pulsecal`` script:
 However, as we wrote in the paper, it tends to provide a much more accurate result.
 In practice, we've already used it many times to calibrate ``p1`` before running other experiments.
 
+.. note:: This AU programme can be installed by typing ``poise --install p1`` into the TopSpin command-line *after* installing POISE.
+
 .. literalinclude:: ../nmrpoise/au/poisecal
    :language: c
-   :lines: 14-
+   :lines: 29-30,48-78
 
-Note that all six lines underneath "set some key params" can be collapsed to one line if an appropriate parameter set is set up beforehand.
+Note that the six lines underneath "set some key params" can be collapsed to one line if an appropriate parameter set is set up beforehand.
 
 Here's the Python equivalent of the AU programme above (download from `here <https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/py/poisecalpy.py>`_):
 
 .. literalinclude:: ../nmrpoise/py/poisecalpy.py
-   :lines: 14-
+   :lines: 21-
 
 
 A helpful trick

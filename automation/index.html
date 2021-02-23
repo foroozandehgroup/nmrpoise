@@ -12,7 +12,6 @@
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex/" />
     <link rel="search" title="Search" href="../search/" />
     <link rel="next" title="Builtin cost functions" href="../costfunctions/" />
@@ -60,9 +59,13 @@ The corresponding syntax for running an optimisation would be:</p>
 This AU script performs a very similar task to the existing <code class="docutils literal notranslate"><span class="pre">pulsecal</span></code> script: it finds the best value of <code class="docutils literal notranslate"><span class="pre">p1</span></code> and plugs it back into the current experiment.
 However, as we wrote in the paper, it tends to provide a much more accurate result.
 In practice, we’ve already used it many times to calibrate <code class="docutils literal notranslate"><span class="pre">p1</span></code> before running other experiments.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// Use EXPNO 99999 in the current folder for optimisation.</span>
-<span class="n">GETCURDATA</span>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This AU programme can be installed by typing <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">--install</span> <span class="pre">p1</span></code> into the TopSpin command-line <em>after</em> installing POISE.</p>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">GETCURDATA</span>
 <span class="kt">int</span> <span class="n">old_expno</span> <span class="o">=</span> <span class="n">expno</span><span class="p">;</span>
+<span class="c1">// Use EXPNO 99999 in the current folder for optimisation.</span>
 <span class="n">DATASET</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="mi">99999</span><span class="p">,</span> <span class="n">procno</span><span class="p">,</span> <span class="n">disk</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
 <span class="c1">// Set some key parameters. Notice that these lines can be substantially cut</span>
 <span class="c1">// if an appropriate parameter set is set up beforehand.</span>
@@ -73,6 +76,10 @@ In practice, we’ve already used it many times to calibrate <code class="docuti
 <span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;DS&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;D 1&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 <span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;RG&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;F1P&quot;</span><span class="p">,</span> <span class="n">f1p</span><span class="p">)</span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;F2P&quot;</span><span class="p">,</span> <span class="n">f2p</span><span class="p">)</span>
+<span class="n">STOREPARS</span><span class="p">(</span><span class="s">&quot;F1P&quot;</span><span class="p">,</span> <span class="n">f1p</span><span class="p">)</span>
+<span class="n">STOREPARS</span><span class="p">(</span><span class="s">&quot;F2P&quot;</span><span class="p">,</span> <span class="n">f2p</span><span class="p">)</span>
 <span class="c1">// Run optimisation.</span>
 <span class="n">XCMD</span><span class="p">(</span><span class="s">&quot;sendgui xpy poise p1cal -a bobyqa -q&quot;</span><span class="p">)</span>
 <span class="c1">// POISE stores the optimised value in p1 after it&#39;s done. We can retrieve it</span>
@@ -91,9 +98,12 @@ In practice, we’ve already used it many times to calibrate <code class="docuti
 <span class="n">QUIT</span>
 </pre></div>
 </div>
-<p>Note that all six lines underneath “set some key params” can be collapsed to one line if an appropriate parameter set is set up beforehand.</p>
+<p>Note that the six lines underneath “set some key params” can be collapsed to one line if an appropriate parameter set is set up beforehand.</p>
 <p>Here’s the Python equivalent of the AU programme above (download from <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/py/poisecalpy.py">here</a>):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use EXPNO 99999 in the current folder for optimisation.</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read in F1P and F2P from current dataset.</span>
+<span class="n">f1p</span> <span class="o">=</span> <span class="n">GETPAR</span><span class="p">(</span><span class="s2">&quot;F1P&quot;</span><span class="p">)</span>
+<span class="n">f2p</span> <span class="o">=</span> <span class="n">GETPAR</span><span class="p">(</span><span class="s2">&quot;F2P&quot;</span><span class="p">)</span>
+<span class="c1"># Use EXPNO 99999 in the current folder for optimisation.</span>
 <span class="n">old_dataset</span> <span class="o">=</span> <span class="n">CURDATA</span><span class="p">()</span>
 <span class="n">opt_dataset</span> <span class="o">=</span> <span class="n">CURDATA</span><span class="p">()</span>
 <span class="n">opt_dataset</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;99999&quot;</span>
@@ -108,6 +118,8 @@ In practice, we’ve already used it many times to calibrate <code class="docuti
 <span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;DS&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">)</span>
 <span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;D 1&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
 <span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;RG&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;s f1p </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f1p</span><span class="p">))</span>  <span class="c1"># PUTPAR(&quot;status F1P&quot;) doesn&#39;t work.</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;s f2p </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f2p</span><span class="p">))</span>  <span class="c1"># Even though the documentation says it should.</span>
 <span class="c1"># Run optimisation.</span>
 <span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;poise p1cal -a bobyqa -q&quot;</span><span class="p">)</span>
 <span class="c1"># POISE stores the optimised value in p1 after it&#39;s done. We can retrieve it</span>
@@ -242,10 +254,10 @@ For example, you could set <code class="docutils literal notranslate"><span clas
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Jonathan Yong.
+      &copy;2020, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

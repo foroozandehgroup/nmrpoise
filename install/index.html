@@ -12,7 +12,6 @@
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex/" />
     <link rel="search" title="Search" href="../search/" />
     <link rel="next" title="Setting up a Routine" href="../routines/" />
@@ -40,7 +39,7 @@
 In particular, POISE requires a minimum version of <strong>Python 3.6.</strong>
 For Windows, your best bet is to download an installer from <a class="reference external" href="https://www.python.org/downloads/">the Python website</a>.
 For Unix machines, we suggest using a package manager to do so (such as Homebrew for macOS or <code class="docutils literal notranslate"><span class="pre">apt</span></code>/<code class="docutils literal notranslate"><span class="pre">yum</span></code> &amp; their equivalents on Linux), although the installers are also fine.</p>
-<p>Once that’s done, you can install POISE using <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
+<p>Once that’s done, you can install POISE using <code class="docutils literal notranslate"><span class="pre">pip</span></code> (or <code class="docutils literal notranslate"><span class="pre">pip3</span></code>):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">nmrpoise</span>
 </pre></div>
 </div>
@@ -82,6 +81,34 @@ The way to do this depends on what operating system (and shell) you use.</p>
 </div>
 <p>The installation to the TopSpin directory is subject to the same considerations as above.</p>
 </div>
+<div class="section" id="without-an-internet-connection">
+<h2>Without an internet connection<a class="headerlink" href="#without-an-internet-connection" title="Permalink to this headline">¶</a></h2>
+<p>If your spectrometer does not have an Internet connection, then the installation becomes a bit more protracted.
+On a computer that <em>does</em> have an Internet connection:</p>
+<ol class="arabic">
+<li><p>Make a new folder.</p></li>
+<li><p>Download the CPython installer for the spectrometer operating system. Place it in that folder.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cd</span></code> to the folder and run these commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">download</span> <span class="n">Py</span><span class="o">-</span><span class="n">BOBYQA</span> <span class="n">nmrpoise</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">deps</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">binary</span><span class="o">=</span><span class="p">:</span><span class="nb">all</span><span class="p">:</span>
+<span class="n">pip</span> <span class="n">download</span> <span class="n">numpy</span> <span class="n">pandas</span> <span class="n">scipy</span> <span class="o">--</span><span class="n">only</span><span class="o">-</span><span class="n">binary</span><span class="o">=</span><span class="p">:</span><span class="nb">all</span><span class="p">:</span> <span class="o">--</span><span class="n">platform</span> <span class="o">&lt;</span><span class="n">PLATFORM</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;PLATFORM&gt;</span></code> should be one of <code class="docutils literal notranslate"><span class="pre">win32</span></code>, <code class="docutils literal notranslate"><span class="pre">macosx_10_9_x86_64</span></code>, or <code class="docutils literal notranslate"><span class="pre">manylinux1_x86_64</span></code> depending on the spectrometer operating system.</p>
+</li>
+<li><p>Copy the whole folder over to your spectrometer. It should contain a bunch of <code class="docutils literal notranslate"><span class="pre">.whl</span></code> files and two <code class="docutils literal notranslate"><span class="pre">.tar.gz</span></code> files.</p></li>
+</ol>
+<p>Now, on the spectrometer:</p>
+<ol class="arabic">
+<li><p>Install CPython with the installer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cd</span></code> to the folder and run</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">./</span><span class="n">nmrpoise</span><span class="o">-&lt;</span><span class="n">VERSION</span><span class="o">&gt;.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">index</span> <span class="o">--</span><span class="n">find</span><span class="o">-</span><span class="n">links</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>(replace <code class="docutils literal notranslate"><span class="pre">&lt;VERSION&gt;</span></code> with whichever version you downloaded).</p>
+</li>
+</ol>
+<p>It should then install properly, unless your TopSpin installation location is non-standard: in that case, set the <code class="docutils literal notranslate"><span class="pre">$TSDIR</span></code> environment variable (described above) before retrying Step 2.</p>
+</div>
 </div>
 
 
@@ -105,6 +132,7 @@ The way to do this depends on what operating system (and shell) you use.</p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#from-source">From source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#without-an-internet-connection">Without an internet connection</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../routines/">Setting up a Routine</a></li>
@@ -149,10 +177,10 @@ The way to do this depends on what operating system (and shell) you use.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Jonathan Yong.
+      &copy;2020, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
