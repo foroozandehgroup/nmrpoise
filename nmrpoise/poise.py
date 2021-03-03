@@ -182,9 +182,12 @@ def main(args):
             # Read in what the backend has to say.
             line = backend.stdout.readline()
 
-            # CASE 1 -- Optimisation has converged
+            # CASE 1 -- Optimisation has converged (or terminated with
+            #           CostFunctionError)
             if line.startswith("optima:"):
                 optima = line.split()[1:]
+                # Get the optimiser message as well.
+                opt_message = backend.stdout.readline()
                 break
 
             # CASE 2 -- Values to put in an experiment
@@ -275,16 +278,16 @@ def main(args):
         err_exit("Error during acquisition loop:\n{}".format(e.message),
                  log=True)
 
-    # TODO: Check the message that the optimiser returns.
-    # If it's not "optimisation completed successfully", then we need to
-    # reflect this.
+    # Optimisation successfully ended, or prematurely ended?
+    opt_success = opt_message == "Optimisation terminated successfully."
 
     # Store the optima in the (final) dataset, and show a message to the user
     # if not in quiet mode.
     RE(current_dataset)
-    s = ""
+    s = opt_message + "\n"
     for par, optimum in zip(routine.pars, optima):
-        s = s + "Optimal value for {}: {}\n".format(par, optimum)
+        so_far = "" if opt_success else " (so far)"
+        s = s + "Optimal value for {}{}: {}\n".format(par, so_far, optimum)
         if not args.separate:
             convert_name_and_putpar(par, optimum)
     if not args.separate:

@@ -159,7 +159,11 @@ def main():
     # Tell frontend script that the optimisation is done
     best_values = unscale(opt_result.xbest, routine.lb,
                           routine.ub, routine.tol, scaleby="tols")
-    print("optima: " + " ".join([str(i) for i in best_values]))
+    print(f"optima: {' '.join([str(i) for i in best_values])}")
+    # Strip newlines from the opt result message, just in case (because the
+    # frontend only expects one line of text here, feeding it more than one
+    # line of text will confuse it)
+    print(opt_result.message.replace("\n", " ").replace("\r", " "))
 
     # More logging
     toc = datetime.now()

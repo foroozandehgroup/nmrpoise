@@ -19,6 +19,11 @@ import pybobyqa as pb
 # effect on the actual optimisation.
 MAGIC_TOL = 0.03
 
+# Constant strings denoting "standard" optimisation outcomes.
+MESSAGE_OPT_SUCCESS = "Optimisation terminated successfully."
+MESSAGE_OPT_MAXFEV_REACHED = "Maximum function evaluations reached."
+MESSAGE_OPT_MAXITER_REACHED = "Maximum iterations reached."
+
 
 def scale(val, lb, ub, tol, scaleby="bounds"):
     """
@@ -467,13 +472,13 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
                     continue
         # END while loop
     except MaxItersReached:
-        message = "Maximum iterations reached."
+        message = MESSAGE_OPT_MAXITER_REACHED
     except MaxFevalsReached:
-        message = "Maximum function evaluations reached."
+        message = MESSAGE_OPT_MAXFEV_REACHED
     except CostFunctionError as e:
         message = e.message
     else:
-        message = "Optimisation terminated successfully."
+        message = MESSAGE_OPT_SUCCESS
 
     # sort the simplex in ascending order of fvals
     sim.sort()
@@ -642,13 +647,13 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
                 sim.sort()  # Step 3(d)
                 continue
     except MaxItersReached:
-        message = "Maximum iterations reached."
+        message = MESSAGE_OPT_MAXITER_REACHED
     except MaxFevalsReached:
-        message = "Maximum function evaluations reached."
+        message = MESSAGE_OPT_MAXFEV_REACHED
     except CostFunctionError as e:
         message = e.message
     else:
-        message = "Optimisation terminated successfully."
+        message = MESSAGE_OPT_SUCCESS
 
     # sort the simplex in ascending order of fvals
     sim.sort()
@@ -734,9 +739,22 @@ def pybobyqa_interface(cf, x0, xtol, scaled_lb, scaled_ub,
                        pb_sol.EXIT_TR_INCREASE_ERROR,
                        pb_sol.EXIT_LINALG_ERROR]:
         raise RuntimeError(pb_sol.msg)
+    # If we reached here, it means the optimisation completed successfully.
     # We just need to coerce the returned information into our OptResult
     # format, so that the backend sees a unified interface for all optimisers.
     # Note that niter is not applicable to PyBOBYQA.
+    # TODO: Convert PyBOBYQA's messages (success, maxiter, maxfev) back into
+    # our standardised messages, so that the frontend can check what happened.
+    if pb_sol.flag == pb_sol.EXIT_SUCCESS:
+        msg = MESSAGE_OPT_SUCCESS
+    elif pb_sol.flag == pb_sol.EXIT_MAXFUN_WARNING:
+        msg = MESSAGE_OPT_MAXFEV_REACHED
+    elif pb_sol.flag == pb_sol.EXIT_SLOW_WARNING:
+        msg = "Optimisation terminated (slow progress)."
+    elif pb_sol.flag == pb_sol.EXIT_FALSE_SUCCESS_WARNING:
+        msg = "Optimisation terminated (max false good steps)."
+    else:
+        msg = pb_sol.msg
     return OptResult(xbest=pb_sol.x, fbest=pb_sol.f,
                      niter=0, nfev=pb_sol.nf,
-                     message=pb_sol.msg)
+                     message=msg)

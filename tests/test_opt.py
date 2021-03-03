@@ -6,7 +6,10 @@ from nmrpoise.poise_backend.optpoise import (nelder_mead,
                                              pybobyqa_interface,
                                              deco_count,
                                              scale,
-                                             unscale)
+                                             unscale,
+                                             MESSAGE_OPT_SUCCESS,
+                                             MESSAGE_OPT_MAXFEV_REACHED,
+                                             MESSAGE_OPT_MAXITER_REACHED)
 from nmrpoise.poise_backend.cfhelpers import CostFunctionError
 
 
@@ -232,10 +235,10 @@ def test_bobyqa_accuracy():
 def test_maxfevals_reached():
     optResult = nelder_mead(cf=quadratic, x0=x0, xtol=([1e-6] * len(x0)),
                             scaled_lb=lb, scaled_ub=ub, maxfev=10)
-    assert optResult.message == "Maximum function evaluations reached."
+    assert optResult.message == MESSAGE_OPT_MAXFEV_REACHED
     optResult = multid_search(cf=quadratic, x0=x0, xtol=([1e-6] * len(x0)),
                               scaled_lb=lb, scaled_ub=ub, maxfev=10)
-    assert optResult.message == "Maximum function evaluations reached."
+    assert optResult.message == MESSAGE_OPT_MAXFEV_REACHED
 
 
 def test_CostFunctionError():
