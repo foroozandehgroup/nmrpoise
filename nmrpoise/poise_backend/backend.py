@@ -285,6 +285,7 @@ def acquire_nmr(x, cost_function, routine):
         # Evaluate the cost function, log, pass the cost function value back
         # to the frontend (it's stored in the `TI` parameter), and return.
         if signal == "done":
+            _g.nfev += 1
             fstr = "{:^10.4f}  " * (len(x) + 1)
             try:
                 cf_val = cost_function()

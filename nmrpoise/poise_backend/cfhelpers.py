@@ -651,6 +651,15 @@ def getndim(p_spec=None):
     return int(bruker_ndim) + 1
 
 
+def getnfev():
+    """
+    Returns the number of NMR spectra evaluated so far. This will be equal to 1
+    (not 0) the first time the cost function is called, since the cost function
+    is only called after the NMR spectrum has been acquired.
+    """
+    return _g.nfev
+
+
 def log(s):
     """
     Prints a string to the poise.log file. If this is called from inside a cost

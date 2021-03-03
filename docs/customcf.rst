@@ -85,6 +85,9 @@ The ones you are likely to use are the following:
 
 .. autofunction:: getndim
 
+|v|
+
+.. autofunction:: getnfev
 
 Logging
 =======

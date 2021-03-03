@@ -55,6 +55,7 @@ class _g():
     p_optlog = None
     p_errlog = None
     maxfev = 0
+    nfev = 0
     p_poise = Path(__file__).parent.resolve()
     spec_f1p = None
     spec_f2p = None
