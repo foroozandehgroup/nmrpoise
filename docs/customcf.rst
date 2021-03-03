@@ -107,16 +107,30 @@ However, most exceptions will *not* preserve any information from the function e
 
  2. Raise a ``CostFunctionError`` instead of any other exception (such as ``ValueError``).
 
-For example, if you want to terminate the optimisation if a cost function is negative, write a cost function with the following structure::
+There are two main patterns of usage here.
+The first is if you simply want to stop the optimisation right away and discard the last point which caused a CostFunctionError to be raised.
+In that case, simply raise an error with an appropriate message::
 
     def cost_function():
         cost_fn_value = foo()   # whatever calculation you want here
-        if cost_fn_value < 0:
-           raise CostFunctionError("Cost function was negative.")
+        if some_bad_condition:
+           raise CostFunctionError("Some bad thing happened!")
         return cost_fn_value
 
-The string that is returned will be displayed to the user, so it is possible to show the user helpful information (further steps to take, or the value of the cost function, for example).
+The string that is returned will be displayed to the user, so it is possible to use this string to show the user helpful information (further steps to take, or the value of the cost function, for example).
 
+Alternatively, you may want the current point (and the corresponding cost function value) to be saved as part of the optimisation.
+For example, it may be the case that a certain threshold is "good enough" for the cost function and any value below that is acceptable.
+In that situation, you would want to raise CostFunctionError once the cost function goes below that threshold, but *also* save that point as the best value.
+To do so, pass the value of the cost function as the *second* parameter when raising CostFunctionError::
+
+    def cost_function():
+        cost_fn_value = foo()   # whatever calculation you want here
+        if cost_fn_value < threshold:
+           raise CostFunctionError("Some bad thing happened!", cost_fn_value)
+        # Note that we still need the return statement, because it will be used
+        # if cost_fn_value is greater than the threshold.
+        return cost_fn_value
 
 Examples
 ========

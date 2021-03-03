@@ -24,20 +24,30 @@ class CostFunctionError(Exception):
     the best value found so far. For the BOBYQA optimiser, no value will be
     returned.
 
+    If raised directly with ``CostFunctionError(str)``, the current iteration
+    (i.e. the iteration on which it was raised) will *not* be included in the
+    optimisation results. If you wish to include the current iteration, then
+    pass the value of the cost function as the second parameter, viz.
+    ``CostFunctionError(str, cf_val=1e6)``.
+
     Examples
     --------
-    To terminate the optimisation immediately if a cost function is negative,
-    write a cost function with the following structure:
+    One might envision a scenario in which *any* value of the cost function
+    below a certain threshold is considered 'good enough' to be the optimum.
+    To obtain this effect, write a cost function with the following structure:
 
     >>>def cost_function():
-    >>>    cost_fn_value = foo()   # whatever calculation you want here
-    >>>    if cost_fn_value < 0:
-    >>>       raise CostFunctionError("Cost function was negative.")
-    >>>    return cost_fn_value
+    >>>    cf_val = foo()   # whatever calculation you want here
+    >>>    if cf_val < threshold:
+    >>>       raise CostFunctionError("Cost function was below threshold.",
+    >>>                               cf_val=cf_val)
+    >>>    return cf_val
     """
-    def __init__(self, message=("A CostFunctionError was thrown inside the"
-                                " cost function.")):
+    def __init__(self,
+                 message=("The cost function raised an error."),
+                 cf_val=None):
         self.message = message
+        self.cf_val = cf_val
 
 
 def make_p_spec(path=None, expno=None, procno=None):

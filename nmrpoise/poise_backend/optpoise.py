@@ -20,7 +20,8 @@ import pybobyqa as pb
 MAGIC_TOL = 0.03
 
 # Constant strings denoting "standard" optimisation outcomes.
-MESSAGE_OPT_SUCCESS = "Optimisation terminated successfully."
+MESSAGE_OPT_SUCCESS = "Optimisation terminated successfully due to convergence."
+MESSAGE_OPT_PREMATURE_TERMINATION = "Optimisation terminated before convergence."
 MESSAGE_OPT_MAXFEV_REACHED = "Maximum function evaluations reached."
 MESSAGE_OPT_MAXITER_REACHED = "Maximum iterations reached."
 
@@ -229,6 +230,10 @@ class MaxItersReached(Exception):
     pass
 
 
+class EarlyTerminationError(Exception):
+    pass
+
+
 def deco_count(fn):
     """
     Decorator which counts the number of times a function has been called, as
@@ -246,24 +251,35 @@ def deco_count(fn):
     return counter
 
 
-def deco_maxfev(maxfev):
+def deco_cf(maxfev):
     """
-    Decorator factory which returns a decorator that causes a function to raise
-    MaxFevalsReached if its number of calls is greater than maxfev.
+    Decorator factory which returns a decorator for cost functions. The
+    decorator in turn causes the cost function to raise MaxFevalsReached if its
+    number of calls is greater than ``maxfev``.
 
-    Yes, it's confusing, but that's how decorators with parameters work...
+    Usage
+    =====
+    The decorator factory itself must take a parameter ``maxfev`` so that the
+    maximum number of function evaluations can be dynamically chosen. Thus,
 
-    Decorate with @deco_maxfev(MAXFEVS), or in order to set maxfev dynamically
-    (as is needed in POISE), do it using cf = deco_maxfev(MAXFEVS)(cf).
+    >>> deco_cf(maxfev=maxfev)
+
+    returns a decorator, which can then be used to decorate a cost function:
+
+    >>> cf = deco_cf(maxfev=maxfev)(cf)
     """
     def decorator(fn):
         @wraps(fn)
-        def counted_cf(*args, **kwargs):
+        def decorated_cf(*args, **kwargs):
+            # Check if maximum function evaluations have been reached.
             if fn.calls >= maxfev:
                 raise MaxFevalsReached
+            # If not, then we can try to run the original function. The
+            # parameters returned are the cost function value, a flag
+            # indicating whether to break, and a message.
             else:
                 return fn(*args, **kwargs)
-        return counted_cf
+        return decorated_cf
     return decorator
 
 
@@ -347,7 +363,7 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
     if maxfev <= 0:
         maxfev = 500 * N
     # Decorate the cost function to raise MaxFevalsReached
-    cf = deco_maxfev(maxfev)(cf)
+    cf = deco_cf(maxfev)(cf)
 
     # Check length of xtol
     if len(x0) != len(xtol):
@@ -398,6 +414,7 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
 
         # Main loop.
         while not converged(sim, xtol):
+            # Proceed to next iteration.
             niter += 1
             sim.sort()  # for good measure
 
@@ -410,8 +427,8 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
 
             # Step 3(a)
             x_r = xnew(mu_r, sim)  # shorthand for x(mu_r)
-            f_r = cf(x_r, *args)
             iter_xs.append(x_r)
+            f_r = cf(x_r, *args)
             iter_fs.append(f_r)
 
             # Step 3(b): Reflect (+ 3g if needed)
@@ -423,8 +440,8 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
             # Step 3(c): Expand (+ 3g if needed)
             if f_r < sim.f[0]:
                 x_e = xnew(mu_e, sim)
-                f_e = cf(x_e, *args)
                 iter_xs.append(x_e)
+                f_e = cf(x_e, *args)
                 iter_fs.append(f_e)
                 if f_e < f_r:
                     sim.replace_worst(x_e, f_e)
@@ -436,8 +453,8 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
             # Step 3(d): Outside contraction (+ 3f and 3g if needed)
             if sim.f[N - 1] <= f_r and f_r < sim.f[N]:
                 x_oc = xnew(mu_oc, sim)
-                f_c = cf(x_oc, *args)
                 iter_xs.append(x_oc)
+                f_c = cf(x_oc, *args)
                 iter_fs.append(f_c)
                 if f_c <= f_r:
                     sim.replace_worst(x_oc, f_c)
@@ -455,8 +472,8 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
             # Step 3(e): Inside contraction (+ 3f and 3g if needed)
             if f_r >= sim.f[N]:
                 x_ic = xnew(mu_ic, sim)
-                f_c = cf(x_ic, *args)
                 iter_xs.append(x_ic)
+                f_c = cf(x_ic, *args)
                 iter_fs.append(f_c)
                 if f_c < sim.f[N]:
                     sim.replace_worst(x_ic, f_c)
@@ -476,7 +493,13 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
     except MaxFevalsReached:
         message = MESSAGE_OPT_MAXFEV_REACHED
     except CostFunctionError as e:
-        message = e.message
+        # Check if a value was returned: if so, add it to iter_fs (iter_xs will
+        # already have been updated prior to cost function calculation).
+        if isinstance(e.cf_val, (int, float)):
+            iter_fs.append(e.cf_val)
+        message = MESSAGE_OPT_PREMATURE_TERMINATION
+        if e.message.strip() != "":
+            message += ("\nReason: " + e.message)
     else:
         message = MESSAGE_OPT_SUCCESS
 
@@ -552,8 +575,9 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
     maxiter = 500 * N
     if maxfev <= 0:
         maxfev = 500 * N
-    # Decorate cost function so that it raises MaxFevalsReached.
-    cf = deco_maxfev(maxfev)(cf)
+    # Decorate cost function so that it handles MaxFevalsReached and
+    # CostFunctionError exceptions correctly.
+    cf = deco_cf(maxfev)(cf)
 
     # Check length of xtol
     if len(x0) != len(xtol):
@@ -587,12 +611,16 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
     # Create temporary list of points evaluated during this iteration (and
     # their corresponding cost function values).
     iter_xs, iter_fs = [], []
+    # Flag to indicate whether we should break out of the main loop. If a
+    # CostFunctionError is raised in the previous iteration, this will be
+    # incremented.
+    break_on_next_iter = 0
 
     try:
         # Evaluate the cost function for the initial simplex.
         # Steps 1 and 2 in Algorithm 8.2.1
         for i in range(N + 1):
-            sim.f[i] = cf(sim.x[i], *args)
+            sim.f[i], break_increment = cf(sim.x[i], *args)
             # Sort simplex
             sim.sort()
 
@@ -613,8 +641,8 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
             f_r_j = np.zeros(N)
             for j in range(1, N + 1):
                 r_j[j - 1] = sim.x[0] - (sim.x[j] - sim.x[0])
-                f_r_j[j - 1] = cf(r_j[j - 1], *args)
                 iter_xs.append(r_j[j - 1])
+                f_r_j[j - 1] = cf(r_j[j - 1], *args)
                 iter_fs.append(f_r_j[j - 1])
 
             # Step 3(b): Expand
@@ -623,8 +651,8 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
                 f_e_j = np.zeros(N)
                 for j in range(1, N + 1):
                     e_j[j - 1] = sim.x[0] - mu_e * (sim.x[j] - sim.x[0])
-                    f_e_j[j - 1] = cf(e_j[j - 1], *args)
                     iter_xs.append(e_j[j - 1])
+                    f_e_j[j - 1] = cf(e_j[j - 1], *args)
                     iter_fs.append(f_e_j[j - 1])
                 # Replace the values, 3(b)(ii)
                 if np.amin(f_r_j) > np.amin(f_e_j):
@@ -640,10 +668,10 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
             # Step 3(c): Contract
             else:
                 for j in range(1, N + 1):
-                    # For this one we don't need to append to iter_xs and
-                    # iter_fs since this directly updates the simplex.
                     sim.x[j] = sim.x[0] + mu_c * (sim.x[j] - sim.x[0])
+                    iter_xs.append(sim.x[j])
                     sim.f[j] = cf(sim.x[j], *args)
+                    iter_fs.append(sim.f[j])
                 sim.sort()  # Step 3(d)
                 continue
     except MaxItersReached:
@@ -651,7 +679,13 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
     except MaxFevalsReached:
         message = MESSAGE_OPT_MAXFEV_REACHED
     except CostFunctionError as e:
-        message = e.message
+        # Check if a value was returned: if so, add it to iter_fs (iter_xs will
+        # already have been updated prior to cost function calculation).
+        if isinstance(e.cf_val, (int, float)):
+            iter_fs.append(e.cf_val)
+        message = MESSAGE_OPT_PREMATURE_TERMINATION
+        if e.message.strip() != "":
+            message += ("\nReason: " + e.message)
     else:
         message = MESSAGE_OPT_SUCCESS
 

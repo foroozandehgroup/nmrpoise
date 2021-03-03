@@ -285,11 +285,23 @@ def acquire_nmr(x, cost_function, routine):
         # Evaluate the cost function, log, pass the cost function value back
         # to the frontend (it's stored in the `TI` parameter), and return.
         if signal == "done":
-            cf_val = cost_function()
             fstr = "{:^10.4f}  " * (len(x) + 1)
-            print(fstr.format(*unscaled_val, cf_val), file=logf)
-            print(f"cf: {cf_val}")
-            return cf_val
+            try:
+                cf_val = cost_function()
+            except CostFunctionError as e:
+                # Log the point and cost function
+                if isinstance(e.cf_val, (int, float)):
+                    print(fstr.format(*unscaled_val, e.cf_val), file=logf)
+                else:
+                    fstr2 = "{:^10.4f}  " * len(x)
+                    print(fstr2.format(*unscaled_val), file=logf)
+                # Log the exception and return control to optimiser.
+                print(e.message, file=logf)
+                raise
+            else:
+                print(fstr.format(*unscaled_val, cf_val), file=logf)
+                print(f"cf: {cf_val}")  # send back to frontend
+                return cf_val    # return control to optimiser
         else:
             # This really shouldn't happen.
             raise ValueError(f"Invalid signal passed from frontend: {signal}")
