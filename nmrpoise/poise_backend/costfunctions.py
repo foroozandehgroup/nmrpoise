@@ -148,69 +148,52 @@ def epsi_gradient_drift():
     caused by imbalanced positive and negative gradients.
     """
     from numpy.polynomial.polynomial import Polynomial
-    def process_1d_epsi():
-        """
-        Processes an EPSI dataset (the pulse programme should be zg_epsi or
-        similar) and returns three arrays:
+    # --- Calculate key parameters -------------------------------
+    fid = get1d_fid()
+    # Number of complex points in k-space, i.e. number of points per EPSI
+    # gradient. TD2 is total number of real & imag points in FID. L3 is number
+    # of EPSI loops (one loop includes both pos + neg gradient). So TD2 / (2 *
+    # L3) is the number of points in one EPSI gradient (i.e. only positive
+    # gradient). The extra factor of 2 is because we're interested only in
+    # complex points.
+    td_k = int(getpar("TD") / (2 * 2 * getpar("L3")))
+    # Time between consecutive EPSI positive gradients, in seconds
+    td_t2 = int(getpar("L3"))
+    dw_eff = getpar("AQ") / td_t2
 
-         1. The 2D (t,k)-matrix as a numpy ndarray (axis=0 is the conventional
-            t2-dimension, and axis=1 is the k-dimension).
-         2. The range of t2-values as a 1D ndarray.
-         3. The range of k-values as a 1D ndarray.
+    # --- Move group delay and drop points to end of FID ---------
+    grpdly_points = int(getpar("GRPDLY"))
+    fid = np.roll(fid, -grpdly_points)
 
-        This processing includes all other bells and whistles such as group delay
-        removal as well as apodisation. Note that it also discards all the points
-        corresponding to negative EPSI gradients.
-        """
-        # --- Calculate key parameters -------------------------------
-        fid = get1d_fid()
-        # Number of complex points in k-space, i.e. number of points per EPSI gradient.
-        # TD2 is total number of real & imag points in FID. L3 is number of EPSI loops
-        # (one loop includes both pos + neg gradient). So TD2 / (2 * L3) is the number
-        # of points in one EPSI gradient (i.e. only positive gradient). The extra
-        # factor of 2 is because we're interested only in complex points.
-        td_k = int(getpar("TD") / (2 * 2 * getpar("L3")))
-        # Time between consecutive EPSI positive gradients, in seconds
-        td_t2 = getpar("L3")
-        dw_eff = getpar("AQ") / getpar("L3")
+    # --- Perform EPSI processing --------------------------------
+    # Reshape into 2D matrix
+    ser = fid.reshape((-1, td_k))
+    # Discard the part acquired with negative gradients
+    ser = ser[0::2, :]
 
-        # --- Move group delay and drop points to end of FID ---------
-        grpdly_points = int(getpar("GRPDLY"))
-        fid = np.roll(fid, -grpdly_points)
+    # Discard any part of the spectrum that was not acquired during an EPSI
+    # gradient, i.e. if the delay D6 was nonzero.
+    if getpar("D6") > 0:
+        ineligible_epsi_points = int(1e6 * getpar("D6") / (getpar("DW") * 2))
+        td_k = td_k - ineligible_epsi_points
+        ser = ser[:, :td_k]
 
-        # --- Perform EPSI processing --------------------------------
-        # Reshape into 2D matrix
-        ser = fid.reshape((-1, td_k))
-        # Discard the part acquired with negative gradients
-        ser = ser[0::2,:]
-
-        ## Discard any part of the spectrum that was not acquired during an EPSI
-        ## gradient, i.e. if the delay D6 was nonzero.
-        if getpar("D6") > 0:
-            ineligible_epsi_points = int(1e6 * getpar("D6") / (getpar("DW") * 2))
-            td_k = td_k - ineligible_epsi_points
-            ser = ser[:,:td_k]
-
-        # --- Apodisation --------------------------------------------
-        # Along k-dimension (Hamming window)
-        alpha_0 = 0.54
-        ks = np.linspace(0, 1, td_k)
-        k_winfunc = (alpha_0
-                     - (1 - alpha_0) * np.cos(2 * np.pi * np.linspace(0, 1, td_k)))
-        ser = ser * k_winfunc[np.newaxis, :]
-        # Along direct dimension
-        t2_winfunc = np.sin(np.pi * np.linspace(0, 1, td_t2))
-        ser = ser * t2_winfunc[:, np.newaxis]
-
-        # Calculate k- and t2-axes
-        t2_values = np.arange(td_t2) * dw_eff
-        k_values = np.linspace(-0.5, 0.5, td_k)
-        return ser, t2_values, k_values
-
-    ser, t2_values, k_values = process_1d_epsi()
-    td_t2, td_k = ser.shape
+    # --- Apodisation --------------------------------------------
+    # Along k-dimension (Hamming window)
+    alpha_0 = 0.54
+    ks = np.linspace(0, 1, td_k)
+    k_winfunc = (alpha_0
+                 - (1 - alpha_0) * np.cos(2 * np.pi * np.linspace(0, 1, td_k)))
+    ser = ser * k_winfunc[np.newaxis, :]
+    # Along direct dimension
+    t2_winfunc = np.sin(np.pi * np.linspace(0, 1, td_t2))
+    ser = ser * t2_winfunc[:, np.newaxis]
     abs_ser = np.abs(ser)
-    
+
+    # Calculate k- and t2-axes
+    t2_values = np.arange(td_t2) * dw_eff
+    k_values = np.linspace(-0.5, 0.5, td_k)
+
     # Drop all rows (i.e. all values of t2) for which the maximum is less than
     # 20% of the overall maximum.
     threshold_amp = 0.2 * np.max(abs_ser)

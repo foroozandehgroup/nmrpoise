@@ -247,12 +247,12 @@ def test_CostFunctionError():
         optResult = nelder_mead(cf=quadratic_with_error, x0=x0, xtol=xtol,
                                 scaled_lb=lb, scaled_ub=ub,
                                 simplex_method=method)
-        assert optResult.message == "Cost function is below 0.3"
+        assert "Cost function is below 0.3" in optResult.message
         assert optResult.fbest >= 0.3
     for method, _ in mds_simplex_methods_nexpts.items():
         quadratic_with_error.calls = 0  # reset fevals
         optResult = multid_search(cf=quadratic_with_error, x0=x0, xtol=xtol,
                                   scaled_lb=lb, scaled_ub=ub,
                                   simplex_method=method)
-        assert optResult.message == "Cost function is below 0.3"
+        assert "Cost function is below 0.3" in optResult.message
         assert optResult.fbest >= 0.3

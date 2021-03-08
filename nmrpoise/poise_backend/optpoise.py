@@ -20,8 +20,10 @@ import pybobyqa as pb
 MAGIC_TOL = 0.03
 
 # Constant strings denoting "standard" optimisation outcomes.
-MESSAGE_OPT_SUCCESS = "Optimisation terminated successfully due to convergence."
-MESSAGE_OPT_PREMATURE_TERMINATION = "Optimisation terminated before convergence."
+MESSAGE_OPT_SUCCESS = ("Optimisation terminated successfully"
+                       " due to convergence.")
+MESSAGE_OPT_PREMATURE_TERMINATION = ("Optimisation terminated"
+                                     " before convergence.")
 MESSAGE_OPT_MAXFEV_REACHED = "Maximum function evaluations reached."
 MESSAGE_OPT_MAXITER_REACHED = "Maximum iterations reached."
 
