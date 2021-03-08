@@ -591,12 +591,25 @@ def getpar(par, p_spec=None):
     # Figure out the number of dimensions.
     ndim = getndim(p_spec=p_spec)
     if ndim == 1:
+        # Hardcode DW and AQ as these aren't stored in acqus file. Note that
+        # DW is in us and AQ in s, as is conventionally displayed in TopSpin.
+        if par.upper() == "DW":
+            return 1000000 / (2 * getpar("SW_h", p_spec))
+        elif par.upper() == "AQ":
+            return getpar("TD", p_spec) / (2 * getpar("SW_h", p_spec))
+
         acq = _get_acqu_par(par, p_spec.parents[1] / "acqus")
         if acq is not None:
             return acq
         else:
             return _get_proc_par(par, p_spec / "procs")
     elif ndim == 2:
+        # Hardcode DW and AQ as these aren't stored in acqus file. Note that
+        # DW only refers to the direct dimension. AQ returns a tuple.
+        if par.upper() == "DW":
+            return 1000000/(2 * getpar("SW_h", p_spec)[1])
+        elif par.upper() == "AQ":
+            return getpar("TD", p_spec) / (2 * getpar("SW_h", p_spec))
         # Try to get acquisition parameters first.
         acq_f1 = _get_acqu_par(par, p_spec.parents[1] / "acqu2s")
         acq_f2 = _get_acqu_par(par, p_spec.parents[1] / "acqus")

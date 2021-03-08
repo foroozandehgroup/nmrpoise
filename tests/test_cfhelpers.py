@@ -75,6 +75,8 @@ def test_getpar():
     assert round(cfh.getpar("spw 20", p_spec=p_spec), 8) == 0.00076827
     assert round(cfh.getpar("PLW 1", p_spec=p_spec), 3) == 31.537
     assert cfh.getpar("pulprog", p_spec=p_spec) is None
+    assert round(cfh.getpar("DW", p_spec=p_spec), 2) == 100.00
+    assert round(cfh.getpar("AQ", p_spec=p_spec), 4) == 3.2768
 
     assert cfh.getpar("si", p_spec=p_spec) == 65536
     assert cfh.getpar("lb", p_spec=p_spec) == 0.30
@@ -94,6 +96,9 @@ def test_getpar():
     assert cfh.getpar("NS", p_spec=p_spec) == 1
     assert round(cfh.getpar("SW", p_spec=p_spec)[0], 4) == 60.0127
     assert round(cfh.getpar("SW", p_spec=p_spec)[1], 4) == 10.0130
+    assert round(cfh.getpar("DW", p_spec=p_spec), 3) == 83.200
+    assert round(cfh.getpar("AQ", p_spec=p_spec)[0], 5) == 0.00177
+    assert round(cfh.getpar("AQ", p_spec=p_spec)[1], 5) == 0.08520
 
 
 def test_getndim():
