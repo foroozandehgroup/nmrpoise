@@ -620,7 +620,7 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
         # Evaluate the cost function for the initial simplex.
         # Steps 1 and 2 in Algorithm 8.2.1
         for i in range(N + 1):
-            sim.f[i], break_increment = cf(sim.x[i], *args)
+            sim.f[i] = cf(sim.x[i], *args)
             # Sort simplex
             sim.sort()
 
