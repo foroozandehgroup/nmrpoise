@@ -149,7 +149,7 @@ def epsi_gradient_drift():
     """
     from numpy.polynomial.polynomial import Polynomial
     # --- Calculate key parameters -------------------------------
-    fid = get1d_fid()
+    fid = get1d_fid(remove_grpdly=True)
     # Number of complex points in k-space, i.e. number of points per EPSI
     # gradient. TD2 is total number of real & imag points in FID. L3 is number
     # of EPSI loops (one loop includes both pos + neg gradient). So TD2 / (2 *
@@ -160,10 +160,6 @@ def epsi_gradient_drift():
     # Time between consecutive EPSI positive gradients, in seconds
     td_t2 = int(getpar("L3"))
     dw_eff = getpar("AQ") / td_t2
-
-    # --- Move group delay and drop points to end of FID ---------
-    grpdly_points = int(getpar("GRPDLY"))
-    fid = np.roll(fid, -grpdly_points)
 
     # --- Perform EPSI processing --------------------------------
     # Reshape into 2D matrix

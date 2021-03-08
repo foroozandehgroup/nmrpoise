@@ -178,20 +178,16 @@ def _ppm_to_point(shift, axis=None, p_spec=None):
     return int(x)
 
 
-def get1d_fid(p_spec=None):
+def get1d_fid(remove_grpdly=True, p_spec=None):
     """
     Returns the FID as a |ndarray|.
 
-    Note that this does *not* modify the "group delay" at the beginning of the
-    FID.
-
-    Also, Bruker spectrometers record real and imaginary points in a sequential
-    fashion. Therefore, each imaginary point in the ndarray is actually
-    measured ``DW`` *after* the corresponding real point. When Fourier
-    transforming, this can be accounted for by using fftshift().
-
     Parameters
     ----------
+    remove_grpdly : bool, optional
+        Whether to remove the group delay (to be precise, it is shifted to the
+        end of the FID). Default True.
+
     p_spec : |Path|, optional
         Path to the procno folder of interest. (The FID is taken from the expno
         folder two levels up.) Leave blank to use the currently active spectrum
@@ -211,7 +207,16 @@ def get1d_fid(p_spec=None):
     fid = fid.reshape(int(td/2), 2)
     fid = np.transpose(fid)
     # so now fid[0] is the real part, fid[1] the imaginary
-    return fid[0] + (1j * fid[1])
+    complex_fid = fid[0] + (1j * fid[1])
+    # Trim any extra points in the FID file (not sure why this happens, but it
+    # could be because data is written as blocks of 1024 points)
+    real_td = int(getpar("TD", p_spec=p_spec) / 2)
+    complex_fid = complex_fid[0:real_td]
+    # Remove group delay if necessary
+    if remove_grpdly:
+        complex_fid = np.roll(complex_fid,
+                              -int(getpar("GRPDLY", p_spec=p_spec)))
+    return complex_fid
 
 
 def _get_1d(spec_fname, bounds="", p_spec=None):

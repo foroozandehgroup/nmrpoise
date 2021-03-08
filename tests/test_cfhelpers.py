@@ -205,7 +205,7 @@ def test_get1d_imag():
 
 def test_get1d_fid():
     p_spec = makep(1, 1)
-    fid = cfh.get1d_fid(p_spec)
+    fid = cfh.get1d_fid(remove_grpdly=False, p_spec=p_spec)
     npff = np.fromfile(p_spec.parents[1] / "fid", dtype=np.int32)
     assert np.array_equal(np.real(fid), npff[0::2])
     assert np.array_equal(np.imag(fid), npff[1::2])
