@@ -20,39 +20,33 @@
 "d0=3u"
 "d11=30m"
 "p15=(td*dw/(2*l3))-d6"
-"p24=p15"
-"cnst17=cnst16"
+"cnst17=cnst16"   ; so that cnst16 shows up in ased
 
 1 ze
-  "cnst17=cnst17"
-  d11 ;pl9:f2
+  "cnst17=cnst17" ; so that cnst16 shows up in ased
+  d11
   30m zd
-; dummy scans
-21 30m
-   10u
-   4u
-   d1 
-   4u ;do:f2
-   100u UNBLKGRAD
-   20u pl1:f1
-
-  p1 ph1
+  ; dummy scans
+4 30m
   10u
-  p24:gp25
+  4u
+  d1 
+  4u
+  100u UNBLKGRAD
+  20u pl1:f1
+  (p1 ph1):f1
   10u
-
-31 p15:gp15
+  p15:gp25
+  10u
+5 p15:gp15
   d6 
   p15:gp16
   d6
-  lo to 31 times l3
+  lo to 5 times l3
   p27:gp27
   100u BLKGRAD
-  lo to 21 times l4
-;end of dummy scans
-
-
-
+  lo to 4 times l4
+  ; end of dummy scans
 2 30m
   10u
   4u
@@ -60,17 +54,13 @@
   4u
   100u UNBLKGRAD
   20u pl1:f1
-
-;excitation
-
-  p1 ph1
-  
-;post-mixing gradient
+  ; excitation
+  (p1 ph1):f1
+  ; prephasing gradient
   10u
-  p24:gp25
+  p15:gp25
   10u
-
-  ;acquisition
+  ; EPSI acquisition
   ACQ_START(ph30,ph31)
   1u DWELL_GEN:f1
 3 p15:gp15
@@ -99,6 +89,7 @@ ph31=0 2
 ;d1: relaxation delay; 1-5 * T1
 ;d6: delay between EPSI gradients
 ;d17: delay after experiment (not necessary)
+;p15: EPSI gradient duration
 ;gpz15: EPSI positive gradient
 ;gpz16: EPSI negative gradient
 ;gpz25: prephasing gradient
