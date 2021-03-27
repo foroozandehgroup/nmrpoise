@@ -1,0 +1,107 @@
+; zg_epsi.2_jy
+; download from: https://git.io/JYGEa
+; 90 pulse followed by EPSI acquisition, with prephasing gradient
+
+; modified from uftocsy, Giraudeau et al.
+; https://madoc.univ-nantes.fr/course/view.php?id=24710&section=1
+; IMPORTANT: set p15 + d6 = DW x TD(F2)/(2xL3)
+
+;$CLASS=HighRes
+;$DIM=1D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+
+#include <Avance.incl>
+#include <Grad.incl>
+#include <De.incl>
+#include <Delay.incl>
+
+"d0=3u"
+"d11=30m"
+"p15=(td*dw/(2*l3))-d6"
+"p24=p15"
+"cnst17=cnst16"
+
+1 ze
+  "cnst17=cnst17"
+  d11 ;pl9:f2
+  30m zd
+; dummy scans
+21 30m
+   10u
+   4u
+   d1 
+   4u ;do:f2
+   100u UNBLKGRAD
+   20u pl1:f1
+
+  p1 ph1
+  10u
+  p24:gp25
+  10u
+
+31 p15:gp15
+  d6 
+  p15:gp16
+  d6
+  lo to 31 times l3
+  p27:gp27
+  100u BLKGRAD
+  lo to 21 times l4
+;end of dummy scans
+
+
+
+2 30m
+  10u
+  4u
+  d1 
+  4u
+  100u UNBLKGRAD
+  20u pl1:f1
+
+;excitation
+
+  p1 ph1
+  
+;post-mixing gradient
+  10u
+  p24:gp25
+  10u
+
+  ;acquisition
+  ACQ_START(ph30,ph31)
+  1u DWELL_GEN:f1
+3 p15:gp15
+  d6 
+  p15:gp16*cnst16
+  d6
+  lo to 3 times l3
+  100u BLKGRAD
+  rcyc=2
+  100u UNBLKGRAD
+  p27:gp27
+  100u BLKGRAD
+  30m mc #0 to 2 F0(zd)
+  d17
+exit
+
+ph1=0 
+ph2=0 1
+ph3=0
+ph29=0
+ph30=0
+ph31=0 2
+
+;pl1: f1 channel - power level for pulse (default)
+;p1: f1 channel - 90 degree high power pulse
+;d1: relaxation delay; 1-5 * T1
+;d6: delay between EPSI gradients
+;d17: delay after experiment (not necessary)
+;gpz15: EPSI positive gradient
+;gpz16: EPSI negative gradient
+;gpz25: prephasing gradient
+;gpz27: purge gradient
+;ns: 1
+;l3: number of loops for EPSI acquisition
