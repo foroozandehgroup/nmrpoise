@@ -232,7 +232,7 @@ def asaphsqc():
 '''
 
 '''
-def psyche():
+def specdiff():
     """
     Returns the "spectral difference" between the current spectrum and a
     reference spectrum with EXPNO 1 and PROCNO 1.
