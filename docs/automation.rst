@@ -47,26 +47,23 @@ Here's the Python equivalent of the AU programme above (download from `here <htt
    :lines: 21-
 
 
-A helpful trick
----------------
+Terminating scripts which call POISE
+------------------------------------
 
-POISE itself is a Python programme which calls an AU programme.
-When incorporating POISE inside another script, it can become *very* difficult to terminate the entire thing as there are several nested loops in which scripts are being run.
-So, for example, you can kill the top-level script using TopSpin's ``kill`` command.
-However, that won't kill POISE itself, and so it will keep acquiring spectra, etc.
+So far we have seen how POISE can be included inside an AU programme or a Python script in TopSpin (a "parent script").
+One problem that we haven't dealt with yet is how to kill the parent script when POISE errors out.
+In general, if POISE is called via ``XCMD(poise ...)``, then even if POISE fails, the parent script will continue running.
 
-(If anybody has a better idea please let us know. As far as we can tell, this is a necessary limitation of the TopSpin ecosystem.)
-
-Anyway, we deal with this using a trick involving the ``TI`` TopSpin parameter, which can be any arbitrary string.
-POISE, upon successful function evaluation, will store the value of the cost function in the ``TI`` parameter.
+One way to deal with this is to use a trick involving the ``TI`` TopSpin parameter, which can be set to any arbitrary string.
+POISE, upon successful termination, will store the value of the cost function in the ``TI`` parameter.
 If it doesn't successfully run (for example if a requested routine or cost function is not found, or some other error), then ``TI`` will be left untouched.
 
 In order to detect when POISE fails from the top-level script, we therefore:
 
-1. Set ``TI`` to be blank. Please read the note below.
+1. Set ``TI`` to be equal to some sentinel value, i.e. any string whose exact value is just used as a marker. Note that this should not be a numeric value. You can set it to be blank if you like, but please read the note below.
 
 .. note::
-   In an AU or Python programme, you have to set ``TI`` to be a non-empty string that contains only whitespace. For example::
+   In an AU or Python programme, to set a parameter to a blank value, you have to set it to be a non-empty string that contains only whitespace. For example, in a Python script::
 
       PUTPAR("TI", " ")   # this will work
       PUTPAR("TI", "")    # this will NOT work!
@@ -78,13 +75,19 @@ In order to detect when POISE fails from the top-level script, we therefore:
 
 2. Run POISE.
 
-3. Check if ``TI`` is an empty string. If it is, then quit unceremoniously with an error message of your choice.
+3. Check if ``TI`` is equal to that sentinel value. If it is, then quit unceremoniously with an error message of your choice.
 
-You can see this strategy in action in the first part of the `DOSY optimisation script <https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/py/dosy_opt.py>`_ (where we optimise the diffusion delay):
+Briefly, here is an example of this strategy in action.
+We show a Python script here, but the AU script is essentially the same, just with different function names.
 
-.. literalinclude:: ../nmrpoise/py/dosy_opt.py
-   :dedent: 4
-   :lines: 103-114
+::
 
-You don't actually have to set it to be blank, of course: it can be any sentinel value you like, as long as it cannot be confused with the value of a cost function.
-For example, you could set ``TI`` to be the string ``"ILoveTopSpin"`` before the optimisation, then after that check whether it is still ``"ILoveTopSpin"``.
+    PUTPAR("TI", "poise")  # here "poise" serves as the sentinel value.
+    XCMD("poise p1cal -a bobyqa -q")
+
+    # Here POISE should be done. If it succeeded then TI will no longer be "poise".
+    if GETPAR("TI") == "poise":
+        raise RuntimeError("POISE failed!")
+
+    # After this you can continue with whatever you wanted to do.
+

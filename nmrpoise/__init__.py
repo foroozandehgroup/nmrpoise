@@ -16,16 +16,16 @@ def parse_log(fname="."):
 
     Parameters
     ----------
-    fname : (optional) str or pathlib.Path or int
+    fname : |Path| or str or int, optional
         Path to poise.log file, or the folder containing it (this would be the
-        TopSpin EXPNO folder). If not specified assumes the current working
-        directory. If passed as an int, assumes "./<fname>" (i.e. expno X in
-        the current working directory).
+        TopSpin EXPNO folder). If an int is passed, it is interpreted as the
+        string "./<fname>" (i.e.  expno X in the current working directory). If
+        not specified, defaults to the current working directory.
 
     Returns
     -------
-    log_df : pandas.DataFrame
-        Dataframe with rows corresponding to optimisations which successfully
+    log_df : :class:`DataFrame <pandas.DataFrame>`
+        DataFrame with rows corresponding to optimisations which successfully
         terminated. The time taken is given in seconds.
     """
     # Handle the int case
