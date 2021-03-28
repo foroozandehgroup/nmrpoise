@@ -54,7 +54,7 @@ def make_p_spec(path=None, expno=None, procno=None):
     """
     Constructs a |Path| object corresponding to the procno folder
     ``<path>/<expno>/pdata/<procno>``. If parameters are not passed, they are
-    inherited from the currently active spectrum (_g.p_spectrum).
+    inherited from the currently active spectrum (``_g.p_spectrum``).
 
     Thus, for example, ``make_p_spec(expno=1, procno=1)`` returns a path to the
     spectrum with EXPNO 1 and PROCNO 1, but with the same name as the currently
@@ -186,12 +186,12 @@ def get1d_fid(remove_grpdly=True, p_spec=None):
     ----------
     remove_grpdly : bool, optional
         Whether to remove the group delay (to be precise, it is shifted to the
-        end of the FID). Default True.
+        end of the FID). Defaults to True.
 
     p_spec : |Path|, optional
         Path to the procno folder of interest. (The FID is taken from the expno
-        folder two levels up.) Leave blank to use the currently active spectrum
-        (i.e. _g.p_spectrum).
+        folder two levels up.) Defaults to the currently active spectrum (i.e.
+        ``_g.p_spectrum``).
 
     Returns
     -------
@@ -275,7 +275,8 @@ def get1d_real(bounds="", p_spec=None):
     Note that this function only works for 1D spectra. It does *not* work for
     1D projections of 2D spectra. If you want to work with projections, you can
     use `get2d_rr` to get the full 2D spectrum, then manipulate it using numpy
-    functions as appropriate. Examples can be found in the docs.
+    functions as appropriate. A documented example can be found in the
+    ``asaphsqc()`` function in ``costfunctions.py`` (commented out by default).
 
     The *bounds* parameter may be specified in the following formats:
 
@@ -291,8 +292,8 @@ def get1d_real(bounds="", p_spec=None):
         processing parameters, which can be specified via ``dpl``. If these are
         not specified, defaults to the whole spectrum.
     p_spec : |Path|, optional
-        Path to the procno folder of interest. Leave blank to use the currently
-        active spectrum (i.e. _g.p_spectrum).
+        Path to the procno folder of interest. Defaults to the currently active
+        spectrum (i.e. ``_g.p_spectrum``).
 
     Returns
     -------
@@ -401,8 +402,8 @@ def get2d_rr(f1_bounds="", f2_bounds="", p_spec=None):
         ``2 F2P`` processing parameters, which can be specified via ``dpl``. If
         these are not specified, defaults to the whole spectrum.
     p_spec : |Path|, optional
-        Path to the procno folder of interest. Leave blank to use the currently
-        active spectrum (i.e. _g.p_spectrum).
+        Path to the procno folder of interest. Defaults to the currently active
+        spectrum (i.e. ``_g.p_spectrum``).
 
     Returns
     -------
@@ -577,8 +578,8 @@ def getpar(par, p_spec=None):
     par : str
         Name of the parameter.
     p_spec : |Path|, optional
-        Path to the procno folder of interest. Leave blank to use the currently
-        active spectrum (i.e. _g.p_spectrum).
+        Path to the procno folder of interest. Defaults to the currently active
+        spectrum (i.e. ``_g.p_spectrum``).
 
     Returns
     -------
@@ -645,17 +646,13 @@ def getpar(par, p_spec=None):
 def getndim(p_spec=None):
     """
     Obtains the dimensionality of the spectrum, i.e. the status value of
-    PARMODE. Note that Bruker uses PARMODE=n for (n+1)D spectra, whereas this
-    function simply returns (n+1) (as an int).
-
-    Note that we call _get_acqu_par() instead of getpar() to avoid an infinite
-    loop.
+    PARMODE, plus one (becaus PARMODE is 0 for 1D spectra, etc.)
 
     Parameters
     ----------
     p_spec : |Path|, optional
-        Path to the procno folder of interest. Leave blank to use the currently
-        active spectrum (i.e. _g.p_spectrum).
+        Path to the procno folder of interest. Defaults to the currently active
+        spectrum (i.e. ``_g.p_spectrum``).
 
     Returns
     -------
@@ -664,7 +661,8 @@ def getndim(p_spec=None):
     """
     p_spec = p_spec or _g.p_spectrum
     p_acqus = p_spec.parents[1] / "acqus"
-    # for (n+1)D, bruker_ndim = n
+    # Note that getpar() itself calls getndim(), so we call _get_acqu_par()
+    # here instead of getpar() to avoid an infinite loop.
     bruker_ndim = _get_acqu_par("PARMODE", p_acqus)
     return int(bruker_ndim) + 1
 
@@ -678,22 +676,23 @@ def getnfev():
     return _g.nfev
 
 
-def log(s):
+def log(*args):
     """
-    Prints a string to the poise.log file. If this is called from inside a cost
-    function, the text is printed *before* the cost function is evaluated, so
-    will appear above the corresponding function evaluation.
+    Prints something to the poise.log file.
+
+    If this is called from inside a cost function, the text is printed *before*
+    the cost function is evaluated, so will appear above the corresponding
+    function evaluation.
 
     Parameters
     ----------
-    s : object
-        The object to be printed. Typically a string, but since this is just
-        passed directly to print(), anything with a __str__() method can be
-        used.
+    args
+        The arguments that ``log()`` takes are exactly the same as those of
+        ``print()``.
 
     Returns
     -------
     None
     """
     with open(_g.p_optlog, 'a') as fp:
-        print(s, file=fp)
+        print(*args, file=fp)

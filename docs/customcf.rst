@@ -92,9 +92,10 @@ The ones you are likely to use are the following:
 Logging
 =======
 
-As noted above, printing anything to stdout will cause the optimisation to crash. Please use `log()` instead, which will print to the ``poise.log`` file in the expno folder.
-
-I'm not entirely sure what printing to stderr does (I suspect it is lost; or it's possible that it will be printed to the terminal window used to open TopSpin on Windows/Linux systems).
+As noted above, printing anything to ``stdout`` will cause the optimisation to crash.
+The reason for this is because ``stdout`` is reserved for communication between the POISE backend (the Python 3 component) and frontend (which runs in TopSpin).
+Please use `log()` instead, which will print to the ``poise.log`` file in the expno folder.
+It works in exactly the same way as the familiar ``print()``, and accepts the same kind of arguments.
 
 .. autofunction:: log
 
