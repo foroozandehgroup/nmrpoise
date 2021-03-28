@@ -67,6 +67,9 @@ def main():
     directory. This function also makes sure to replace p_python3 (the path to
     the Python 3 executable) in the frontend script.
 
+    Also installs the poisecal AU script, for good measure. It's a pretty
+    useful part of the package and showcases POISE's capabilities well.
+
     Parameters
     ----------
     None
@@ -113,73 +116,12 @@ def main():
         # Copy core AU scripts over. The others can be installed with
         # poise_addons.
         ts_au_user_path = ts_path / "au" / "src" / "user"
-        core_au_scripts = ["poise_1d", "poise_2d"]
+        core_au_scripts = ["poise_1d", "poise_2d", "poisecal"]
         for auscript in core_au_scripts:
             src = dirname / "au" / auscript
             dest = ts_au_user_path / auscript
             cp(str(src), str(dest))
     print("topspin_install.py: completed")
-
-
-def install_addons():
-    """
-    Attempts to install additional AU programmes and Python scripts into the
-    TopSpin user directories.
-
-    This function can be called using the ``poise_addons`` command-line entry
-    point.
-
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    None
-    """
-    dirname = Path(__file__).parent.resolve()
-    ostype = get_ostype()
-    ts_paths = get_topspin_path(ostype)
-
-    # List of all the files we want to copy over.
-    python_scripts = [
-        "make_double_saltire.py",
-        "dosy_opt.py",
-        "poisecalpy.py",
-    ]
-    au_scripts = [
-        "poise_psyche",
-        "poise_2pdosy",
-        "poisecal",
-    ]
-    pulse_programmes = [
-        "asaphsqc_jy",
-        "doneshot_1d_jy",
-        "doneshot_2d_jy",
-        "psyche_1dopt_jy",
-        "spfgsenoezs2.1_jy",
-    ]
-    # Copy them to TopSpin's directories.
-    for ts_path in ts_paths:
-        # Python scripts first
-        ts_py_user_path = ts_path / "py" / "user"
-        for pyscript in python_scripts:
-            src = dirname / "py" / pyscript
-            dest = ts_py_user_path / pyscript
-            cp(str(src), str(dest))
-        # AU scripts next
-        ts_au_user_path = ts_path / "au" / "src" / "user"
-        for auscript in au_scripts:
-            src = dirname / "au" / auscript
-            dest = ts_au_user_path / auscript
-            cp(str(src), str(dest))
-        # Pulse programmes finally
-        pp_user_path = ts_path / "lists" / "pp" / "user"
-        for pulprog in pulse_programmes:
-            src = dirname / "pp" / pulprog
-            dest = pp_user_path / pulprog
-            cp(str(src), str(dest))
-    print("install_addons: complete")
 
 
 def get_topspin_path(ostype):

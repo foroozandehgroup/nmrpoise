@@ -23,10 +23,6 @@ General options
 
     Show a help message then exit.
 
-``--install``
-
-    For ultra-quick installation of p1 optimisation script (see `index`).
-
 ``--kill``
 
     Kill POISE backends that may still be running.

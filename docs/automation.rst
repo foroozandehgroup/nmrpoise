@@ -33,7 +33,8 @@ This AU script performs a very similar task to the existing ``pulsecal`` script:
 However, as we wrote in the paper, it tends to provide a much more accurate result.
 In practice, we've already used it many times to calibrate ``p1`` before running other experiments.
 
-.. note:: This AU programme can be installed by typing ``poise --install p1`` into the TopSpin command-line *after* installing POISE.
+.. note::
+   This AU programme comes installed with POISE. However, you must create the ``p1cal`` routine before you can use this. Please see `routines` for a full walkthrough.
 
 .. literalinclude:: ../nmrpoise/au/poisecal
    :language: c
