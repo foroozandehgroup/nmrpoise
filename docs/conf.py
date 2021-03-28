@@ -93,4 +93,5 @@ latex_elements = {
         \usepackage{inconsolata}
         """,
     "extraclassoptions": "openany",
+    "printindex": "\\def\\twocolumn[#1]{#1}\\printindex",
 }
