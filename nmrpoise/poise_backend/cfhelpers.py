@@ -233,12 +233,13 @@ def _get_1d(spec_fname, bounds="", p_spec=None):
     nc_proc = int(getpar("NC_proc", p_spec))
     spec = spec * (2 ** nc_proc)
 
-    # Here, _g.spec_f1p and _g.spec_f2p can be ndarrays in a VERY special case.
-    # The spectrum must appear to be 2D before the optimisation is started
-    # (i.e. when backend.py initialises these values), and then must be changed
-    # to 1D after the first acquisition. This happens, for example, in
-    # dosy_opt.py. In ordinary cases, these conditionals will never occur so
-    # they won't hurt.
+    # Handle an edge case where _g.spec_f1p and _g.spec_f2p can be ndarrays
+    # (for a 1D spectrum they should be floats). This occurs when the spectrum
+    # is 2D *before* the optimisation is started (i.e. when backend.py
+    # initialises these values), and then is changed to 1D before the first
+    # acquisition. (This used to happen in the dosy_opt.py script, which has
+    # since been removed from POISE; however, keeping this code here won't
+    # hurt.)
     if isinstance(_g.spec_f1p, np.ndarray):
         _g.spec_f1p = _g.spec_f1p[1]
     if isinstance(_g.spec_f2p, np.ndarray):
