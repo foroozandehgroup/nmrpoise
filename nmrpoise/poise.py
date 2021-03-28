@@ -1102,12 +1102,13 @@ if __name__ == "__main__":
         "--create",
         type=str,
         nargs=8,
+        metavar=("NAME", "PARAM", "MINVAL", "MAXVAL", "INIT", "TOLS", "CF",
+                 "AU"),
         help=("Create a new POISE routine for optimisation of one parameter."
               " For multiple parameter optimisations, please use the GUI."
-              " Invoke using 'poise --create [NAME] [PARAM] [MINVAL] [MAXVAL]"
-              " [INITVAL] [TOLS] [CF] [AU]. Note that unlike in the GUI, the"
-              " AU programme must be specified here. Also, shorthand notation"
-              " such as 'u' or 'm' for units are not allowed here.")
+              " Note that unlike in the GUI, the AU programme must be"
+              " specified here. Also, shorthand notation such as 'u' or 'm'"
+              " for units are not allowed here.")
     )
     me_group.add_argument(
         "--delete",
