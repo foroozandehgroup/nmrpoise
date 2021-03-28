@@ -103,17 +103,20 @@ It works in exactly the same way as the familiar ``print()``, and accepts the sa
 Premature termination
 =====================
 
-In order to terminate an optimisation prematurely, you can raise any exception you like: this will be propagated through the backend and to the frontend.
+In order to terminate an optimisation prematurely, you can raise any exception you like, for example with ``raise ValueError``.
+POISE will stop the optimisation, and the error will be displayed in TopSpin.
+The drawback of this naive approach is that *no information from the incomplete optimisation will be retained*.
+That means that even if you have found a point that is substantially better than the initial point, it will not be saved.
 
-However, most exceptions will *not* preserve any information from the function evaluations performed so far. If you want to (for example) terminate *and* return the best point found so far, please:
+If you want to (for example) terminate *and* return the best point found so far, please do the following:
 
  1. Use the Nelder–Mead or MDS optimisers. (This behaviour is not possible with BOBYQA as the optimiser is provided by an external package, not built into POISE.)
 
  2. Raise a ``CostFunctionError`` instead of any other exception (such as ``ValueError``).
 
-There are two main patterns of usage here.
-The first is if you simply want to stop the optimisation right away and discard the last point which caused a CostFunctionError to be raised.
-In that case, simply raise an error with an appropriate message::
+``CostFunctionError`` takes up to 2 arguments: the number of arguments to supply depends on whether you want to include the last point which caused the error to be raised.
+
+If you want to discard the last point, i.e. just stop the optimisation right away, then raise a ``CostFunctionError`` with just 1 argument. The argument should be the message that you want to display to the user::
 
     def cost_function():
         cost_fn_value = foo()   # whatever calculation you want here
@@ -121,7 +124,7 @@ In that case, simply raise an error with an appropriate message::
            raise CostFunctionError("Some bad thing happened!")
         return cost_fn_value
 
-The string that is returned will be displayed to the user, so it is possible to use this string to show the user helpful information (further steps to take, or the value of the cost function, for example).
+It is possible, and probably advisable, to use this string to show the user helpful information (further steps to take, or the value of the cost function, for example).
 
 Alternatively, you may want the current point (and the corresponding cost function value) to be saved as part of the optimisation.
 For example, it may be the case that a certain threshold is "good enough" for the cost function and any value below that is acceptable.
@@ -131,7 +134,8 @@ To do so, pass the value of the cost function as the *second* parameter when rai
     def cost_function():
         cost_fn_value = foo()   # whatever calculation you want here
         if cost_fn_value < threshold:
-           raise CostFunctionError("Some bad thing happened!", cost_fn_value)
+           raise CostFunctionError("The cost function is below the threshold.",
+                                   cost_fn_value)
         # Note that we still need the return statement, because it will be used
         # if cost_fn_value is greater than the threshold.
         return cost_fn_value
