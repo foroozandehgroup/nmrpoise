@@ -61,7 +61,7 @@ However, as we wrote in the paper, it tends to provide a much more accurate resu
 In practice, we’ve already used it many times to calibrate <code class="docutils literal notranslate"><span class="pre">p1</span></code> before running other experiments.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This AU programme can be installed by typing <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">--install</span> <span class="pre">p1</span></code> into the TopSpin command-line <em>after</em> installing POISE.</p>
+<p>This AU programme comes installed with POISE. However, you must create the <code class="docutils literal notranslate"><span class="pre">p1cal</span></code> routine before you can use this. Please see <a class="reference internal" href="../routines/"><span class="doc">Setting up a Routine</span></a> for a full walkthrough.</p>
 </div>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">GETCURDATA</span>
 <span class="kt">int</span> <span class="n">old_expno</span> <span class="o">=</span> <span class="n">expno</span><span class="p">;</span>
@@ -138,23 +138,21 @@ In practice, we’ve already used it many times to calibrate <code class="docuti
 </pre></div>
 </div>
 </div>
-<div class="section" id="a-helpful-trick">
-<h2>A helpful trick<a class="headerlink" href="#a-helpful-trick" title="Permalink to this headline">¶</a></h2>
-<p>POISE itself is a Python programme which calls an AU programme.
-When incorporating POISE inside another script, it can become <em>very</em> difficult to terminate the entire thing as there are several nested loops in which scripts are being run.
-So, for example, you can kill the top-level script using TopSpin’s <code class="docutils literal notranslate"><span class="pre">kill</span></code> command.
-However, that won’t kill POISE itself, and so it will keep acquiring spectra, etc.</p>
-<p>(If anybody has a better idea please let us know. As far as we can tell, this is a necessary limitation of the TopSpin ecosystem.)</p>
-<p>Anyway, we deal with this using a trick involving the <code class="docutils literal notranslate"><span class="pre">TI</span></code> TopSpin parameter, which can be any arbitrary string.
-POISE, upon successful function evaluation, will store the value of the cost function in the <code class="docutils literal notranslate"><span class="pre">TI</span></code> parameter.
+<div class="section" id="terminating-scripts-which-call-poise">
+<h2>Terminating scripts which call POISE<a class="headerlink" href="#terminating-scripts-which-call-poise" title="Permalink to this headline">¶</a></h2>
+<p>So far we have seen how POISE can be included inside an AU programme or a Python script in TopSpin (a “parent script”).
+One problem that we haven’t dealt with yet is how to kill the parent script when POISE errors out.
+In general, if POISE is called via <code class="docutils literal notranslate"><span class="pre">XCMD(poise</span> <span class="pre">...)</span></code>, then even if POISE fails, the parent script will continue running.</p>
+<p>One way to deal with this is to use a trick involving the <code class="docutils literal notranslate"><span class="pre">TI</span></code> TopSpin parameter, which can be set to any arbitrary string.
+POISE, upon successful termination, will store the value of the cost function in the <code class="docutils literal notranslate"><span class="pre">TI</span></code> parameter.
 If it doesn’t successfully run (for example if a requested routine or cost function is not found, or some other error), then <code class="docutils literal notranslate"><span class="pre">TI</span></code> will be left untouched.</p>
 <p>In order to detect when POISE fails from the top-level script, we therefore:</p>
 <ol class="arabic simple">
-<li><p>Set <code class="docutils literal notranslate"><span class="pre">TI</span></code> to be blank. Please read the note below.</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">TI</span></code> to be equal to some sentinel value, i.e. any string whose exact value is just used as a marker. Note that this should not be a numeric value. You can set it to be blank if you like, but please read the note below.</p></li>
 </ol>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>In an AU or Python programme, you have to set <code class="docutils literal notranslate"><span class="pre">TI</span></code> to be a non-empty string that contains only whitespace. For example:</p>
+<p>In an AU or Python programme, to set a parameter to a blank value, you have to set it to be a non-empty string that contains only whitespace. For example, in a Python script:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;TI&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>   <span class="c1"># this will work</span>
 <span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;TI&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>    <span class="c1"># this will NOT work!</span>
 </pre></div>
@@ -166,25 +164,20 @@ The same applies to the <code class="docutils literal notranslate"><span class="
 </div>
 <ol class="arabic simple" start="2">
 <li><p>Run POISE.</p></li>
-<li><p>Check if <code class="docutils literal notranslate"><span class="pre">TI</span></code> is an empty string. If it is, then quit unceremoniously with an error message of your choice.</p></li>
+<li><p>Check if <code class="docutils literal notranslate"><span class="pre">TI</span></code> is equal to that sentinel value. If it is, then quit unceremoniously with an error message of your choice.</p></li>
 </ol>
-<p>You can see this strategy in action in the first part of the <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/py/dosy_opt.py">DOSY optimisation script</a> (where we optimise the diffusion delay):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">msg_nonmodal</span><span class="p">(</span><span class="s2">&quot;dosy_opt: optimising diffusion delay...&quot;</span><span class="p">)</span>
-<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;poise_1d&quot;</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="n">WAIT_TILL_DONE</span><span class="p">)</span>
+<p>Briefly, here is an example of this strategy in action.
+We show a Python script here, but the AU script is essentially the same, just with different function names.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;TI&quot;</span><span class="p">,</span> <span class="s2">&quot;poise&quot;</span><span class="p">)</span>  <span class="c1"># here &quot;poise&quot; serves as the sentinel value.</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;poise p1cal -a bobyqa -q&quot;</span><span class="p">)</span>
 
-<span class="c1"># Set up optimisation expno.</span>
-<span class="n">optimisation_expno</span> <span class="o">=</span> <span class="mi">99999</span>
-<span class="n">optimisation_dataset</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">original_2d_dataset</span><span class="p">)</span>   <span class="c1"># make a copy</span>
-<span class="n">optimisation_dataset</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">optimisation_expno</span><span class="p">)</span>
-<span class="n">NEWDATASET</span><span class="p">(</span><span class="n">optimisation_dataset</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;dosytemp&quot;</span><span class="p">)</span>
-<span class="n">RE</span><span class="p">(</span><span class="n">optimisation_dataset</span><span class="p">)</span>
-<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;PULPROG&quot;</span><span class="p">,</span> <span class="n">pp1d</span><span class="p">)</span>
-<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;PARMODE&quot;</span><span class="p">,</span> <span class="s2">&quot;1D&quot;</span><span class="p">)</span>
-<span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;PPARMOD&quot;</span><span class="p">,</span> <span class="s2">&quot;1D&quot;</span><span class="p">)</span>
+<span class="c1"># Here POISE should be done. If it succeeded then TI will no longer be &quot;poise&quot;.</span>
+<span class="k">if</span> <span class="n">GETPAR</span><span class="p">(</span><span class="s2">&quot;TI&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;poise&quot;</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;POISE failed!&quot;</span><span class="p">)</span>
+
+<span class="c1"># After this you can continue with whatever you wanted to do.</span>
 </pre></div>
 </div>
-<p>You don’t actually have to set it to be blank, of course: it can be any sentinel value you like, as long as it cannot be confused with the value of a cost function.
-For example, you could set <code class="docutils literal notranslate"><span class="pre">TI</span></code> to be the string <code class="docutils literal notranslate"><span class="pre">&quot;ILoveTopSpin&quot;</span></code> before the optimisation, then after that check whether it is still <code class="docutils literal notranslate"><span class="pre">&quot;ILoveTopSpin&quot;</span></code>.</p>
 </div>
 </div>
 
@@ -213,7 +206,7 @@ For example, you could set <code class="docutils literal notranslate"><span clas
 <li class="toctree-l1 current"><a class="current reference internal" href="#">POISE under automation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#basics">Basics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#a-simple-ish-example">A simple(ish) example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#a-helpful-trick">A helpful trick</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#terminating-scripts-which-call-poise">Terminating scripts which call POISE</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../costfunctions/">Builtin cost functions</a></li>
@@ -257,7 +250,7 @@ For example, you could set <code class="docutils literal notranslate"><span clas
       &copy;2020, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

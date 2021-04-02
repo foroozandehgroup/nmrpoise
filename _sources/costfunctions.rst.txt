@@ -55,3 +55,15 @@ noe_1d
 Seeks to minimise the intensity of the spectrum, *except* for a region of 50 Hz centred on the parameter ``SPOFFS2`` (which corresponds to the frequency of the selective pulse).
 
 Since NOE crosspeaks are typically negative (and ``apk`` typically phases them to be so), this essentially seeks to maximise the intensity of the crosspeaks.
+
+Please see the POISE paper for example usage.
+
+
+epsi_gradient_drift
+===================
+
+Performs EPSI processing on a 1D FID, and seeks to minimise the 'drift' seen in the echo positions.
+This is only valid when the echo locations are *supposed* to be constant, e.g. when there is no indirect-dimension evolution period (otherwise, echoes will be observed at indirect-dimension frequencies).
+This is to be used for optimising the positive/negative gradient balance in EPSI acquisitions.
+
+Please see the POISE paper for example usage.

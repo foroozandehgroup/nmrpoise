@@ -48,15 +48,17 @@ Secondly, any cost functions defined in <code class="docutils literal notranslat
 <div class="section" id="the-rules-for-cost-functions">
 <h2>The rules for cost functions<a class="headerlink" href="#the-rules-for-cost-functions" title="Permalink to this headline">¶</a></h2>
 <p>Cost functions are defined as a standard Python 3 function which takes no parameters and returns a float (the value of the cost function).</p>
-<p>Do write a useful docstring if you can: this docstring will be shown to the user when they type <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">-l</span></code> (which lists all available cost functions and routines).</p>
-<p>Also, you should <em>never</em> print anything inside a cost function directly to <code class="docutils literal notranslate"><span class="pre">stdout</span></code>.
-That will cause the optimisation to stop.
-If you want to do some debugging, read on — there’s a function for that.</p>
-<p>That’s it!</p>
-<p>Of course, it’s quite useless saying that without telling you how to (for example) access the spectrum that’s being optimised.
-The way this is done is by using several variables inside the class <code class="docutils literal notranslate"><span class="pre">_g</span></code>, which is imported from <code class="docutils literal notranslate"><span class="pre">shared.py</span></code>.
-These global variables provide information about the current optimisation.
-For example, using <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code> you can find the path of the real spectrum, then parse the file to get the spectrum as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref any docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> (for example).</p>
+<ol class="arabic simple">
+<li><p><strong>Do write a useful docstring if possible</strong>: this docstring will be shown to the user when they type <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">-l</span></code> into TopSpin (which lists all available cost functions and routines).</p></li>
+<li><p><strong>The spectrum under optimisation, as well as acquisition parameters, can be accessed via helper functions.</strong> These are described more fully below.</p></li>
+<li><p><strong>Never print anything inside a cost function directly to stdout</strong>. This will cause the optimisation to stop. If you want to perform debugging, use the <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.log" title="nmrpoise.poise_backend.cfhelpers.log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">log</span></code></a> function described below.</p></li>
+<li><p><strong>To terminate the optimisation prematurely, raise CostFunctionError().</strong> See below for more information.</p></li>
+</ol>
+</div>
+<div class="section" id="accessing-spectra-and-parameters">
+<h2>Accessing spectra and parameters<a class="headerlink" href="#accessing-spectra-and-parameters" title="Permalink to this headline">¶</a></h2>
+<p>The most primitive way of accessing “outside” information is through the class <code class="docutils literal notranslate"><span class="pre">_g</span></code>, which is imported from <code class="docutils literal notranslate"><span class="pre">shared.py</span></code> and contains a series of global variables reflecting the current optimisation.
+For example, <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code> is the path to the procno folder: you can read and parse the <code class="docutils literal notranslate"><span class="pre">1r</span></code> file inside this to get the real spectrum as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref any docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> (for example).</p>
 <dl class="py class">
 <dt id="nmrpoise.poise_backend.shared._g">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.shared.</span></code><code class="sig-name descname"><span class="pre">_g</span></code><a class="headerlink" href="#nmrpoise.poise_backend.shared._g" title="Permalink to this definition">¶</a></dt>
@@ -92,19 +94,16 @@ to the values of <code class="docutils literal notranslate"><span class="pre">F1
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="helper-methods">
-<h2>Helper methods<a class="headerlink" href="#helper-methods" title="Permalink to this headline">¶</a></h2>
-<p>If you’ve looked inside the <code class="docutils literal notranslate"><span class="pre">costfunctions.py</span></code> file, you’ve probably realised that none of them actually use these variables directly.
-Instead, we have a bunch of helper methods that use these to get more useful information directly.
-All of these methods are stored inside <code class="docutils literal notranslate"><span class="pre">cfhelpers.py</span></code> and are already imported.</p>
+<p>However, this is quite tedious and error-prone, so there are a number of helper methods which use these primitives.
+All the existing cost functions (inside <code class="docutils literal notranslate"><span class="pre">costfunctions.py</span></code>) only use these helper methods.
+All of these methods are stored inside <code class="docutils literal notranslate"><span class="pre">cfhelpers.py</span></code> and are already imported by default.</p>
 <p>The ones you are likely to use are the following:</p>
 <dl class="py function">
 <dt id="nmrpoise.poise_backend.cfhelpers.make_p_spec">
 <code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">make_p_spec</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.make_p_spec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a> object corresponding to the procno folder
 <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;/&lt;expno&gt;/pdata/&lt;procno&gt;</span></code>. If parameters are not passed, they are
-inherited from the currently active spectrum (_g.p_spectrum).</p>
+inherited from the currently active spectrum (<code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 <p>Thus, for example, <code class="docutils literal notranslate"><span class="pre">make_p_spec(expno=1,</span> <span class="pre">procno=1)</span></code> returns a path to the
 spectrum with EXPNO 1 and PROCNO 1, but with the same name as the currently
 active spectrum.</p>
@@ -130,20 +129,17 @@ folders).</p>
 <p><br /> </p>
 <dl class="py function">
 <dt id="nmrpoise.poise_backend.cfhelpers.get1d_fid">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">get1d_fid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_fid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">get1d_fid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remove_grpdly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_fid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the FID as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>.</p>
-<p>Note that this does <em>not</em> modify the “group delay” at the beginning of the
-FID.</p>
-<p>Also, Bruker spectrometers record real and imaginary points in a sequential
-fashion. Therefore, each imaginary point in the ndarray is actually
-measured <code class="docutils literal notranslate"><span class="pre">DW</span></code> <em>after</em> the corresponding real point. When Fourier
-transforming, this can be accounted for by using fftshift().</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
+<dt><strong>remove_grpdly</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to remove the group delay (to be precise, it is shifted to the
+end of the FID). Defaults to True.</p>
+</dd>
 <dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. (The FID is taken from the expno
-folder two levels up.) Leave blank to use the currently active spectrum
-(i.e. _g.p_spectrum).</p>
+folder two levels up.) Defaults to the currently active spectrum (i.e.
+<code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 </dd>
 </dl>
 </dd>
@@ -165,7 +161,8 @@ TopSpin’s <code class="docutils literal notranslate"><span class="pre">NC_PROC
 <p>Note that this function only works for 1D spectra. It does <em>not</em> work for
 1D projections of 2D spectra. If you want to work with projections, you can
 use <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="nmrpoise.poise_backend.cfhelpers.get2d_rr"><code class="xref any py py-func docutils literal notranslate"><span class="pre">get2d_rr</span></code></a> to get the full 2D spectrum, then manipulate it using numpy
-functions as appropriate. Examples can be found in the docs.</p>
+functions as appropriate. A documented example can be found in the
+<code class="docutils literal notranslate"><span class="pre">asaphsqc()</span></code> function in <code class="docutils literal notranslate"><span class="pre">costfunctions.py</span></code> (commented out by default).</p>
 <p>The <em>bounds</em> parameter may be specified in the following formats:</p>
 <blockquote>
 <div><ul class="simple">
@@ -182,8 +179,8 @@ examples. If no bounds are provided, uses the <code class="docutils literal notr
 processing parameters, which can be specified via <code class="docutils literal notranslate"><span class="pre">dpl</span></code>. If these are
 not specified, defaults to the whole spectrum.</p>
 </dd>
-<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Leave blank to use the currently
-active spectrum (i.e. _g.p_spectrum).</p>
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
+spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 </dd>
 </dl>
 </dd>
@@ -233,8 +230,8 @@ above for examples. If no bounds are provided, uses the <code class="docutils li
 <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">F2P</span></code> processing parameters, which can be specified via <code class="docutils literal notranslate"><span class="pre">dpl</span></code>. If
 these are not specified, defaults to the whole spectrum.</p>
 </dd>
-<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Leave blank to use the currently
-active spectrum (i.e. _g.p_spectrum).</p>
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
+spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 </dd>
 </dl>
 </dd>
@@ -281,8 +278,8 @@ for both 1D and 2D spectra (see return type below), but nothing higher.</p>
 <dd class="field-odd"><dl>
 <dt><strong>par</strong><span class="classifier">str</span></dt><dd><p>Name of the parameter.</p>
 </dd>
-<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Leave blank to use the currently
-active spectrum (i.e. _g.p_spectrum).</p>
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
+spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 </dd>
 </dl>
 </dd>
@@ -305,15 +302,12 @@ dimension), getpar() returns a float.</p>
 <dt id="nmrpoise.poise_backend.cfhelpers.getndim">
 <code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">getndim</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.getndim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Obtains the dimensionality of the spectrum, i.e. the status value of
-PARMODE. Note that Bruker uses PARMODE=n for (n+1)D spectra, whereas this
-function simply returns (n+1) (as an int).</p>
-<p>Note that we call _get_acqu_par() instead of getpar() to avoid an infinite
-loop.</p>
+PARMODE, plus one (becaus PARMODE is 0 for 1D spectra, etc.)</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Leave blank to use the currently
-active spectrum (i.e. _g.p_spectrum).</p>
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
+spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 </dd>
 </dl>
 </dd>
@@ -328,17 +322,32 @@ active spectrum (i.e. _g.p_spectrum).</p>
 
 <p><br /> </p>
 <dl class="py function">
+<dt id="nmrpoise.poise_backend.cfhelpers.getnfev">
+<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">getnfev</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.getnfev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of NMR spectra evaluated so far. This will be equal to 1
+(not 0) the first time the cost function is called, since the cost function
+is only called after the NMR spectrum has been acquired.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<p>As noted above, printing anything to <code class="docutils literal notranslate"><span class="pre">stdout</span></code> will cause the optimisation to crash.
+The reason for this is because <code class="docutils literal notranslate"><span class="pre">stdout</span></code> is reserved for communication between the POISE backend (the Python 3 component) and frontend (which runs in TopSpin).
+Please use <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.log" title="nmrpoise.poise_backend.cfhelpers.log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">log()</span></code></a> instead, which will print to the <code class="docutils literal notranslate"><span class="pre">poise.log</span></code> file in the expno folder.
+It works in exactly the same way as the familiar <code class="docutils literal notranslate"><span class="pre">print()</span></code>, and accepts the same kind of arguments.</p>
+<dl class="py function">
 <dt id="nmrpoise.poise_backend.cfhelpers.log">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">log</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.log" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prints a string to the poise.log file. If this is called from inside a cost
-function, the text is printed <em>before</em> the cost function is evaluated, so
-will appear above the corresponding function evaluation.</p>
+<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">log</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints something to the poise.log file.</p>
+<p>If this is called from inside a cost function, the text is printed <em>before</em>
+the cost function is evaluated, so will appear above the corresponding
+function evaluation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>s</strong><span class="classifier">object</span></dt><dd><p>The object to be printed. Typically a string, but since this is just
-passed directly to print(), anything with a __str__() method can be
-used.</p>
+<dt><strong>args</strong></dt><dd><p>The arguments that <code class="docutils literal notranslate"><span class="pre">log()</span></code> takes are exactly the same as those of
+<code class="docutils literal notranslate"><span class="pre">print()</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -350,7 +359,44 @@ used.</p>
 </dl>
 </dd></dl>
 
-<p><br /> </p>
+</div>
+<div class="section" id="premature-termination">
+<h2>Premature termination<a class="headerlink" href="#premature-termination" title="Permalink to this headline">¶</a></h2>
+<p>In order to terminate an optimisation prematurely, you can raise any exception you like, for example with <code class="docutils literal notranslate"><span class="pre">raise</span> <span class="pre">ValueError</span></code>.
+POISE will stop the optimisation, and the error will be displayed in TopSpin.
+The drawback of this naive approach is that <em>no information from the incomplete optimisation will be retained</em>.
+That means that even if you have found a point that is substantially better than the initial point, it will not be saved.</p>
+<p>If you want to (for example) terminate <em>and</em> return the best point found so far, please do the following:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Use the Nelder–Mead or MDS optimisers. (This behaviour is not possible with BOBYQA as the optimiser is provided by an external package, not built into POISE.)</p></li>
+<li><p>Raise a <code class="docutils literal notranslate"><span class="pre">CostFunctionError</span></code> instead of any other exception (such as <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>).</p></li>
+</ol>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">CostFunctionError</span></code> takes up to 2 arguments: the number of arguments to supply depends on whether you want to include the last point which caused the error to be raised.</p>
+<p>If you want to discard the last point, i.e. just stop the optimisation right away, then raise a <code class="docutils literal notranslate"><span class="pre">CostFunctionError</span></code> with just 1 argument. The argument should be the message that you want to display to the user:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cost_function</span><span class="p">():</span>
+    <span class="n">cost_fn_value</span> <span class="o">=</span> <span class="n">foo</span><span class="p">()</span>   <span class="c1"># whatever calculation you want here</span>
+    <span class="k">if</span> <span class="n">some_bad_condition</span><span class="p">:</span>
+       <span class="k">raise</span> <span class="n">CostFunctionError</span><span class="p">(</span><span class="s2">&quot;Some bad thing happened!&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cost_fn_value</span>
+</pre></div>
+</div>
+<p>It is possible, and probably advisable, to use this string to show the user helpful information (further steps to take, or the value of the cost function, for example).</p>
+<p>Alternatively, you may want the current point (and the corresponding cost function value) to be saved as part of the optimisation.
+For example, it may be the case that a certain threshold is “good enough” for the cost function and any value below that is acceptable.
+In that situation, you would want to raise CostFunctionError once the cost function goes below that threshold, but <em>also</em> save that point as the best value.
+To do so, pass the value of the cost function as the <em>second</em> parameter when raising CostFunctionError:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cost_function</span><span class="p">():</span>
+    <span class="n">cost_fn_value</span> <span class="o">=</span> <span class="n">foo</span><span class="p">()</span>   <span class="c1"># whatever calculation you want here</span>
+    <span class="k">if</span> <span class="n">cost_fn_value</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
+       <span class="k">raise</span> <span class="n">CostFunctionError</span><span class="p">(</span><span class="s2">&quot;The cost function is below the threshold.&quot;</span><span class="p">,</span>
+                               <span class="n">cost_fn_value</span><span class="p">)</span>
+    <span class="c1"># Note that we still need the return statement, because it will be used</span>
+    <span class="c1"># if cost_fn_value is greater than the threshold.</span>
+    <span class="k">return</span> <span class="n">cost_fn_value</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
@@ -389,7 +435,9 @@ This file also contains a number of more specialised cost functions, which were 
 <li class="toctree-l1"><a class="reference internal" href="../au/">Builtin AU programmes</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Custom cost functions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#the-rules-for-cost-functions">The rules for cost functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helper-methods">Helper methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#accessing-spectra-and-parameters">Accessing spectra and parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#premature-termination">Premature termination</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
 </ul>
 </li>
@@ -431,7 +479,7 @@ This file also contains a number of more specialised cost functions, which were 
       &copy;2020, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

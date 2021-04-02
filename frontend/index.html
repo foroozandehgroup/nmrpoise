@@ -40,18 +40,23 @@ You can also access short descriptions of these by typing <code class="docutils 
 <div class="section" id="general-options">
 <h2>General options<a class="headerlink" href="#general-options" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">--create</span> <span class="pre">NAME</span> <span class="pre">PARAM</span> <span class="pre">MIN</span> <span class="pre">MAX</span> <span class="pre">INIT</span> <span class="pre">TOL</span> <span class="pre">CF</span> <span class="pre">AU</span></code></p>
-<p>Create a new named routine. This can only handle one-parameter routines; if you want a multiple-parameter routine, please use the GUI. The AU programme must be specified, it can’t be left blank like in the GUI. Also, short forms such as <code class="docutils literal notranslate"><span class="pre">4u</span></code> for 4 µs are not allowed here.</p>
+<blockquote>
+<div><p>Create a new named routine. This can only handle one-parameter routines; if you want a multiple-parameter routine, please use the GUI. The AU programme must be specified, it can’t be left blank like in the GUI. Also, short forms such as <code class="docutils literal notranslate"><span class="pre">4u</span></code> for 4 µs are not allowed here.</p>
+</div></blockquote>
 <p><code class="docutils literal notranslate"><span class="pre">--delete</span> <span class="pre">DELETE</span></code></p>
-<p>Delete a named routine. For example, run <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">--delete</span> <span class="pre">p1cal</span></code> to delete a routine named <code class="docutils literal notranslate"><span class="pre">p1cal</span></code>.</p>
+<blockquote>
+<div><p>Delete a named routine. For example, run <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">--delete</span> <span class="pre">p1cal</span></code> to delete a routine named <code class="docutils literal notranslate"><span class="pre">p1cal</span></code>.</p>
 <p>If you want to edit a routine, you can just re-create a new routine with the same name: the old one will be overwritten.</p>
+</div></blockquote>
 <p><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--help</span></code></p>
-<p>Show a help message then exit.</p>
-<p><code class="docutils literal notranslate"><span class="pre">--install</span></code></p>
-<p>For ultra-quick installation of p1 or DOSY optimisation scripts (see <a class="reference internal" href="../"><span class="doc">POISE User Guide</span></a>). Should not be otherwise used.</p>
+<blockquote>
+<div><p>Show a help message then exit.</p>
+</div></blockquote>
 <p><code class="docutils literal notranslate"><span class="pre">--kill</span></code></p>
-<p>Kill POISE backends that may still be running.</p>
+<blockquote>
+<div><p>Kill POISE backends that may still be running.</p>
 <p>Running <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">--kill</span></code> should be the first course of action if you find unusual behaviour after terminating a POISE optimisation (e.g. being unable to delete a log file as it is still in use).
-If this does not work, then you may need to manually kill the Python processes: for example, on Windows PowerShell, run:</p>
+If this does not work (very rare), then you may need to manually kill the Python processes: for example, on Windows PowerShell, run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Stop</span><span class="o">-</span><span class="n">Process</span> <span class="o">-</span><span class="n">name</span> <span class="n">python</span>
 </pre></div>
 </div>
@@ -59,30 +64,41 @@ If this does not work, then you may need to manually kill the Python processes: 
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">killall</span> <span class="o">-</span><span class="mi">9</span> <span class="n">python</span>
 </pre></div>
 </div>
-<p>(replace <code class="docutils literal notranslate"><span class="pre">python</span></code> with <code class="docutils literal notranslate"><span class="pre">python3</span></code> as appropriate for your system).</p>
+<p>(replace <code class="docutils literal notranslate"><span class="pre">python</span></code> with <code class="docutils literal notranslate"><span class="pre">python3</span></code> as appropriate for your system). If you find that you need to do this, and can reproduce the error, please do <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/issues">submit a bug report</a> or drop us an email.</p>
+</div></blockquote>
 <p><code class="docutils literal notranslate"><span class="pre">-l,</span> <span class="pre">--list</span></code></p>
-<p>List all available routines and their parameters, then exit.</p>
+<blockquote>
+<div><p>List all available cost functions, as well as all available routines and their parameters.</p>
+</div></blockquote>
 </div>
 <div class="section" id="options-for-running-optimisations">
 <h2>Options for running optimisations<a class="headerlink" href="#options-for-running-optimisations" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">-a</span> <span class="pre">ALG,</span> <span class="pre">--algorithm</span> <span class="pre">ALG</span></code></p>
-<p>Use the algorithm ALG for the optimisation.
+<blockquote>
+<div><p>Use the algorithm ALG for the optimisation.
 ALG can be one of <code class="docutils literal notranslate"><span class="pre">nm</span></code> (for Nelder–Mead), <code class="docutils literal notranslate"><span class="pre">mds</span></code> (for multidirectional search), or <code class="docutils literal notranslate"><span class="pre">bobyqa</span></code> (for Py-BOBYQA).
 The default is <code class="docutils literal notranslate"><span class="pre">nm</span></code>.</p>
+</div></blockquote>
 <p><code class="docutils literal notranslate"><span class="pre">--maxfev</span> <span class="pre">MAXFEV</span></code></p>
-<p>Maximum function evaluations to allow (i.e. maximum number of spectra to acquire during the optimisation run).
+<blockquote>
+<div><p>Maximum function evaluations to allow (i.e. maximum number of spectra to acquire during the optimisation run).
 If the optimisation reaches the limit, it will terminate, reporting the best value so far as the ‘optimum’.</p>
 <p>This is useful for enforcing an upper limit on the time taken to perform an optimisation.
 Since by far the majority of the time is spent on acquiring the NMR spectra, <code class="docutils literal notranslate"><span class="pre">MAXFEV</span></code> evaluations will simply take roughly <code class="docutils literal notranslate"><span class="pre">MAXFEV</span> <span class="pre">*</span> <span class="pre">t</span></code> time to run (where <code class="docutils literal notranslate"><span class="pre">t</span></code> is the time taken for one spectrum — you can find this out using TopSpin’s <code class="docutils literal notranslate"><span class="pre">expt</span></code> command).</p>
 <p>If you don’t want to have a limit on function evaluations, just don’t use this flag, or pass the value of 0.
 Technically, there is always a hard limit on the number of function evaluations (which is 500 times the number of parameters being optimised).
 However, it is probably almost impossible to run into that hard limit.</p>
+</div></blockquote>
 <p><code class="docutils literal notranslate"><span class="pre">-q,</span> <span class="pre">--quiet</span></code></p>
-<p>Don’t display the final popup at the end of the optimisation informing the user that the optimisation is done.
+<blockquote>
+<div><p>Don’t display the final popup at the end of the optimisation informing the user that the optimisation is done.
 This is mostly a matter of taste, as the final popup does not block any subsequent commands from being executed.</p>
+</div></blockquote>
 <p><code class="docutils literal notranslate"><span class="pre">-s,</span> <span class="pre">--separate</span></code></p>
-<p>Use a separate expno for each function evaluation.
+<blockquote>
+<div><p>Use a separate expno for each function evaluation.
 Note that if POISE runs into an expno which already exists, it will terminate with an error!</p>
+</div></blockquote>
 </div>
 </div>
 
@@ -154,7 +170,7 @@ Note that if POISE runs into an expno which already exists, it will terminate wi
       &copy;2020, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

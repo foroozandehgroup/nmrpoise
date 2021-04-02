@@ -72,6 +72,14 @@ Because the real spectrum can have negative peaks, this essentially tries to max
 <h2>noe_1d<a class="headerlink" href="#noe-1d" title="Permalink to this headline">¶</a></h2>
 <p>Seeks to minimise the intensity of the spectrum, <em>except</em> for a region of 50 Hz centred on the parameter <code class="docutils literal notranslate"><span class="pre">SPOFFS2</span></code> (which corresponds to the frequency of the selective pulse).</p>
 <p>Since NOE crosspeaks are typically negative (and <code class="docutils literal notranslate"><span class="pre">apk</span></code> typically phases them to be so), this essentially seeks to maximise the intensity of the crosspeaks.</p>
+<p>Please see the POISE paper for example usage.</p>
+</div>
+<div class="section" id="epsi-gradient-drift">
+<h2>epsi_gradient_drift<a class="headerlink" href="#epsi-gradient-drift" title="Permalink to this headline">¶</a></h2>
+<p>Performs EPSI processing on a 1D FID, and seeks to minimise the ‘drift’ seen in the echo positions.
+This is only valid when the echo locations are <em>supposed</em> to be constant, e.g. when there is no indirect-dimension evolution period (otherwise, echoes will be observed at indirect-dimension frequencies).
+This is to be used for optimising the positive/negative gradient balance in EPSI acquisitions.</p>
+<p>Please see the POISE paper for example usage.</p>
 </div>
 </div>
 
@@ -105,6 +113,7 @@ Because the real spectrum can have negative peaks, this essentially tries to max
 <li class="toctree-l2"><a class="reference internal" href="#maxrealint">maxrealint</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#zerorealint">zerorealint</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#noe-1d">noe_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#epsi-gradient-drift">epsi_gradient_drift</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../au/">Builtin AU programmes</a></li>
@@ -147,7 +156,7 @@ Because the real spectrum can have negative peaks, this essentially tries to max
       &copy;2020, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

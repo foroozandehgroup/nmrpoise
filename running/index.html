@@ -70,15 +70,14 @@ Don’t forget that for this particular optimisation, you will have to divide th
 <h2>Parsing the log<a class="headerlink" href="#parsing-the-log" title="Permalink to this headline">¶</a></h2>
 <p>If you are interested in analysing data from (possibly multiple) optimisation runs, all information is logged in a <code class="docutils literal notranslate"><span class="pre">poise.log</span></code> file.
 This log file is stored inside the expno folder (the post-optimisation popup also tells you where it can be found — see above for an example).
-It can be parsed using a Python 3 script:</p>
+Some of the key information inside the <code class="docutils literal notranslate"><span class="pre">poise.log</span></code> file can be extracted in Python:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nmrpoise</span> <span class="kn">import</span> <span class="n">parse_log</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># pass it the path to poise.log, or to the directory containing it</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">parse_log</span><span class="p">(</span><span class="s2">&quot;C:/NMR/data/mfgroup/nmr/poise_demo/1&quot;</span><span class="p">)</span>
 <span class="go">  routine  initial param    lb    ub  tol algorithm     costfn    auprog  optimum         fbest  nfev  time</span>
 <span class="go">0   p1cal     48.0  [p1]  40.0  56.0  0.2        nm  minabsint  poise_1d   48.125  6.849146e+06    10    77</span>
 </pre></div>
 </div>
-<p><a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.2.2)"><code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> object which contains most of the information in the log file.
+<p><a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.2.3)"><code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> object which contains most of the information in the log file.
 However, this object does not include details of individual cost function evaluations (even though these are fully logged).
 If you want to analyse that data, you will have to write your own function!</p>
 <p>The full documentation for <a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> (which really doesn’t say much more than the previous example) is as follows:</p>
@@ -86,19 +85,19 @@ If you want to analyse that data, you will have to write your own function!</p>
 <dt id="nmrpoise.parse_log">
 <code class="sig-prename descclassname"><span class="pre">nmrpoise.</span></code><code class="sig-name descname"><span class="pre">parse_log</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.parse_log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a poise.log file.</p>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>fname</strong><span class="classifier">(optional) str or pathlib.Path or int</span></dt><dd><p>Path to poise.log file, or the folder containing it (this would be the
-TopSpin EXPNO folder). If not specified assumes the current working
-directory. If passed as an int, assumes “./&lt;fname&gt;” (i.e. expno X in
-the current working directory).</p>
+<dd class="field-odd"><dl>
+<dt><strong>fname</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a> or str or int, optional</span></dt><dd><p>Path to poise.log file, or the folder containing it (this would be the
+TopSpin EXPNO folder). If an int is passed, it is interpreted as the
+string “./&lt;fname&gt;” (i.e.  expno X in the current working directory). If
+not specified, defaults to the current working directory.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>log_df</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>Dataframe with rows corresponding to optimisations which successfully
+<dd class="field-even"><dl>
+<dt><strong>log_df</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></span></dt><dd><p>DataFrame with rows corresponding to optimisations which successfully
 terminated. The time taken is given in seconds.</p>
 </dd>
 </dl>
@@ -184,7 +183,7 @@ We welcome bug reports — please <a class="reference external" href="https://gi
       &copy;2020, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -3,8 +3,6 @@ POISE User Guide
 
 POISE (*Parameter Optimisation by Iterative Spectral Evaluation*) is a Python package for on-the-fly optimisation of NMR parameters in Bruker's TopSpin software.
 
-<citation should be put here>
-
 The code is licensed under `the GNU General Public License v3 <https://www.gnu.org/licenses/gpl-3.0.en.html>`_ and can be found on `GitHub <https://github.com/foroozandehgroup/nmrpoise>`_.
 The latest HTML version of the documentation can always be found at https://foroozandehgroup.github.io/nmrpoise.
 Likewise, the latest PDF version is always at https://foroozandehgroup.github.io/nmrpoise/poise.pdf.

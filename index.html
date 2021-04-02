@@ -34,7 +34,6 @@
   <div class="section" id="poise-user-guide">
 <h1>POISE User Guide<a class="headerlink" href="#poise-user-guide" title="Permalink to this headline">¶</a></h1>
 <p>POISE (<em>Parameter Optimisation by Iterative Spectral Evaluation</em>) is a Python package for on-the-fly optimisation of NMR parameters in Bruker’s TopSpin software.</p>
-<p>&lt;citation should be put here&gt;</p>
 <p>The code is licensed under <a class="reference external" href="https://www.gnu.org/licenses/gpl-3.0.en.html">the GNU General Public License v3</a> and can be found on <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise">GitHub</a>.
 The latest HTML version of the documentation can always be found at <a class="reference external" href="https://foroozandehgroup.github.io/nmrpoise">https://foroozandehgroup.github.io/nmrpoise</a>.
 Likewise, the latest PDF version is always at <a class="reference external" href="https://foroozandehgroup.github.io/nmrpoise/poise.pdf">https://foroozandehgroup.github.io/nmrpoise/poise.pdf</a>.</p>
@@ -64,7 +63,7 @@ For example, if somebody else has already set up POISE for you, you can probably
 <li class="toctree-l1"><a class="reference internal" href="automation/">POISE under automation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="automation/#basics">Basics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="automation/#a-simple-ish-example">A simple(ish) example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="automation/#a-helpful-trick">A helpful trick</a></li>
+<li class="toctree-l2"><a class="reference internal" href="automation/#terminating-scripts-which-call-poise">Terminating scripts which call POISE</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="costfunctions/">Builtin cost functions</a><ul>
@@ -74,6 +73,7 @@ For example, if somebody else has already set up POISE for you, you can probably
 <li class="toctree-l2"><a class="reference internal" href="costfunctions/#maxrealint">maxrealint</a></li>
 <li class="toctree-l2"><a class="reference internal" href="costfunctions/#zerorealint">zerorealint</a></li>
 <li class="toctree-l2"><a class="reference internal" href="costfunctions/#noe-1d">noe_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="costfunctions/#epsi-gradient-drift">epsi_gradient_drift</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="au/">Builtin AU programmes</a><ul>
@@ -83,7 +83,9 @@ For example, if somebody else has already set up POISE for you, you can probably
 </li>
 <li class="toctree-l1"><a class="reference internal" href="customcf/">Custom cost functions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="customcf/#the-rules-for-cost-functions">The rules for cost functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="customcf/#helper-methods">Helper methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="customcf/#accessing-spectra-and-parameters">Accessing spectra and parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="customcf/#logging">Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="customcf/#premature-termination">Premature termination</a></li>
 <li class="toctree-l2"><a class="reference internal" href="customcf/#examples">Examples</a></li>
 </ul>
 </li>
@@ -158,7 +160,7 @@ For example, if somebody else has already set up POISE for you, you can probably
       &copy;2020, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

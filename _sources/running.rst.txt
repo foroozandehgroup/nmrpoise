@@ -48,10 +48,9 @@ Parsing the log
 
 If you are interested in analysing data from (possibly multiple) optimisation runs, all information is logged in a ``poise.log`` file.
 This log file is stored inside the expno folder (the post-optimisation popup also tells you where it can be found — see above for an example).
-It can be parsed using a Python 3 script::
+Some of the key information inside the ``poise.log`` file can be extracted in Python::
 
    >>> from nmrpoise import parse_log
-   >>> # pass it the path to poise.log, or to the directory containing it
    >>> parse_log("C:/NMR/data/mfgroup/nmr/poise_demo/1")
      routine  initial param    lb    ub  tol algorithm     costfn    auprog  optimum         fbest  nfev  time
    0   p1cal     48.0  [p1]  40.0  56.0  0.2        nm  minabsint  poise_1d   48.125  6.849146e+06    10    77
