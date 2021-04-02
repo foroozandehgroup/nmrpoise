@@ -73,13 +73,23 @@ html_theme = 'alabaster'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+html_static_path = ['_templates']
 
 html_theme_options = {
     "page_width": "1000px",
     "sidebar_width": "250px",
 }
 
+html_sidebars = {
+    '**': [
+        'about.html',
+        'github_link.html',
+        'navigation.html',
+        'relations.html',
+        'searchbox.html',
+        'donate.html',
+    ]
+}
 
 # -- Options for LaTeX output ------------------------------------------------
 

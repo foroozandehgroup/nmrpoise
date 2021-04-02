@@ -4,8 +4,6 @@ __pycache__
 build/
 dist/
 docs/dirhtml/
-docs/_static/
-docs/_templates/
 docs/latex/
 nmrpoise.egg-info/
 .tox
