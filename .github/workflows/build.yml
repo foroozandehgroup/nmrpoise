@@ -1,5 +1,5 @@
 name: build
-on: [workflow_dispatch]
+on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,8 +29,7 @@ jobs:
       run: |
         pytest -v --cov=nmrpoise/poise_backend --cov-report=xml
 
-    # Uncomment this when repository is made public.
-    # - name: Upload code coverage
-    #   uses: codecov/codecov-action@v1
-    #   with:
-    #     file: ./coverage.xml
+    - name: Upload code coverage
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
