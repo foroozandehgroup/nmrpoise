@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
     <title>Developer notes &#8212; poise  documentation</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
@@ -31,7 +32,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="developer-notes">
+  <section id="developer-notes">
 <h1>Developer notes<a class="headerlink" href="#developer-notes" title="Permalink to this headline">¶</a></h1>
 <p>POISE does not contain all that much code.
 However, if you are thinking of modifying it, it helps to have an understanding of the distinction between the <em>frontend</em> and the <em>backend</em>.
@@ -67,7 +68,7 @@ This applies to all files inside the <code class="docutils literal notranslate">
 <p class="admonition-title">Note</p>
 <p>If you really just want to do some quick-and-dirty debugging, you <em>can</em> actually use this behaviour to your advantage. The frontend will echo any “invalid” message it receives from the backend, so if you print some unexpected text from the backend (on purpose), you should see it pop up as a TopSpin message when you run an optimisation. This is slightly less hassle than printing to a file and opening the file.</p>
 </div>
-<div class="section" id="testing">
+<section id="testing">
 <h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
 <p>Tests are carried out using the excellent <a class="reference external" href="https://docs.pytest.org/en/stable/">pytest</a> and <a class="reference external" href="https://tox.readthedocs.io/en/latest/">tox</a> tools.
 To run all tests, simply run:</p>
@@ -86,8 +87,8 @@ If you only have one of these versions, use:</p>
 </pre></div>
 </div>
 <p>The HTML documentation will be built in <code class="docutils literal notranslate"><span class="pre">docs/dirhtml</span></code>, and the PDF documentation in <code class="docutils literal notranslate"><span class="pre">docs/latex</span></code> (this assumes you have a working installation of <code class="docutils literal notranslate"><span class="pre">pdflatex</span></code> on your system).</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
