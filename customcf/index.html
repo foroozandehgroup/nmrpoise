@@ -53,7 +53,7 @@ Secondly, any cost functions defined in <code class="docutils literal notranslat
 <li><p><strong>Do write a useful docstring if possible</strong>: this docstring will be shown to the user when they type <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">-l</span></code> into TopSpin (which lists all available cost functions and routines).</p></li>
 <li><p><strong>The spectrum under optimisation, as well as acquisition parameters, can be accessed via helper functions.</strong> These are described more fully below.</p></li>
 <li><p><strong>Never print anything inside a cost function directly to stdout</strong>. This will cause the optimisation to stop. If you want to perform debugging, use the <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.log" title="nmrpoise.poise_backend.cfhelpers.log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">log</span></code></a> function described below.</p></li>
-<li><p><strong>To terminate the optimisation prematurely, raise CostFunctionError().</strong> See below for more information.</p></li>
+<li><p><strong>To terminate the optimisation prematurely and return the best point found so far, raise CostFunctionError().</strong> See below for more information.</p></li>
 </ol>
 </section>
 <section id="accessing-spectra-and-parameters">
@@ -89,6 +89,14 @@ spectrum this is a tuple of floats (<code class="docutils literal notranslate"><
 to the values of <code class="docutils literal notranslate"><span class="pre">F1P</span></code> in both spectral dimensions.</p>
 </dd>
 <dt><strong>spec_f2p</strong><span class="classifier">float or tuple of float</span></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">F2P</span></code> parameter.</p>
+</dd>
+<dt><strong>xvals</strong><span class="classifier">list of ndarray</span></dt><dd><p>The points sampled during the optimisation, in chronological order.
+These are ndarrays which contain the values of the parameters being
+optimised at each spectrum acquisition. The parameters are ordered in
+the same way as specified in the routine.</p>
+</dd>
+<dt><strong>fvals</strong><span class="classifier">ndarray</span></dt><dd><p>The values of the cost functions calculated at each stage of the
+optimisation.</p>
 </dd>
 </dl>
 </dd>
@@ -367,19 +375,13 @@ function evaluation.</p>
 POISE will stop the optimisation, and the error will be displayed in TopSpin.
 The drawback of this naive approach is that <em>no information from the incomplete optimisation will be retained</em>.
 That means that even if you have found a point that is substantially better than the initial point, it will not be saved.</p>
-<p>If you want to (for example) terminate <em>and</em> return the best point found so far, please do the following:</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li><p>Use the Nelder–Mead or MDS optimisers. (This behaviour is not possible with BOBYQA as the optimiser is provided by an external package, not built into POISE.)</p></li>
-<li><p>Raise a <code class="docutils literal notranslate"><span class="pre">CostFunctionError</span></code> instead of any other exception (such as <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>).</p></li>
-</ol>
-</div></blockquote>
-<p><code class="docutils literal notranslate"><span class="pre">CostFunctionError</span></code> takes up to 2 arguments: the number of arguments to supply depends on whether you want to include the last point which caused the error to be raised.</p>
+<p>If you want to terminate <em>and</em> return the best point found so far, please raise a <code class="docutils literal notranslate"><span class="pre">CostFunctionError</span></code> instead of any other exception (such as <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>).
+<code class="docutils literal notranslate"><span class="pre">CostFunctionError</span></code> takes up to 2 arguments: the number of arguments to supply depends on whether you want to include the final point which caused the error to be raised.</p>
 <p>If you want to discard the last point, i.e. just stop the optimisation right away, then raise a <code class="docutils literal notranslate"><span class="pre">CostFunctionError</span></code> with just 1 argument. The argument should be the message that you want to display to the user:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cost_function</span><span class="p">():</span>
     <span class="n">cost_fn_value</span> <span class="o">=</span> <span class="n">foo</span><span class="p">()</span>   <span class="c1"># whatever calculation you want here</span>
     <span class="k">if</span> <span class="n">some_bad_condition</span><span class="p">:</span>
-       <span class="k">raise</span> <span class="n">CostFunctionError</span><span class="p">(</span><span class="s2">&quot;Some bad thing happened!&quot;</span><span class="p">)</span>
+       <span class="k">raise</span> <span class="n">CostFunctionError</span><span class="p">(</span><span class="s2">&quot;Some bad condition occurred!&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cost_fn_value</span>
 </pre></div>
 </div>
@@ -398,6 +400,12 @@ To do so, pass the value of the cost function as the <em>second</em> parameter w
     <span class="k">return</span> <span class="n">cost_fn_value</span>
 </pre></div>
 </div>
+<p>The value passed as the second argument can in general be any number.
+If you want to make sure that the final point (which raised the CostFunctionError) is <em>always</em> chosen to be the optimal point, then you can do this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">raise</span> <span class="n">CostFunctionError</span><span class="p">(</span><span class="s2">&quot;A message here&quot;</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Because <code class="docutils literal notranslate"><span class="pre">-np.inf</span></code> is smaller than any other possible number, it will always be picked as the “best” point.</p>
 </section>
 <section id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>

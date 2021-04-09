@@ -26,7 +26,7 @@ Cost functions are defined as a standard Python 3 function which takes no parame
 
 3. **Never print anything inside a cost function directly to stdout**. This will cause the optimisation to stop. If you want to perform debugging, use the `log` function described below.
 
-4. **To terminate the optimisation prematurely, raise CostFunctionError().** See below for more information.
+4. **To terminate the optimisation prematurely and return the best point found so far, raise CostFunctionError().** See below for more information.
 
 
 Accessing spectra and parameters
@@ -108,20 +108,15 @@ POISE will stop the optimisation, and the error will be displayed in TopSpin.
 The drawback of this naive approach is that *no information from the incomplete optimisation will be retained*.
 That means that even if you have found a point that is substantially better than the initial point, it will not be saved.
 
-If you want to (for example) terminate *and* return the best point found so far, please do the following:
-
- 1. Use the Nelder–Mead or MDS optimisers. (This behaviour is not possible with BOBYQA as the optimiser is provided by an external package, not built into POISE.)
-
- 2. Raise a ``CostFunctionError`` instead of any other exception (such as ``ValueError``).
-
-``CostFunctionError`` takes up to 2 arguments: the number of arguments to supply depends on whether you want to include the last point which caused the error to be raised.
+If you want to terminate *and* return the best point found so far, please raise a ``CostFunctionError`` instead of any other exception (such as ``ValueError``).
+``CostFunctionError`` takes up to 2 arguments: the number of arguments to supply depends on whether you want to include the final point which caused the error to be raised.
 
 If you want to discard the last point, i.e. just stop the optimisation right away, then raise a ``CostFunctionError`` with just 1 argument. The argument should be the message that you want to display to the user::
 
     def cost_function():
         cost_fn_value = foo()   # whatever calculation you want here
         if some_bad_condition:
-           raise CostFunctionError("Some bad thing happened!")
+           raise CostFunctionError("Some bad condition occurred!")
         return cost_fn_value
 
 It is possible, and probably advisable, to use this string to show the user helpful information (further steps to take, or the value of the cost function, for example).
@@ -139,6 +134,14 @@ To do so, pass the value of the cost function as the *second* parameter when rai
         # Note that we still need the return statement, because it will be used
         # if cost_fn_value is greater than the threshold.
         return cost_fn_value
+
+The value passed as the second argument can in general be any number.
+If you want to make sure that the final point (which raised the CostFunctionError) is *always* chosen to be the optimal point, then you can do this::
+
+    raise CostFunctionError("A message here", -np.inf)
+
+Because ``-np.inf`` is smaller than any other possible number, it will always be picked as the "best" point.
+
 
 Examples
 ========

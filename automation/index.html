@@ -81,8 +81,8 @@ In practice, we’ve already used it many times to calibrate <code class="docuti
 <span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;F2P&quot;</span><span class="p">,</span> <span class="n">f2p</span><span class="p">)</span>
 <span class="n">STOREPARS</span><span class="p">(</span><span class="s">&quot;F1P&quot;</span><span class="p">,</span> <span class="n">f1p</span><span class="p">)</span>
 <span class="n">STOREPARS</span><span class="p">(</span><span class="s">&quot;F2P&quot;</span><span class="p">,</span> <span class="n">f2p</span><span class="p">)</span>
-<span class="c1">// Run optimisation.</span>
-<span class="n">XCMD</span><span class="p">(</span><span class="s">&quot;sendgui xpy poise p1cal -a bobyqa -q&quot;</span><span class="p">)</span>
+<span class="c1">// Run optimisation (uses BOBYQA by default).</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s">&quot;sendgui xpy poise p1cal -q&quot;</span><span class="p">)</span>
 <span class="c1">// POISE stores the optimised value in p1 after it&#39;s done. We can retrieve it</span>
 <span class="c1">// here. Don&#39;t try to get the *status* parameter, since that is not the</span>
 <span class="c1">// optimised value (it is the value used for the last function evaluation!)</span>
@@ -121,8 +121,8 @@ In practice, we’ve already used it many times to calibrate <code class="docuti
 <span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;RG&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
 <span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;s f1p </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f1p</span><span class="p">))</span>  <span class="c1"># PUTPAR(&quot;status F1P&quot;) doesn&#39;t work.</span>
 <span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;s f2p </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f2p</span><span class="p">))</span>  <span class="c1"># Even though the documentation says it should.</span>
-<span class="c1"># Run optimisation.</span>
-<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;poise p1cal -a bobyqa -q&quot;</span><span class="p">)</span>
+<span class="c1"># Run optimisation (uses BOBYQA by default).</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;poise p1cal -q&quot;</span><span class="p">)</span>
 <span class="c1"># POISE stores the optimised value in p1 after it&#39;s done. We can retrieve it</span>
 <span class="c1"># here. Don&#39;t try to get the *status* parameter, since that is not the</span>
 <span class="c1"># optimised value (it is the value used for the last function evaluation!)</span>
@@ -170,7 +170,7 @@ The same applies to the <code class="docutils literal notranslate"><span class="
 <p>Briefly, here is an example of this strategy in action.
 We show a Python script here, but the AU script is essentially the same, just with different function names.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PUTPAR</span><span class="p">(</span><span class="s2">&quot;TI&quot;</span><span class="p">,</span> <span class="s2">&quot;poise&quot;</span><span class="p">)</span>  <span class="c1"># here &quot;poise&quot; serves as the sentinel value.</span>
-<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;poise p1cal -a bobyqa -q&quot;</span><span class="p">)</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;poise p1cal -q&quot;</span><span class="p">)</span>
 
 <span class="c1"># Here POISE should be done. If it succeeded then TI will no longer be &quot;poise&quot;.</span>
 <span class="k">if</span> <span class="n">GETPAR</span><span class="p">(</span><span class="s2">&quot;TI&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;poise&quot;</span><span class="p">:</span>

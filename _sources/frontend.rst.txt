@@ -50,7 +50,7 @@ Options for running optimisations
 
     Use the algorithm ALG for the optimisation.
     ALG can be one of ``nm`` (for Nelder–Mead), ``mds`` (for multidirectional search), or ``bobyqa`` (for Py-BOBYQA).
-    The default is ``nm``.
+    The default is ``bobyqa``.
 
 ``--maxfev MAXFEV``
 
