@@ -1,5 +1,8 @@
-name: docs
-on: [push, pull_request]
+name: publish
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   build:
@@ -28,3 +31,22 @@ jobs:
       with:
         working_directory: docs/latex
         root_file: poise.tex
+
+    - name: Copy PDF to dirhtml root
+      run: cp docs/latex/poise.pdf docs/dirhtml
+
+    - name: Clone gh-pages branch
+      uses: actions/checkout@v2
+      with:
+        ref: gh-pages
+        path: gh-pages
+
+    - name: Update content
+      run: |
+        cp -r docs/dirhtml/* gh-pages
+        cd gh-pages
+        git config --local user.name "GitHub Actions"
+        git config --local user.email "<>"
+        git add -A
+        git commit -m "Update online documentation" || true
+        git push
