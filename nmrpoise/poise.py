@@ -31,6 +31,7 @@ p_backend = os.path.join(p_poise, "backend.py")
 p_routines = os.path.join(p_poise, "routines")
 p_python3 = r"/usr/local/bin/python"
 Routine = namedtuple("Routine", "name pars lb ub init tol cf au")
+version = "1.0.0"
 
 
 def main(args):
@@ -678,6 +679,11 @@ def list_routines_cfs():
     EXIT()
 
 
+def show_version():
+    MSG_nonmodal("poise version {}".format(version))
+    EXIT()
+
+
 def detect_costfunctions():
     """
     Gets poise_backend/get_cfs.py to parse the costfunctions.py file (using the
@@ -1131,6 +1137,12 @@ if __name__ == "__main__":
         action="store_true",
         help="List all available routines and exit."
     )
+    me_group.add_argument(
+        "-V",
+        "--version",
+        action="store_true",
+        help="Show the POISE version and exit."
+    )
     parser.add_argument(
         "--maxfev",
         type=int,
@@ -1165,5 +1177,7 @@ if __name__ == "__main__":
         list_routines_cfs()
     elif args.kill:
         kill_remaining_backends()
+    elif args.version:
+        show_version()
     else:
         main(args)
