@@ -38,8 +38,8 @@ PUTPAR("D 1", "1")
 PUTPAR("RG", "1")
 XCMD("s f1p {}".format(f1p))  # PUTPAR("status F1P") doesn't work.
 XCMD("s f2p {}".format(f2p))  # Even though the documentation says it should.
-# Run optimisation.
-XCMD("poise p1cal -a bobyqa -q")
+# Run optimisation (uses BOBYQA by default).
+XCMD("poise p1cal -q")
 # POISE stores the optimised value in p1 after it's done. We can retrieve it
 # here. Don't try to get the *status* parameter, since that is not the
 # optimised value (it is the value used for the last function evaluation!)

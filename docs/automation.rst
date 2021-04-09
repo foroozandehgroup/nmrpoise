@@ -84,7 +84,7 @@ We show a Python script here, but the AU script is essentially the same, just wi
 ::
 
     PUTPAR("TI", "poise")  # here "poise" serves as the sentinel value.
-    XCMD("poise p1cal -a bobyqa -q")
+    XCMD("poise p1cal -q")
 
     # Here POISE should be done. If it succeeded then TI will no longer be "poise".
     if GETPAR("TI") == "poise":

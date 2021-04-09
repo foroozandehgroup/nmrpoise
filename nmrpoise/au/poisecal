@@ -60,8 +60,8 @@ STOREPAR("F1P", f1p)
 STOREPAR("F2P", f2p)
 STOREPARS("F1P", f1p)
 STOREPARS("F2P", f2p)
-// Run optimisation.
-XCMD("sendgui xpy poise p1cal -a bobyqa -q")
+// Run optimisation (uses BOBYQA by default).
+XCMD("sendgui xpy poise p1cal -q")
 // POISE stores the optimised value in p1 after it's done. We can retrieve it
 // here. Don't try to get the *status* parameter, since that is not the
 // optimised value (it is the value used for the last function evaluation!)

@@ -154,8 +154,8 @@ def main(args):
     if args.algorithm not in ["nm", "mds", "bobyqa"]:
         # Have to use ERRMSG because MSG() is modal
         ERRMSG("Optimisation algorithm '{}' not found; "
-               "using Nelder-Mead instead".format(args.algorithm))
-        args.algorithm = "nm"
+               "using BOBYQA instead".format(args.algorithm))
+        args.algorithm = "bobyqa"
 
     # Before we start the main loop, we need to kill off any other backend
     # processes that are still alive. (We don't do it too early, otherwise we
@@ -1099,9 +1099,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-a",
         "--algorithm",
-        default="nm",
+        default="bobyqa",
         choices=["nm", "mds", "bobyqa"],
-        help="Optimisation algorithm to use. (default: 'nm')"
+        help="Optimisation algorithm to use. (default: 'bobyqa')"
     )
     me_group.add_argument(
         "--create",
