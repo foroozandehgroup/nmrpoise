@@ -663,7 +663,8 @@ def list_routines_cfs():
     """
     # Get cost functions
     cfs = detect_costfunctions()
-    text = "Available cost functions (and their descriptions)\n"
+    text = "poise version {}\n\n\n".format(version)
+    text += "Available cost functions (and their descriptions)\n"
     text += "-------------------------------------------------\n"
     cf_strings = [" * {}\n    {}".format(function_name, docstring)
                   for function_name, docstring in cfs.items()]
@@ -675,7 +676,7 @@ def list_routines_cfs():
     routine_strings = [routine_to_str(load_routine(routine_name))
                        for routine_name in routine_names]
     text += "\n\n".join(routine_strings)
-    VIEWTEXT(title="Available poise cost functions and routines", text=text)
+    VIEWTEXT(title="available poise cost functions and routines", text=text)
     EXIT()
 
 
