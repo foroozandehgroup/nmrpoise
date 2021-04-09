@@ -4,7 +4,7 @@
 [![GitHub Actions Documentation Status](https://github.com/foroozandehgroup/nmrpoise/workflows/docs/badge.svg)](https://github.com/foroozandehgroup/nmrpoise/actions?query=workflow%3Adocs)
 [![PyPI version](https://badge.fury.io/py/nmrpoise.svg)](https://badge.fury.io/py/nmrpoise)
 [![License](https://img.shields.io/github/license/foroozandehgroup/nmrpoise)](https://www.gnu.org/licenses/gpl-3.0.en.html)
-[![Zenodo DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4660709.svg)](https://doi.org/10.5281/zenodo.4660709)
+[![Zenodo DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4660708.svg)](https://doi.org/10.5281/zenodo.4660708)
 
 Jonathan Yong and Mohammadali Foroozandeh, University of Oxford
 
