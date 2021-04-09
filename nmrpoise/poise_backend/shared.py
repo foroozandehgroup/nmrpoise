@@ -10,6 +10,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 from pathlib import Path
 
+import numpy as np
+
 
 class _g():
     """
@@ -48,6 +50,16 @@ class _g():
 
     spec_f2p : float or tuple of float
         The ``F2P`` parameter.
+
+    xvals : list of ndarray
+        The points sampled during the optimisation, in chronological order.
+        These are ndarrays which contain the values of the parameters being
+        optimised at each spectrum acquisition. The parameters are ordered in
+        the same way as specified in the routine.
+
+    fvals : ndarray
+        The values of the cost functions calculated at each stage of the
+        optimisation.
     """
     optimiser = None
     routine_id = None
@@ -59,3 +71,5 @@ class _g():
     p_poise = Path(__file__).parent.resolve()
     spec_f1p = None
     spec_f2p = None
+    xvals = []
+    fvals = np.array([])

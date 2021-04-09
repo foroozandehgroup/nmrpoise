@@ -183,14 +183,24 @@ def main(args):
             line = backend.stdout.readline()
 
             # CASE 1 -- Optimisation has converged (or terminated with
-            #           CostFunctionError)
+            #           CostFunctionError after at least one acquisition)
             if line.startswith("optima:"):
                 optima = line.split()[1:]
                 # Get the optimiser message as well.
                 opt_message = backend.stdout.readline()
                 break
 
-            # CASE 2 -- Values to put in an experiment
+            # CASE 2 -- Optimisation terminated before first acquisition
+            if line == "terminated":
+                raise RuntimeError("The optimisation was terminated.")
+
+            # CASE 3 - Value of cost function at current spectrum
+            # We take this value and put it inside the parameter TI.
+            elif line.startswith("cf:"):
+                cf_val = line.split()[1]
+                PUTPAR("TI", cf_val)
+
+            # CASE 4 -- Values to put in an experiment
             elif line.startswith("values:"):
                 # Increment expno if it's not the first time.
                 if args.separate:
@@ -241,24 +251,19 @@ def main(args):
                 print(make_p_spectrum(), file=backend.stdin)
                 backend.stdin.flush()
 
-            # CASE 3 - Value of cost function at current spectrum
-            # We take this value and put it inside the parameter TI.
-            elif line.startswith("cf:"):
-                cf_val = line.split()[1]
-                PUTPAR("TI", cf_val)
-
-            # CASE 4 - Traceback for backend error
+            # CASE 5 - Traceback for backend error
             # The entire main() routine in the backend is wrapped by a
             # try/except which catches all exceptions and propagates them to
             # the frontend by printing the traceback.
             elif line.startswith("Backend exception: "):
                 raise RuntimeError(line)
 
-            # CASE 5 - Everything else
+            # CASE 6 - Everything else
             else:
                 raise RuntimeError("Invalid message from backend: '{}'."
                                    "Please see error log for more "
                                    "information.".format(line))
+
     # Cleanup code if anything goes wrong.
     except (Error, RuntimeError) as e:
         # Reset TI to empty string

@@ -151,15 +151,30 @@ def main():
 
     # Set up optimisation arguments
     optimargs = (cost_function, routine)
-    # Carry out the optimisation
+    # Clear out _g.xvals and _g.fvals. They will be added to by acquire_nmr().
+    _g.xvals = []
+    _g.fvals = np.array([])
+    # Carry out the optimisation.
     opt_result = optimfn(acquire_nmr, scaled_x0, scaled_xtol,
                          scaled_lb, scaled_ub,
                          args=optimargs, maxfev=_g.maxfev)
+    # We are going to ignore the xbest returned by the optimiser itself, in
+    # favour of the best xval and fval stored globally. This is so that we can
+    # "interrupt" the optimisation halfway through (using a CostFunctionError)
+    # while still returning the best point to the user.
+    # We *will*, however, use the opt_result.message attribute.
+
+    # If no values have been recorded yet, just end immediately.
+    if _g.fvals.size == 0:
+        print("terminated")
+        return
+    # Note that _g.xvals are unscaled values (this is more useful to the
+    # advanced user who may want to access it from within a cost function).
+    best_index = np.argmin(_g.fvals)
+    xbest, fbest = _g.xvals[best_index], _g.fvals[best_index]
 
     # Tell frontend script that the optimisation is done
-    best_values = unscale(opt_result.xbest, routine.lb,
-                          routine.ub, routine.tol, scaleby="tols")
-    print(f"optima: {' '.join([str(i) for i in best_values])}")
+    print(f"optima: {' '.join([str(i) for i in xbest])}")
     # Strip newlines from the opt result message, just in case (because the
     # frontend only expects one line of text here, feeding it more than one
     # line of text will confuse it)
@@ -171,8 +186,8 @@ def main():
     with open(_g.p_optlog, "a") as log:
         print("", file=log)
         fmt = "{:27s} - {}"
-        print(fmt.format("Best values found", best_values.tolist()), file=log)
-        print(fmt.format("Cost function at minimum", opt_result.fbest),
+        print(fmt.format("Best values found", xbest.tolist()), file=log)
+        print(fmt.format("Cost function at minimum", fbest),
               file=log)
         print(fmt.format("Number of spectra ran", acquire_nmr.calls),
               file=log)
@@ -293,6 +308,8 @@ def acquire_nmr(x, cost_function, routine):
                 # Log the point and cost function
                 if isinstance(e.cf_val, (int, float)):
                     print(fstr.format(*unscaled_val, e.cf_val), file=logf)
+                    _g.xvals.append(unscaled_val)
+                    _g.fvals = np.append(_g.fvals, e.cf_val)
                 else:
                     fstr2 = "{:^10.4f}  " * len(x)
                     print(fstr2.format(*unscaled_val), file=logf)
@@ -300,9 +317,13 @@ def acquire_nmr(x, cost_function, routine):
                 print(e.message, file=logf)
                 raise
             else:
+                # No CostFunctionError raised.
                 print(fstr.format(*unscaled_val, cf_val), file=logf)
                 print(f"cf: {cf_val}")  # send back to frontend
+                _g.xvals.append(unscaled_val)
+                _g.fvals = np.append(_g.fvals, cf_val)
                 return cf_val    # return control to optimiser
+            # Any other error will be propagated up.
         else:
             # This really shouldn't happen.
             raise ValueError(f"Invalid signal passed from frontend: {signal}")

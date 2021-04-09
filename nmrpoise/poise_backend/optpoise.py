@@ -495,10 +495,6 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
     except MaxFevalsReached:
         message = MESSAGE_OPT_MAXFEV_REACHED
     except CostFunctionError as e:
-        # Check if a value was returned: if so, add it to iter_fs (iter_xs will
-        # already have been updated prior to cost function calculation).
-        if isinstance(e.cf_val, (int, float)):
-            iter_fs.append(e.cf_val)
         message = MESSAGE_OPT_PREMATURE_TERMINATION
         if e.message.strip() != "":
             message += ("\nReason: " + e.message)
@@ -577,8 +573,7 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
     maxiter = 500 * N
     if maxfev <= 0:
         maxfev = 500 * N
-    # Decorate cost function so that it handles MaxFevalsReached and
-    # CostFunctionError exceptions correctly.
+    # Decorate cost function so that it handles MaxFevalsReached
     cf = deco_cf(maxfev)(cf)
 
     # Check length of xtol
@@ -613,10 +608,6 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
     # Create temporary list of points evaluated during this iteration (and
     # their corresponding cost function values).
     iter_xs, iter_fs = [], []
-    # Flag to indicate whether we should break out of the main loop. If a
-    # CostFunctionError is raised in the previous iteration, this will be
-    # incremented.
-    break_on_next_iter = 0
 
     try:
         # Evaluate the cost function for the initial simplex.
@@ -681,10 +672,6 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
     except MaxFevalsReached:
         message = MESSAGE_OPT_MAXFEV_REACHED
     except CostFunctionError as e:
-        # Check if a value was returned: if so, add it to iter_fs (iter_xs will
-        # already have been updated prior to cost function calculation).
-        if isinstance(e.cf_val, (int, float)):
-            iter_fs.append(e.cf_val)
         message = MESSAGE_OPT_PREMATURE_TERMINATION
         if e.message.strip() != "":
             message += ("\nReason: " + e.message)
@@ -765,32 +752,47 @@ def pybobyqa_interface(cf, x0, xtol, scaled_lb, scaled_ub,
                           bounds=bounds, objfun_has_noise=True,
                           user_params={'restarts.use_restarts': False})
     except CostFunctionError as e:
-        # Catch user-thrown errors. Because the BOBYQA optimiser is opaque,
-        # there's no way we can return any useful info to the user, so we just
-        # convert it into a RuntimeError which will be passed on to the
-        # frontend.
-        raise RuntimeError(e.message) from None
-    # Catch Py-BOBYQA complaints if the optimiser exited with failure.
-    if pb_sol.flag in [pb_sol.EXIT_INPUT_ERROR,
-                       pb_sol.EXIT_TR_INCREASE_ERROR,
-                       pb_sol.EXIT_LINALG_ERROR]:
-        raise RuntimeError(pb_sol.msg)
-    # If we reached here, it means the optimisation completed successfully.
-    # We just need to coerce the returned information into our OptResult
-    # format, so that the backend sees a unified interface for all optimisers.
-    # Note that niter is not applicable to PyBOBYQA.
-    # TODO: Convert PyBOBYQA's messages (success, maxiter, maxfev) back into
-    # our standardised messages, so that the frontend can check what happened.
-    if pb_sol.flag == pb_sol.EXIT_SUCCESS:
-        msg = MESSAGE_OPT_SUCCESS
-    elif pb_sol.flag == pb_sol.EXIT_MAXFUN_WARNING:
-        msg = MESSAGE_OPT_MAXFEV_REACHED
-    elif pb_sol.flag == pb_sol.EXIT_SLOW_WARNING:
-        msg = "Optimisation terminated (slow progress)."
-    elif pb_sol.flag == pb_sol.EXIT_FALSE_SUCCESS_WARNING:
-        msg = "Optimisation terminated (max false good steps)."
+        # If we run into a CFError, we need to turn on this flag, because
+        # pb_sol won't be a valid object.
+        cferror_flag = True
+        cferror_message = MESSAGE_OPT_PREMATURE_TERMINATION
+        if e.message.strip() != "":
+            cferror_message += ("\nReason: " + e.message)
     else:
-        msg = pb_sol.msg
-    return OptResult(xbest=pb_sol.x, fbest=pb_sol.f,
-                     niter=0, nfev=pb_sol.nf,
+        cferror_flag = False
+
+    if cferror_flag:
+        msg = cferror_message
+        # These are all placeholder values which won't be used by POISE (it
+        # takes xbest and fbest from _g, and takes nfev from the decorated
+        # acquire_nmr function).
+        xbest = None
+        fbest = None
+        nfev = None
+    else:
+        # Catch Py-BOBYQA complaints if the optimiser exited with failure.
+        if pb_sol.flag in [pb_sol.EXIT_INPUT_ERROR,
+                           pb_sol.EXIT_TR_INCREASE_ERROR,
+                           pb_sol.EXIT_LINALG_ERROR]:
+            raise RuntimeError(pb_sol.msg)
+        # If we reached here, it means the optimisation completed successfully.
+        xbest = pb_sol.x
+        fbest = pb_sol.f
+        nfev = pb_sol.nf
+        # We just need to coerce the returned information into our OptResult
+        # format, so that the backend sees a unified interface for all
+        # optimisers.  Note that niter is not applicable to PyBOBYQA.
+        if pb_sol.flag == pb_sol.EXIT_SUCCESS:
+            msg = MESSAGE_OPT_SUCCESS
+        elif pb_sol.flag == pb_sol.EXIT_MAXFUN_WARNING:
+            msg = MESSAGE_OPT_MAXFEV_REACHED
+        elif pb_sol.flag == pb_sol.EXIT_SLOW_WARNING:
+            msg = "Optimisation terminated (slow progress)."
+        elif pb_sol.flag == pb_sol.EXIT_FALSE_SUCCESS_WARNING:
+            msg = "Optimisation terminated (max false good steps)."
+        else:
+            msg = pb_sol.msg
+
+    return OptResult(xbest=xbest, fbest=fbest,
+                     niter=0, nfev=nfev,
                      message=msg)
