@@ -317,6 +317,17 @@ def acquire_nmr(x, cost_function, routine):
                 print(e.message, file=logf)
                 raise
             else:
+                # Check whether the cost function returned None. This most
+                # likely indicates the user forgot to return something.
+                if cf_val is None:
+                    raise ValueError("The cost function returned None. Did"
+                                     " you forget to return a value at the"
+                                     " end of the cost function?")
+                # Check whether it's a float.
+                if not isinstance(cf_val, (int, float)):
+                    raise ValueError("Expected cost function to return a"
+                                     " single numeric value, but instead got"
+                                     f" an object of type {type(cf_val)}.")
                 # No CostFunctionError raised.
                 print(fstr.format(*unscaled_val, cf_val), file=logf)
                 print(f"cf: {cf_val}")  # send back to frontend
