@@ -14,6 +14,8 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../nmrpoise'))
 
+# Get version number
+exec(open('../nmrpoise/_version.py').read())
 
 # -- Project information -----------------------------------------------------
 
@@ -40,6 +42,7 @@ intersphinx_mapping = {
 }
 
 rst_prolog = """
+.. |version| replace:: {}
 .. |Path| replace:: :class:`Path <pathlib.Path>`
 .. |ndarray| replace:: :class:`ndarray <numpy.ndarray>`
 .. |v| replace:: |br| |vspace|
@@ -49,8 +52,8 @@ rst_prolog = """
 
 .. |vspace| raw:: latex
 
-   \\vspace{5mm}
-"""
+   \\vspace{{5mm}}
+""".format(__version__)
 
 default_role = "any"
 
