@@ -88,7 +88,7 @@ On a computer that *does* have an Internet connection:
       pip download Py-BOBYQA nmrpoise --no-deps --no-binary=:all:
       pip download numpy pandas scipy --only-binary=:all: --python-version <3.X> --platform <PLATFORM>
 
-   where ``<3.X>`` is the version of Python installed on the spectrometer, and ``<PLATFORM>`` is one of ``win32``, ``win_amd64``, ``macosx_10_9_x86_64``, or ``manylinux1_x86_64`` depending on the spectrometer operating system. (n.b. These options are not well-documented; I have figured them out by trawling Stack Overflow. Any additions are welcome.)
+   where ``<3.X>`` is the version of Python to be installed on the spectrometer, and ``<PLATFORM>`` is one of ``win32``, ``win_amd64``, ``macosx_10_9_x86_64``, or ``manylinux1_x86_64`` depending on the spectrometer operating system. (n.b. These options are not well-documented; I have figured them out by trawling Stack Overflow. Any additions are welcome.)
 
 4. Copy the whole folder over to your spectrometer. It should contain a bunch of ``.whl`` files and two ``.tar.gz`` files.
 
