@@ -1,12 +1,20 @@
 # Parameter Optimisation by Iterative Spectral Evaluation
 
-[![GitHub Actions Build Status](https://github.com/foroozandehgroup/nmrpoise/workflows/build/badge.svg)](https://github.com/foroozandehgroup/nmrpoise/actions?query=workflow%3Abuild)
-[![GitHub Actions Documentation Status](https://github.com/foroozandehgroup/nmrpoise/workflows/docs/badge.svg)](https://github.com/foroozandehgroup/nmrpoise/actions?query=workflow%3Adocs)
-[![PyPI version](https://badge.fury.io/py/nmrpoise.svg)](https://badge.fury.io/py/nmrpoise)
-[![License](https://img.shields.io/github/license/foroozandehgroup/nmrpoise)](https://www.gnu.org/licenses/gpl-3.0.en.html)
-[![Zenodo DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4660708.svg)](https://doi.org/10.5281/zenodo.4660708)
+<p align="center">
+<a href="https://github.com/foroozandehgroup/nmrpoise/actions?query=workflow%3Abuild"><img src="https://github.com/foroozandehgroup/nmrpoise/workflows/build/badge.svg" alt="GitHub Actions Build Status"></a>
+<a href="https://github.com/foroozandehgroup/nmrpoise/actions?query=workflow%3Apublish"><img src="https://github.com/foroozandehgroup/nmrpoise/workflows/publish/badge.svg" alt="GitHub Actions Documentation Status"></a>
+<a href="https://badge.fury.io/py/nmrpoise"><img src="https://badge.fury.io/py/nmrpoise.svg" alt="PyPI version"></a>
+<a href="https://www.gnu.org/licenses/gpl-3.0.en.html"><img src="https://img.shields.io/github/license/foroozandehgroup/nmrpoise" alt="License"></a>
+<a href="https://doi.org/10.5281/zenodo.4660708"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4660708.svg" alt="Zenodo DOI"></a>
+</p>
 
+<p align="center">
+<img width="200" src="https://raw.githubusercontent.com/foroozandehgroup/nmrpoise/master/logo.png">
+</p>
+
+<p align="center">
 Jonathan Yong and Mohammadali Foroozandeh, University of Oxford
+</p>
 
 ---------
 
