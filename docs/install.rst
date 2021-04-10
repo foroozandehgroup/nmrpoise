@@ -19,6 +19,17 @@ To do so, it checks for TopSpin installations in standard directories (``/opt`` 
 If ``pip`` exits without errors, this should have succeeded; you can test it by typing ``poise -h`` into TopSpin's command-line, which should spawn a popup.
 If that is the case, congratulations — you can move on to the next chapter, `routines`.
 
+
+Updating POISE
+--------------
+
+Simply use::
+
+    pip install --upgrade nmrpoise
+
+All other steps (including troubleshooting, if necessary) are the same.
+
+
 Troubleshooting
 ---------------
 
