@@ -9,11 +9,11 @@
 </p>
 
 <p align="center">
-<img width="200" src="https://raw.githubusercontent.com/foroozandehgroup/nmrpoise/master/logo.png">
+<img width="250" src="https://raw.githubusercontent.com/foroozandehgroup/nmrpoise/master/logo.png">
 </p>
 
 <p align="center">
-Jonathan Yong and Mohammadali Foroozandeh, University of Oxford
+<b>Jonathan Yong and Mohammadali Foroozandeh, University of Oxford</b>
 </p>
 
 ---------
