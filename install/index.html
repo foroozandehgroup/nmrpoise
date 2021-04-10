@@ -49,6 +49,14 @@ For Unix machines, we suggest using a package manager to do so (such as Homebrew
 To do so, it checks for TopSpin installations in standard directories (<code class="docutils literal notranslate"><span class="pre">/opt</span></code> on Unix and <code class="docutils literal notranslate"><span class="pre">C:\Bruker</span></code> on Windows).
 If <code class="docutils literal notranslate"><span class="pre">pip</span></code> exits without errors, this should have succeeded; you can test it by typing <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">-h</span></code> into TopSpin’s command-line, which should spawn a popup.
 If that is the case, congratulations — you can move on to the next chapter, <a class="reference internal" href="../routines/"><span class="doc">Setting up a Routine</span></a>.</p>
+<section id="updating-poise">
+<h2>Updating POISE<a class="headerlink" href="#updating-poise" title="Permalink to this headline">¶</a></h2>
+<p>Simply use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">nmrpoise</span>
+</pre></div>
+</div>
+<p>All other steps (including troubleshooting, if necessary) are the same.</p>
+</section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
 <p>The installation can occasionally fail if TopSpin is installed to a non-standard location.
@@ -133,6 +141,7 @@ On a computer that <em>does</em> have an Internet connection:</p>
 </p><h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#updating-poise">Updating POISE</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#from-source">From source</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#without-an-internet-connection">Without an internet connection</a></li>

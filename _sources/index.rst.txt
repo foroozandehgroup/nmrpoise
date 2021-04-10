@@ -7,6 +7,9 @@ The code is licensed under `the GNU General Public License v3 <https://www.gnu.o
 
 .. note::
 
+    The documentation you are currently reading is for version |version| of POISE.
+    To check your current version of POISE, type ``poise --version`` in TopSpin.
+
     The most recent HTML version of the documentation can always be found at
 
         https://foroozandehgroup.github.io/nmrpoise.
