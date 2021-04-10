@@ -2,7 +2,7 @@
 
 <p align="center">
 <a href="https://github.com/foroozandehgroup/nmrpoise/actions?query=workflow%3Abuild"><img src="https://github.com/foroozandehgroup/nmrpoise/workflows/build/badge.svg" alt="GitHub Actions Build Status"></a>
-<a href="https://github.com/foroozandehgroup/nmrpoise/actions?query=workflow%3Apublish"><img src="https://github.com/foroozandehgroup/nmrpoise/workflows/publish/badge.svg" alt="GitHub Actions Documentation Status"></a>
+<a href="https://github.com/foroozandehgroup/nmrpoise/actions?query=workflow%3Apublish-docs"><img src="https://github.com/foroozandehgroup/nmrpoise/workflows/publish-docs/badge.svg" alt="GitHub Actions Documentation Status"></a>
 <a href="https://badge.fury.io/py/nmrpoise"><img src="https://badge.fury.io/py/nmrpoise.svg" alt="PyPI version"></a>
 <a href="https://www.gnu.org/licenses/gpl-3.0.en.html"><img src="https://img.shields.io/github/license/foroozandehgroup/nmrpoise" alt="License"></a>
 <a href="https://doi.org/10.5281/zenodo.4660708"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4660708.svg" alt="Zenodo DOI"></a>
