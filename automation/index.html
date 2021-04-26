@@ -4,8 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>POISE under automation &#8212; poise  documentation</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
@@ -33,12 +32,12 @@
 
           <div class="body" role="main">
             
-  <section id="poise-under-automation">
+  <div class="section" id="poise-under-automation">
 <h1>POISE under automation<a class="headerlink" href="#poise-under-automation" title="Permalink to this headline">¶</a></h1>
 <p>The command-line interface that POISE offers (see <a class="reference internal" href="../frontend/"><span class="doc">Frontend options</span></a>) allows us to wrap POISE within a larger script.
 Here we present some examples of how this can be accomplished: after this, the extension to automation is largely straightforward.
 For example, if POISE is used inside an AU programme, then set the the <code class="docutils literal notranslate"><span class="pre">AUNM</span></code> parameter in TopSpin appropriately.</p>
-<section id="basics">
+<div class="section" id="basics">
 <h2>Basics<a class="headerlink" href="#basics" title="Permalink to this headline">¶</a></h2>
 <p>To incorporate POISE in an AU programme, you can use the syntax:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">XCMD</span><span class="p">(</span><span class="s2">&quot;sendgui xpy poise &lt;routine_name&gt; [options]&quot;</span><span class="p">)</span>
@@ -53,8 +52,8 @@ The corresponding syntax for running an optimisation would be:</p>
 </pre></div>
 </div>
 <p>As you can see, it is the same except that <code class="docutils literal notranslate"><span class="pre">sendgui</span></code> isn’t needed.</p>
-</section>
-<section id="a-simple-ish-example">
+</div>
+<div class="section" id="a-simple-ish-example">
 <h2>A simple(ish) example<a class="headerlink" href="#a-simple-ish-example" title="Permalink to this headline">¶</a></h2>
 <p>Here’s an example of how the <code class="docutils literal notranslate"><span class="pre">p1</span></code> optimisation (shown in <a class="reference internal" href="../routines/"><span class="doc">Setting up a Routine</span></a>) can be incorporated into an AU script (download from <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/au/poisecal">here</a>).
 This AU script performs a very similar task to the existing <code class="docutils literal notranslate"><span class="pre">pulsecal</span></code> script: it finds the best value of <code class="docutils literal notranslate"><span class="pre">p1</span></code> and plugs it back into the current experiment.
@@ -138,8 +137,8 @@ In practice, we’ve already used it many times to calibrate <code class="docuti
 <span class="c1"># ZG()</span>
 </pre></div>
 </div>
-</section>
-<section id="terminating-scripts-which-call-poise">
+</div>
+<div class="section" id="terminating-scripts-which-call-poise">
 <h2>Terminating scripts which call POISE<a class="headerlink" href="#terminating-scripts-which-call-poise" title="Permalink to this headline">¶</a></h2>
 <p>So far we have seen how POISE can be included inside an AU programme or a Python script in TopSpin (a “parent script”).
 One problem that we haven’t dealt with yet is how to kill the parent script when POISE errors out.
@@ -179,8 +178,8 @@ We show a Python script here, but the AU script is essentially the same, just wi
 <span class="c1"># After this you can continue with whatever you wanted to do.</span>
 </pre></div>
 </div>
-</section>
-</section>
+</div>
+</div>
 
 
           </div>
@@ -253,7 +252,7 @@ We show a Python script here, but the AU script is essentially the same, just wi
       &copy;2021, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

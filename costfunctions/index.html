@@ -4,8 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Builtin cost functions &#8212; poise  documentation</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
@@ -33,7 +32,7 @@
 
           <div class="body" role="main">
             
-  <section id="builtin-cost-functions">
+  <div class="section" id="builtin-cost-functions">
 <h1>Builtin cost functions<a class="headerlink" href="#builtin-cost-functions" title="Permalink to this headline">¶</a></h1>
 <p>POISE comes with a few, very basic, builtin cost functions.
 These largely mirror those that are in TopSpin’s native <code class="docutils literal notranslate"><span class="pre">popt</span></code> screen.</p>
@@ -46,43 +45,43 @@ This works for all the builtin cost functions except for <code class="docutils l
 See <a class="reference internal" href="../customcf/"><span class="doc">Custom cost functions</span></a> for a more in-depth explanation.</p>
 </div>
 <hr class="docutils" />
-<section id="minabsint">
+<div class="section" id="minabsint">
 <h2>minabsint<a class="headerlink" href="#minabsint" title="Permalink to this headline">¶</a></h2>
 <p>Seeks to minimise the intensity of the magnitude-mode spectrum. The intensity is measured by integration of the entire spectral region, i.e. summation of every point.</p>
 <p>Note that this is different from the <code class="docutils literal notranslate"><span class="pre">MAGMIN</span></code> criterion in <code class="docutils literal notranslate"><span class="pre">popt</span></code>, which (from what the Bruker documentation suggests) seeks to minimise the highest point in the magnitude-mode spectrum.</p>
-</section>
-<section id="maxabsint">
+</div>
+<div class="section" id="maxabsint">
 <h2>maxabsint<a class="headerlink" href="#maxabsint" title="Permalink to this headline">¶</a></h2>
 <p>Seeks to maximise the intensity of the magnitude-mode spectrum.</p>
-</section>
-<section id="minrealint">
+</div>
+<div class="section" id="minrealint">
 <h2>minrealint<a class="headerlink" href="#minrealint" title="Permalink to this headline">¶</a></h2>
 <p>Seeks to minimise the intensity of the real spectrum (this is probably equivalent to <code class="docutils literal notranslate"><span class="pre">INTMIN</span></code> in <code class="docutils literal notranslate"><span class="pre">popt</span></code>).</p>
 <p>Note that this does <em>not</em> behave in the same way as <code class="docutils literal notranslate"><span class="pre">minabsint</span></code>.
 Because the real spectrum can have negative peaks, this essentially tries to maximise the intensity of negative peaks.</p>
-</section>
-<section id="maxrealint">
+</div>
+<div class="section" id="maxrealint">
 <h2>maxrealint<a class="headerlink" href="#maxrealint" title="Permalink to this headline">¶</a></h2>
 <p>Seeks to maximise the intensity of the real spectrum (equivalent to <code class="docutils literal notranslate"><span class="pre">INTMAX</span></code>).</p>
-</section>
-<section id="zerorealint">
+</div>
+<div class="section" id="zerorealint">
 <h2>zerorealint<a class="headerlink" href="#zerorealint" title="Permalink to this headline">¶</a></h2>
 <p>Seeks to make the intensity of the real spectrum as close as possible to zero (equivalent to <code class="docutils literal notranslate"><span class="pre">ZERO</span></code>).</p>
-</section>
-<section id="noe-1d">
+</div>
+<div class="section" id="noe-1d">
 <h2>noe_1d<a class="headerlink" href="#noe-1d" title="Permalink to this headline">¶</a></h2>
 <p>Seeks to minimise the intensity of the spectrum, <em>except</em> for a region of 50 Hz centred on the parameter <code class="docutils literal notranslate"><span class="pre">SPOFFS2</span></code> (which corresponds to the frequency of the selective pulse).</p>
 <p>Since NOE crosspeaks are typically negative (and <code class="docutils literal notranslate"><span class="pre">apk</span></code> typically phases them to be so), this essentially seeks to maximise the intensity of the crosspeaks.</p>
 <p>Please see the POISE paper for example usage.</p>
-</section>
-<section id="epsi-gradient-drift">
+</div>
+<div class="section" id="epsi-gradient-drift">
 <h2>epsi_gradient_drift<a class="headerlink" href="#epsi-gradient-drift" title="Permalink to this headline">¶</a></h2>
 <p>Performs EPSI processing on a 1D FID, and seeks to minimise the ‘drift’ seen in the echo positions.
 This is only valid when the echo locations are <em>supposed</em> to be constant, e.g. when there is no indirect-dimension evolution period (otherwise, echoes will be observed at indirect-dimension frequencies).
 This is to be used for optimising the positive/negative gradient balance in EPSI acquisitions.</p>
 <p>Please see the POISE paper for example usage.</p>
-</section>
-</section>
+</div>
+</div>
 
 
           </div>
@@ -159,7 +158,7 @@ This is to be used for optimising the positive/negative gradient balance in EPSI
       &copy;2021, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

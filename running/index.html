@@ -4,8 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Running an optimisation &#8212; poise  documentation</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
@@ -33,7 +32,7 @@
 
           <div class="body" role="main">
             
-  <section id="running-an-optimisation">
+  <div class="section" id="running-an-optimisation">
 <h1>Running an optimisation<a class="headerlink" href="#running-an-optimisation" title="Permalink to this headline">¶</a></h1>
 <p>Assuming you or someone else has already created a routine (see <a class="reference internal" href="../routines/"><span class="doc">Setting up a Routine</span></a> if not), this page will show you how to run the optimisation.
 We’ll use the same <code class="docutils literal notranslate"><span class="pre">p1</span></code> calibration routine that we described on that page, but the principles apply equally to all routines.</p>
@@ -67,7 +66,7 @@ You should get a result in 1–2 minutes.</p>
 <img alt="../_images/running2.png" class="align-center" src="../_images/running2.png" />
 <p>The best value(s) will automatically be stored in the corresponding parameter so that any subsequent acquisition will use the optimised parameters.
 Don’t forget that for this particular optimisation, you will have to divide the optimised value by 4 to get back the 90° pulse.</p>
-<section id="parsing-the-log">
+<div class="section" id="parsing-the-log">
 <h2>Parsing the log<a class="headerlink" href="#parsing-the-log" title="Permalink to this headline">¶</a></h2>
 <p>If you are interested in analysing data from (possibly multiple) optimisation runs, all information is logged in a <code class="docutils literal notranslate"><span class="pre">poise.log</span></code> file.
 This log file is stored inside the expno folder (the post-optimisation popup also tells you where it can be found — see above for an example).
@@ -78,7 +77,7 @@ Some of the key information inside the <code class="docutils literal notranslate
 <span class="go">0   p1cal     48.0  [p1]  40.0  56.0  0.2        nm  minabsint  poise_1d   48.125  6.849146e+06    10    77</span>
 </pre></div>
 </div>
-<p><a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.2.3)"><code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> object which contains most of the information in the log file.
+<p><a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.2.4)"><code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> object which contains most of the information in the log file.
 However, this object does not include details of individual cost function evaluations (even though these are fully logged).
 If you want to analyse that data, you will have to write your own function!</p>
 <p>The full documentation for <a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> (which really doesn’t say much more than the previous example) is as follows:</p>
@@ -98,7 +97,7 @@ not specified, defaults to the current working directory.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl>
-<dt><strong>log_df</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></span></dt><dd><p>DataFrame with rows corresponding to optimisations which successfully
+<dt><strong>log_df</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></span></dt><dd><p>DataFrame with rows corresponding to optimisations which successfully
 terminated. The time taken is given in seconds.</p>
 </dd>
 </dl>
@@ -106,15 +105,15 @@ terminated. The time taken is given in seconds.</p>
 </dl>
 </dd></dl>
 
-</section>
-<section id="errors">
+</div>
+<div class="section" id="errors">
 <h2>Errors<a class="headerlink" href="#errors" title="Permalink to this headline">¶</a></h2>
 <p>POISE tries its best to exit gracefully from errors, and often you won’t need to care about any of them.
 However, if something <em>does</em> go wrong during an optimisation, errors will be logged to the two files <code class="docutils literal notranslate"><span class="pre">poise_err_frontend.log</span></code> and <code class="docutils literal notranslate"><span class="pre">poise_err_backend.log</span></code>, depending on which script runs into an error.
 These files reside in the same folder as <code class="docutils literal notranslate"><span class="pre">poise.log</span></code>, i.e. the “expno folder”.
 We welcome bug reports — please <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/issues">submit an issue on GitHub</a> or drop us an email (addresses can be found on the paper).</p>
-</section>
-</section>
+</div>
+</div>
 
 
           </div>
@@ -186,7 +185,7 @@ We welcome bug reports — please <a class="reference external" href="https://gi
       &copy;2021, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
