@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-<img width="250" src="https://raw.githubusercontent.com/foroozandehgroup/nmrpoise/master/logo.png">
+<img width="250" src="https://raw.githubusercontent.com/foroozandehgroup/nmrpoise/master/logo2.png">
 </p>
 
 <p align="center">
