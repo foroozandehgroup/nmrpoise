@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Custom cost functions &#8212; poise  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -32,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="custom-cost-functions">
+  <section id="custom-cost-functions">
 <h1>Custom cost functions<a class="headerlink" href="#custom-cost-functions" title="Permalink to this headline">¶</a></h1>
 <p>All user-defined cost functions are stored inside the file:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$TS/exp/stan/nmr/py/user/poise_backend/costfunctions_user.py
@@ -45,7 +46,7 @@ You <em>can</em> edit this file directly: if you add a cost function there, it w
 However, there are two risks with this.
 Firstly, if you ever reinstall POISE, this file will be reset to the default (whereas <code class="docutils literal notranslate"><span class="pre">costfunctions_user.py</span></code> will not).
 Secondly, any cost functions defined in <code class="docutils literal notranslate"><span class="pre">costfunctions_user.py</span></code> will shadow (i.e. take priority over) the cost functions defined in <code class="docutils literal notranslate"><span class="pre">costfunctions.py</span></code> if they have the same name.</p>
-<div class="section" id="the-rules-for-cost-functions">
+<section id="the-rules-for-cost-functions">
 <h2>The rules for cost functions<a class="headerlink" href="#the-rules-for-cost-functions" title="Permalink to this headline">¶</a></h2>
 <p>Cost functions are defined as a standard Python 3 function which takes no parameters and returns a float (the value of the cost function).</p>
 <ol class="arabic simple">
@@ -54,14 +55,14 @@ Secondly, any cost functions defined in <code class="docutils literal notranslat
 <li><p><strong>Never print anything inside a cost function directly to stdout</strong>. This will cause the optimisation to stop. If you want to perform debugging, use the <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.log" title="nmrpoise.poise_backend.cfhelpers.log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">log</span></code></a> function described below.</p></li>
 <li><p><strong>To terminate the optimisation prematurely and return the best point found so far, raise CostFunctionError().</strong> See below for more information.</p></li>
 </ol>
-</div>
-<div class="section" id="accessing-spectra-and-parameters">
+</section>
+<section id="accessing-spectra-and-parameters">
 <h2>Accessing spectra and parameters<a class="headerlink" href="#accessing-spectra-and-parameters" title="Permalink to this headline">¶</a></h2>
 <p>The most primitive way of accessing “outside” information is through the class <code class="docutils literal notranslate"><span class="pre">_g</span></code>, which is imported from <code class="docutils literal notranslate"><span class="pre">shared.py</span></code> and contains a series of global variables reflecting the current optimisation.
 For example, <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code> is the path to the procno folder: you can read and parse the <code class="docutils literal notranslate"><span class="pre">1r</span></code> file inside this to get the real spectrum as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref any docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> (for example).</p>
 <dl class="py class">
-<dt id="nmrpoise.poise_backend.shared._g">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.shared.</span></code><code class="sig-name descname"><span class="pre">_g</span></code><a class="headerlink" href="#nmrpoise.poise_backend.shared._g" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.shared._g">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.shared.</span></span><span class="sig-name descname"><span class="pre">_g</span></span><a class="headerlink" href="#nmrpoise.poise_backend.shared._g" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class to store the “global” variables.</p>
 <dl class="field-list">
 <dt class="field-odd">Attributes</dt>
@@ -107,8 +108,8 @@ All the existing cost functions (inside <code class="docutils literal notranslat
 All of these methods are stored inside <code class="docutils literal notranslate"><span class="pre">cfhelpers.py</span></code> and are already imported by default.</p>
 <p>The ones you are likely to use are the following:</p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.make_p_spec">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">make_p_spec</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.make_p_spec" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.make_p_spec">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">make_p_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.make_p_spec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructs a <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a> object corresponding to the procno folder
 <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;/&lt;expno&gt;/pdata/&lt;procno&gt;</span></code>. If parameters are not passed, they are
 inherited from the currently active spectrum (<code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
@@ -136,8 +137,8 @@ folders).</p>
 
 <p><br /> </p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.get1d_fid">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">get1d_fid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remove_grpdly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_fid" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.get1d_fid">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">get1d_fid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remove_grpdly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_fid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the FID as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -162,8 +163,8 @@ folder two levels up.) Defaults to the currently active spectrum (i.e.
 
 <p><br /> </p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.get1d_real">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">get1d_real</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_real" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.get1d_real">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">get1d_real</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_real" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the real spectrum as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>. This function accounts for
 TopSpin’s <code class="docutils literal notranslate"><span class="pre">NC_PROC</span></code> variable, scaling the spectrum intensity accordingly.</p>
 <p>Note that this function only works for 1D spectra. It does <em>not</em> work for
@@ -204,15 +205,15 @@ were specified).</p>
 
 <p><br /> </p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.get1d_imag">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">get1d_imag</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_imag" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.get1d_imag">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">get1d_imag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_imag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Same as <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.get1d_real" title="nmrpoise.poise_backend.cfhelpers.get1d_real"><code class="xref any py py-func docutils literal notranslate"><span class="pre">get1d_real</span></code></a>, except that it reads the imaginary spectrum.</p>
 </dd></dl>
 
 <p><br /> </p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.get2d_rr">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">get2d_rr</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f1_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.get2d_rr">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">get2d_rr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f1_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the real part of the 2D spectrum (the “RR” quadrant) as a 2D
 <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>. This function takes into account the <code class="docutils literal notranslate"><span class="pre">NC_PROC</span></code> value in
 TopSpin’s processing parameters.</p>
@@ -255,29 +256,29 @@ spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p
 
 <p><br /> </p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.get2d_ri">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">get2d_ri</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f1_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_ri" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.get2d_ri">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">get2d_ri</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f1_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_ri" title="Permalink to this definition">¶</a></dt>
 <dd><p>Same as <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="nmrpoise.poise_backend.cfhelpers.get2d_rr"><code class="xref any py py-func docutils literal notranslate"><span class="pre">get2d_rr</span></code></a>, except that it reads the ‘2ri’ file.</p>
 </dd></dl>
 
 <p><br /> </p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.get2d_ir">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">get2d_ir</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f1_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_ir" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.get2d_ir">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">get2d_ir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f1_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_ir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Same as <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="nmrpoise.poise_backend.cfhelpers.get2d_rr"><code class="xref any py py-func docutils literal notranslate"><span class="pre">get2d_rr</span></code></a>, except that it reads the ‘2ir’ file.</p>
 </dd></dl>
 
 <p><br /> </p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.get2d_ii">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">get2d_ii</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f1_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_ii" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.get2d_ii">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">get2d_ii</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f1_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_ii" title="Permalink to this definition">¶</a></dt>
 <dd><p>Same as <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="nmrpoise.poise_backend.cfhelpers.get2d_rr"><code class="xref any py py-func docutils literal notranslate"><span class="pre">get2d_rr</span></code></a>, except that it reads the ‘2ii’ file.</p>
 </dd></dl>
 
 <p><br /> </p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.getpar">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">getpar</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.getpar" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.getpar">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">getpar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.getpar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Obtains the value of a numeric (acquisition or processing) parameter.
 Non-numeric parameters (i.e. strings) are not currently accessible! Works
 for both 1D and 2D spectra (see return type below), but nothing higher.</p>
@@ -307,8 +308,8 @@ dimension), getpar() returns a float.</p>
 
 <p><br /> </p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.getndim">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">getndim</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.getndim" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.getndim">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">getndim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.getndim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Obtains the dimensionality of the spectrum, i.e. the status value of
 PARMODE, plus one (becaus PARMODE is 0 for 1D spectra, etc.)</p>
 <dl class="field-list">
@@ -330,23 +331,23 @@ spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p
 
 <p><br /> </p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.getnfev">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">getnfev</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.getnfev" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.getnfev">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">getnfev</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.getnfev" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the number of NMR spectra evaluated so far. This will be equal to 1
 (not 0) the first time the cost function is called, since the cost function
 is only called after the NMR spectrum has been acquired.</p>
 </dd></dl>
 
-</div>
-<div class="section" id="logging">
+</section>
+<section id="logging">
 <h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
 <p>As noted above, printing anything to <code class="docutils literal notranslate"><span class="pre">stdout</span></code> will cause the optimisation to crash.
 The reason for this is because <code class="docutils literal notranslate"><span class="pre">stdout</span></code> is reserved for communication between the POISE backend (the Python 3 component) and frontend (which runs in TopSpin).
 Please use <a class="reference internal" href="#nmrpoise.poise_backend.cfhelpers.log" title="nmrpoise.poise_backend.cfhelpers.log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">log()</span></code></a> instead, which will print to the <code class="docutils literal notranslate"><span class="pre">poise.log</span></code> file in the expno folder.
 It works in exactly the same way as the familiar <code class="docutils literal notranslate"><span class="pre">print()</span></code>, and accepts the same kind of arguments.</p>
 <dl class="py function">
-<dt id="nmrpoise.poise_backend.cfhelpers.log">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></code><code class="sig-name descname"><span class="pre">log</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.log" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.log">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints something to the poise.log file.</p>
 <p>If this is called from inside a cost function, the text is printed <em>before</em>
 the cost function is evaluated, so will appear above the corresponding
@@ -367,8 +368,8 @@ function evaluation.</p>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="premature-termination">
+</section>
+<section id="premature-termination">
 <h2>Premature termination<a class="headerlink" href="#premature-termination" title="Permalink to this headline">¶</a></h2>
 <p>In order to terminate an optimisation prematurely, you can raise any exception you like, for example with <code class="docutils literal notranslate"><span class="pre">raise</span> <span class="pre">ValueError</span></code>.
 POISE will stop the optimisation, and the error will be displayed in TopSpin.
@@ -405,16 +406,16 @@ If you want to make sure that the final point (which raised the CostFunctionErro
 </pre></div>
 </div>
 <p>Because <code class="docutils literal notranslate"><span class="pre">-np.inf</span></code> is smaller than any other possible number, it will always be picked as the “best” point.</p>
-</div>
-<div class="section" id="examples">
+</section>
+<section id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <p>There are a number of cost functions which ship with POISE.
 These can all be found inside the <code class="docutils literal notranslate"><span class="pre">costfunctions.py</span></code> file referred to above.
 This file also contains a number of more specialised cost functions, which were used for the examples in the POISE paper.
 (Instead of opening the file, you can also find the <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/blob/master/nmrpoise/poise_backend/costfunctions.py">source code on GitHub</a>.)</p>
 <p>A number of these are thoroughly commented with detailed explanations; do consider checking these out if you want more guidance on how to write your own cost function.</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
@@ -489,7 +490,7 @@ This file also contains a number of more specialised cost functions, which were 
       &copy;2021, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

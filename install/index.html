@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Installation &#8212; poise  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -32,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="installation">
+  <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>POISE comprises a <em>frontend</em> script, which is accessible from within TopSpin itself, as well as a <em>backend</em> script, which has to be run using Python 3 (i.e. not TopSpin’s native Python interpreter).</p>
 <p>This means that Python 3 must be installed separately first.
@@ -48,15 +49,15 @@ For Unix machines, we suggest using a package manager to do so (such as Homebrew
 To do so, it checks for TopSpin installations in standard directories (<code class="docutils literal notranslate"><span class="pre">/opt</span></code> on Unix and <code class="docutils literal notranslate"><span class="pre">C:\Bruker</span></code> on Windows).
 If <code class="docutils literal notranslate"><span class="pre">pip</span></code> exits without errors, this should have succeeded; you can test it by typing <code class="docutils literal notranslate"><span class="pre">poise</span> <span class="pre">-h</span></code> into TopSpin’s command-line, which should spawn a popup.
 If that is the case, congratulations — you can move on to the next chapter, <a class="reference internal" href="../routines/"><span class="doc">Setting up a Routine</span></a>.</p>
-<div class="section" id="updating-poise">
+<section id="updating-poise">
 <h2>Updating POISE<a class="headerlink" href="#updating-poise" title="Permalink to this headline">¶</a></h2>
 <p>Simply use:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">nmrpoise</span>
 </pre></div>
 </div>
 <p>All other steps (including troubleshooting, if necessary) are the same.</p>
-</div>
-<div class="section" id="troubleshooting">
+</section>
+<section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
 <p>The installation can occasionally fail if TopSpin is installed to a non-standard location.
 To solve this issue, you can specify the TopSpin installation directory as an environment variable <code class="docutils literal notranslate"><span class="pre">TSDIR</span></code> before installing POISE.
@@ -76,8 +77,8 @@ The way to do this depends on what operating system (and shell) you use.</p>
 </div>
 <p>(Unless you’re using <code class="docutils literal notranslate"><span class="pre">csh</span></code> or the like, in which case you use <code class="docutils literal notranslate"><span class="pre">setenv</span></code>, although you probably didn’t need to be told that!)</p>
 <p>After running the appropriate command for your operating system, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">nmrpoise</span></code> should be able to detect the <code class="docutils literal notranslate"><span class="pre">TSDIR</span></code> environment variable and install the scripts accordingly.</p>
-</div>
-<div class="section" id="from-source">
+</section>
+<section id="from-source">
 <h2>From source<a class="headerlink" href="#from-source" title="Permalink to this headline">¶</a></h2>
 <p>If you obtained the source code (e.g. from <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code> or a <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/releases">GitHub release</a>) and want to install from there, simply <code class="docutils literal notranslate"><span class="pre">cd</span></code> into the top-level <code class="docutils literal notranslate"><span class="pre">nmrpoise</span></code> directory and run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
@@ -88,8 +89,8 @@ The way to do this depends on what operating system (and shell) you use.</p>
 </pre></div>
 </div>
 <p>The installation to the TopSpin directory is subject to the same considerations as above.</p>
-</div>
-<div class="section" id="without-an-internet-connection">
+</section>
+<section id="without-an-internet-connection">
 <h2>Without an internet connection<a class="headerlink" href="#without-an-internet-connection" title="Permalink to this headline">¶</a></h2>
 <p>If your spectrometer does not have an Internet connection, then the installation becomes a bit more protracted.
 On a computer that <em>does</em> have an Internet connection:</p>
@@ -116,8 +117,8 @@ On a computer that <em>does</em> have an Internet connection:</p>
 </li>
 </ol>
 <p>It should then install properly, unless your TopSpin installation location is non-standard: in that case, set the <code class="docutils literal notranslate"><span class="pre">$TSDIR</span></code> environment variable (described above) before retrying Step 2.</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
@@ -191,7 +192,7 @@ On a computer that <em>does</em> have an Internet connection:</p>
       &copy;2021, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

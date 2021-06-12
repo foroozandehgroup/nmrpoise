@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Running an optimisation &#8212; poise  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -32,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="running-an-optimisation">
+  <section id="running-an-optimisation">
 <h1>Running an optimisation<a class="headerlink" href="#running-an-optimisation" title="Permalink to this headline">¶</a></h1>
 <p>Assuming you or someone else has already created a routine (see <a class="reference internal" href="../routines/"><span class="doc">Setting up a Routine</span></a> if not), this page will show you how to run the optimisation.
 We’ll use the same <code class="docutils literal notranslate"><span class="pre">p1</span></code> calibration routine that we described on that page, but the principles apply equally to all routines.</p>
@@ -66,7 +67,7 @@ You should get a result in 1–2 minutes.</p>
 <img alt="../_images/running2.png" class="align-center" src="../_images/running2.png" />
 <p>The best value(s) will automatically be stored in the corresponding parameter so that any subsequent acquisition will use the optimised parameters.
 Don’t forget that for this particular optimisation, you will have to divide the optimised value by 4 to get back the 90° pulse.</p>
-<div class="section" id="parsing-the-log">
+<section id="parsing-the-log">
 <h2>Parsing the log<a class="headerlink" href="#parsing-the-log" title="Permalink to this headline">¶</a></h2>
 <p>If you are interested in analysing data from (possibly multiple) optimisation runs, all information is logged in a <code class="docutils literal notranslate"><span class="pre">poise.log</span></code> file.
 This log file is stored inside the expno folder (the post-optimisation popup also tells you where it can be found — see above for an example).
@@ -82,8 +83,8 @@ However, this object does not include details of individual cost function evalua
 If you want to analyse that data, you will have to write your own function!</p>
 <p>The full documentation for <a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> (which really doesn’t say much more than the previous example) is as follows:</p>
 <dl class="py function">
-<dt id="nmrpoise.parse_log">
-<code class="sig-prename descclassname"><span class="pre">nmrpoise.</span></code><code class="sig-name descname"><span class="pre">parse_log</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.parse_log" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="nmrpoise.parse_log">
+<span class="sig-prename descclassname"><span class="pre">nmrpoise.</span></span><span class="sig-name descname"><span class="pre">parse_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.parse_log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a poise.log file.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
@@ -105,15 +106,15 @@ terminated. The time taken is given in seconds.</p>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="errors">
+</section>
+<section id="errors">
 <h2>Errors<a class="headerlink" href="#errors" title="Permalink to this headline">¶</a></h2>
 <p>POISE tries its best to exit gracefully from errors, and often you won’t need to care about any of them.
 However, if something <em>does</em> go wrong during an optimisation, errors will be logged to the two files <code class="docutils literal notranslate"><span class="pre">poise_err_frontend.log</span></code> and <code class="docutils literal notranslate"><span class="pre">poise_err_backend.log</span></code>, depending on which script runs into an error.
 These files reside in the same folder as <code class="docutils literal notranslate"><span class="pre">poise.log</span></code>, i.e. the “expno folder”.
 We welcome bug reports — please <a class="reference external" href="https://github.com/foroozandehgroup/nmrpoise/issues">submit an issue on GitHub</a> or drop us an email (addresses can be found on the paper).</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
@@ -185,7 +186,7 @@ We welcome bug reports — please <a class="reference external" href="https://gi
       &copy;2021, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
