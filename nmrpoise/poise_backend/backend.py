@@ -31,7 +31,8 @@ if __name__ == "__main__" and __package__ is None:
     __import__(__package__)
 
 from .optpoise import (scale, unscale, deco_count,
-                       nelder_mead, multid_search, pybobyqa_interface)
+                       nelder_mead, multid_search, pybobyqa_interface,
+                       OutOfBoundsError)
 from .shared import _g
 from .cfhelpers import *
 from . import costfunctions
@@ -283,12 +284,9 @@ def acquire_nmr(x, cost_function, routine):
         if (_g.optimiser in ["nm", "mds"] and
                 (np.any(unscaled_val < routine.lb)
                  or np.any(unscaled_val > routine.ub))):
-            # Set the value of the cost function to infinity.
-            cf_val = np.inf
-            # Log that.
-            print(fstr.format(*unscaled_val, cf_val), file=logf)
-            # Return immediately.
-            return cf_val
+            # Log a 'cost function' of infinity then raise an error.
+            print(fstr.format(*unscaled_val, np.inf), file=logf)
+            raise OutOfBoundsError
 
         # Print unscaled values, prompting frontend script to start acquisition
         print("values: " + " ".join([str(i) for i in unscaled_val]))

@@ -236,6 +236,10 @@ class EarlyTerminationError(Exception):
     pass
 
 
+class OutOfBoundsError(Exception):
+    pass
+
+
 def deco_count(fn):
     """
     Decorator which counts the number of times a function has been called, as
@@ -245,10 +249,13 @@ def deco_count(fn):
     """
     @wraps(fn)
     def counter(*args, **kwargs):
-        result = fn(*args, **kwargs)
-        if result != np.inf:
+        try:
+            result = fn(*args, **kwargs)
+        except OutOfBoundsError:
+            return np.inf  # don't increment calls as experiment was never run
+        else:
             counter.calls += 1
-        return result
+            return result
     counter.calls = 0
     return counter
 
