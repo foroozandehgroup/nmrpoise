@@ -122,7 +122,8 @@ class Simplex():
     """
     Simplex class.
     """
-    def __init__(self, x0, method="spendley", length=MAGIC_TOL * 10):
+    def __init__(self, x0, method="spendley",
+                 length=MAGIC_TOL * 10, seed=None):
         """
         Initialises a Simplex object.
 
@@ -143,6 +144,11 @@ class Simplex():
             A measure of the size of the initial simplex. Defaults to
             MAGIC_TOL * 10, because that's 10 times the tolerances after the
             problem is scaled by tols.
+        seed : int or other types, optional
+            Initial seed for random number generation. Only applicable for
+            method="random". This parameter is passed directly to
+            `numpy.random.default_rng()`; the full list of acceptable input is
+            documented there.
         """
         self.x0 = np.ravel(np.asfarray(x0))
         self.N = np.size(self.x0)
@@ -176,7 +182,7 @@ class Simplex():
             # Rosenbrock with x0 = [1.3, 0.7, 0.8, 1.9, 1.2]: 705 nfev, 431 nit
             # (average over 1000 iterations)
             self.x[0] = self.x0
-            rng = np.random.default_rng()
+            rng = np.random.default_rng(seed=seed)
             for i in range(1, self.N + 1):
                 self.x[i] = rng.uniform(size=self.N)
         else:
@@ -306,7 +312,7 @@ class OptResult:
 
 
 def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
-                args=(), maxfev=0, simplex_method="spendley"):
+                args=(), maxfev=0, simplex_method="spendley", seed=None):
     """
     Nelder-Mead optimiser, as described in Section 8.1 of Kelley, "Iterative
     Methods for Optimization".
@@ -334,7 +340,12 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
         Maximum function evaluations to use. Defaults to 500 times the number
         of parameters.
     simplex_method : str, optional
-        Method for generation of initial simplex.
+       Method for generation of initial simplex.
+    seed : int or other types, optional
+        Initial seed for random number generation. Only applicable for
+        simplex_method="random". This parameter is passed directly to
+        `numpy.random.default_rng()`; the full list of acceptable input is
+        documented there.
 
     Returns
     -------
@@ -379,7 +390,7 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
         raise ValueError("Nelder-Mead: x0 and xtol have incompatible lengths")
 
     # Create and initialise simplex object.
-    sim = Simplex(x0, method=simplex_method, length=MAGIC_TOL * 10)
+    sim = Simplex(x0, method=simplex_method, length=MAGIC_TOL * 10, seed=seed)
     # Number of iterations. Function evaluations are stored as cf.calls.
     niter = 0
 
@@ -523,7 +534,7 @@ def nelder_mead(cf, x0, xtol, scaled_lb, scaled_ub,
 
 
 def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
-                  args=(), maxfev=0, simplex_method="spendley"):
+                  args=(), maxfev=0, simplex_method="spendley", seed=None):
     """
     Multidimensional search optimiser, as described in Secion 8.2 of Kelley,
     "Iterative Methods for Optimization".
@@ -552,6 +563,11 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
         of parameters.
     simplex_method : str, optional
         Method for generation of initial simplex.
+    seed : int or other types, optional
+        Initial seed for random number generation. Only applicable for
+        simplex_method="random". This parameter is passed directly to
+        `numpy.random.default_rng()`; the full list of acceptable input is
+        documented there.
 
     Returns
     -------
@@ -589,7 +605,7 @@ def multid_search(cf, x0, xtol, scaled_lb, scaled_ub,
                          "incompatible lengths")
 
     # Create and initialise simplex object.
-    sim = Simplex(x0, method=simplex_method, length=MAGIC_TOL * 10)
+    sim = Simplex(x0, method=simplex_method, length=MAGIC_TOL * 10, seed=seed)
     # Number of iterations. Function evaluations are stored as cf.calls.
     niter = 0
 
