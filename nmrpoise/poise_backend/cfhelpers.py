@@ -249,7 +249,7 @@ def _get_1d(spec_fname, bounds="", p_spec=None):
     # OK now we can proceed as normal.
     if bounds == "":
         if _g.spec_f1p is None and _g.spec_f2p is None:  # DPL not used
-            return spec
+            return spec.astype(np.float64)
         else:
             # set the bounds to F1P and F2P if they are not None.
             left, right = _g.spec_f1p, _g.spec_f2p
@@ -265,7 +265,8 @@ def _get_1d(spec_fname, bounds="", p_spec=None):
     if right is not None:
         right_point = _ppm_to_point(right, p_spec=p_spec)
 
-    return spec[left_point:right_point + 1]
+    result = spec[left_point:right_point + 1]
+    return result.astype(np.float64)  # guard against overflows
 
 
 def get1d_real(bounds="", p_spec=None):
@@ -373,8 +374,10 @@ def _get_2d(spec_fname, f1_bounds="", f2_bounds="", p_spec=None):
         if f2_lower is not None else si[1] - 1
     f2_upper_point = _ppm_to_point(f2_upper, axis=1, p_spec=p_spec) \
         if f2_upper is not None else 0
-    return sp[f1_upper_point:f1_lower_point + 1,
-              f2_upper_point:f2_lower_point + 1]
+
+    result = sp[f1_upper_point:f1_lower_point + 1,
+                f2_upper_point:f2_lower_point + 1]
+    return result.astype(np.float64)  # guard against overflows
 
 
 def get2d_rr(f1_bounds="", f2_bounds="", p_spec=None):
