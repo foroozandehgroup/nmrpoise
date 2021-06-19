@@ -304,11 +304,12 @@ def acquire_nmr(x, cost_function, routine):
                 cf_val = cost_function()
             except CostFunctionError as e:
                 # Log the point and cost function
-                if isinstance(e.cf_val, (int, float)):
+                try:
+                    e.cf_val = float(e.cf_val)
                     print(fstr.format(*unscaled_val, e.cf_val), file=logf)
                     _g.xvals.append(unscaled_val)
                     _g.fvals = np.append(_g.fvals, e.cf_val)
-                else:
+                except ValueError:   # couldn't be converted to a float
                     fstr2 = "{:^10.4f}  " * len(x)
                     print(fstr2.format(*unscaled_val), file=logf)
                 # Log the exception and return control to optimiser.
@@ -322,7 +323,9 @@ def acquire_nmr(x, cost_function, routine):
                                      " you forget to return a value at the"
                                      " end of the cost function?")
                 # Check whether it's a float.
-                if not isinstance(cf_val, (int, float)):
+                try:
+                    cf_val = float(cf_val)
+                except ValueError:
                     raise ValueError("Expected cost function to return a"
                                      " single numeric value, but instead got"
                                      f" an object of type {type(cf_val)}.")
