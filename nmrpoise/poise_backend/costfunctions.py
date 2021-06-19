@@ -99,13 +99,22 @@ def maxrealint():
     return -np.sum(get1d_real())
 
 
-def zerorealint():
+def zeronetrealint():
     """
-    Tries to get the intensity of the real spectrum to be as close to zero as
-    possible. This works by summation, so dispersion-mode peaks will not
-    contribute to this cost function (as they add to zero).
+    Tries to get the *net* intensity of the real spectrum to be as close to
+    zero as possible. Note that dispersion-mode peaks will contribute to this
+    cost function (as they add to zero).
     """
     return np.abs(np.sum(get1d_real()))
+
+
+def zerorealint():
+    """
+    Tries to get the real spectrum to be as close to zero as possible. This
+    takes the absolute value of the real spectrum before summing, so
+    dispersion-mode peaks do not add to zero.
+    """
+    return np.sum(np.abs(get1d_real()))
 
 
 def epsi_gradient_drift():
