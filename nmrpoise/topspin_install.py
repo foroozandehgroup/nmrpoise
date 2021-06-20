@@ -15,6 +15,10 @@ from pathlib import Path
 from glob import glob
 
 
+# AU scripts to be automatically installed with POISE.
+CORE_AU_SCRIPTS = ["poise_1d", "poise_2d", "poisecal"]
+
+
 def cp_r(src, dest):
     """
     Recursively copies src to dest.
@@ -88,9 +92,7 @@ def main():
     poise_py_out = dirname / "poise.py.out"
     # Iterate over lines in poise.py and print them to poise.py.out
     # Essentially this is sed -i behaviour.
-    # open() only takes Path objects in >= 3.6
-    with open(str(poise_py), "r") as infile, \
-            open(str(poise_py_out), "w") as outfile:
+    with open(poise_py, "r") as infile, open(poise_py_out, "w") as outfile:
         for line in infile:
             if line.startswith("p_python3 = "):
                 line = f"p_python3 = r\"{Path(sys.executable)}\""
@@ -98,7 +100,7 @@ def main():
             # includes one for us.
             print(line.rstrip(), file=outfile)
     # Copy the new file over the old file.
-    cp(str(poise_py_out), str(poise_py))
+    cp(poise_py_out, poise_py)
 
     # Copy the files to TopSpin's directories.
     for ts_path in ts_paths:
@@ -106,18 +108,17 @@ def main():
         ts_backend_path = ts_path / "py" / "user" / "poise_backend"
         # Copy poise.py and poise_backend/ to TopSpin path, except for
         # costfunctions_user.py (which is hardcoded as an exception in cp_r()).
-        cp(str(poise_py), str(ts_user_path))
-        cp_r(str(poise_backend), str(ts_backend_path))
+        cp(poise_py, ts_user_path)
+        cp_r(poise_backend, ts_backend_path)
         # Copy costfunctions_user.py but only if it's not found.
         cf_user_path = poise_backend / "costfunctions_user.py"
         ts_cf_user_path = ts_backend_path / "costfunctions_user.py"
         if not ts_cf_user_path.exists():
-            cp(str(cf_user_path), str(ts_cf_user_path))
+            cp(cf_user_path, ts_cf_user_path)
         # Copy core AU scripts over. The others can be installed with
         # poise_addons.
         ts_au_user_path = ts_path / "au" / "src" / "user"
-        core_au_scripts = ["poise_1d", "poise_2d", "poisecal"]
-        for auscript in core_au_scripts:
+        for auscript in CORE_AU_SCRIPTS:
             src = dirname / "au" / auscript
             dest = ts_au_user_path / auscript
             cp(str(src), str(dest))
@@ -150,18 +151,18 @@ def get_topspin_path(ostype):
         If no paths were found. We need to throw an error so that the pip
         installation fails.
     """
-    invalid_envvar_error = (
+    INVALID_ENVVAR_ERROR = (
         "The TopSpin installation directory was specified as the environment "
         "variable TSDIR, but it was not a valid path.\n\n"
         "Please make sure that TSDIR points to the ../exp/stan/nmr folder in "
         "TopSpin."
     )
-    no_tsdir_unix_error = (
+    NO_TSDIR_UNIX_ERROR = (
         "A valid TopSpin installation directory was not found.\n"
         "Please set it using the TSDIR environment variable:\n\n"
         "\texport TSDIR=/opt/topspinX.Y.Z/exp/stan/nmr\n"
     )
-    no_tsdir_win_error = (
+    NO_TSDIR_WIN_ERROR = (
         "A valid TopSpin installation directory was not found.\n"
         "Please set it using the TSDIR environment variable:\n\n"
         "\t$env:TSDIR = \"C:\\Bruker\\TopSpinX.Y.Z\\exp\\stan\\nmr\"\n"
@@ -170,7 +171,7 @@ def get_topspin_path(ostype):
         ts = os.environ["TSDIR"]    # KeyError if not provided
         py_user = ts / "py" / "user"
         if not ts.is_dir() and py_user.is_dir():
-            raise RuntimeError(invalid_envvar_error)
+            raise RuntimeError(INVALID_ENVVAR_ERROR)
         dirs = [ts]
     else:
         if ostype == "unix":
@@ -181,9 +182,9 @@ def get_topspin_path(ostype):
 
         if len(dirs) == 0:              # No TopSpin folders found
             if ostype == "unix":
-                raise RuntimeError(no_tsdir_unix_error)
+                raise RuntimeError(NO_TSDIR_UNIX_ERROR)
             if ostype == "win":
-                raise RuntimeError(no_tsdir_win_error)
+                raise RuntimeError(NO_TSDIR_WIN_ERROR)
         else:
             # Convert to pathlib.Path and filter out invalid entries
             dirs = [Path(dir) for dir in dirs
@@ -191,9 +192,9 @@ def get_topspin_path(ostype):
             # Error out if no valid ones were found
             if dirs == []:
                 if ostype == "unix":
-                    raise RuntimeError(no_tsdir_unix_error)
+                    raise RuntimeError(NO_TSDIR_UNIX_ERROR)
                 if ostype == "win":
-                    raise RuntimeError(no_tsdir_win_error)
+                    raise RuntimeError(NO_TSDIR_WIN_ERROR)
 
     print("topspin_install.py: found TopSpin paths", dirs)
     return dirs
