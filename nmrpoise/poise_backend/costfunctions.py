@@ -117,6 +117,18 @@ def zerorealint():
     return np.sum(np.abs(get1d_real()))
 
 
+def zerorealint_squared():
+    """
+    Tries to get the real spectrum to be as close to zero as possible. This
+    uses a sum-of-squares metric, which (compared to ``zerorealint``) leads to
+    two main differences. Firstly, dispersion-mode peaks do not sum to zero
+    because sign information is lost upon squaring. Secondly, it more strongly
+    penalises large deviations away from zero.
+    """
+    s = get1d_real()
+    return np.sum(s * s)
+
+
 def epsi_gradient_drift():
     """
     Calculates the amount of 'gradient drift' seen in a 1D EPSI acquisition, as

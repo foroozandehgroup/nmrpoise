@@ -15,5 +15,6 @@ def test_get_cfs(capsys):
                                  "maxrealint",
                                  "zeronetrealint",
                                  "zerorealint",
+                                 "zerorealint_squared",
                                  "epsi_gradient_drift"
                                  }
