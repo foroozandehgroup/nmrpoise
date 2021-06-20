@@ -1,0 +1,1 @@
+{"name": "solvsupp1", "pars": ["o1"], "lb": [1870.61], "ub": [1890.61], "init": [1880.61], "tol": [0.2], "cf": "zerorealint_squared", "au": "poise_1d_noapk"}
