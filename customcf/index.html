@@ -300,6 +300,9 @@ not found.</p>
 returns an ndarray consisting of (f1_value, f2_value).  Otherwise (for
 1D spectra, or for 2D parameters which only apply to the direct
 dimension), getpar() returns a float.</p>
+<p>Note that a float is returned even for parameters which can logically
+only be integers (e.g. TD). If you want an integer you have to manually
+convert it using <code class="xref any docutils literal notranslate"><span class="pre">int()</span></code>.</p>
 </dd>
 </dl>
 </dd>
