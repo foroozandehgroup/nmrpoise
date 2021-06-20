@@ -204,13 +204,22 @@ def test_get1d_imag():
 
 
 def test_get1d_fid():
+    # TopSpin 3 data
     p_spec = makep(1, 1)
     fid = cfh.get1d_fid(remove_grpdly=False, p_spec=p_spec)
-    npff = np.fromfile(p_spec.parents[1] / "fid", dtype=np.int32)
+    npff = np.fromfile(p_spec.parents[1] / "fid", dtype=np.int32) * (2 ** -7)
     assert np.array_equal(np.real(fid), npff[0::2])
     assert np.array_equal(np.imag(fid), npff[1::2])
 
-    p_spec = makep(101, 1)  # this is a 2D spectrum
+    # TopSpin 4 data
+    p_spec = makep(8, 1)
+    fid = cfh.get1d_fid(remove_grpdly=False, p_spec=p_spec)
+    npff = np.fromfile(p_spec.parents[1] / "fid", dtype=np.double)
+    assert np.array_equal(np.real(fid), npff[0::2])
+    assert np.array_equal(np.imag(fid), npff[1::2])
+
+    # Try to run it on a 2D spectrum
+    p_spec = makep(101, 1)
     with pytest.raises(ValueError, match="not 1D"):
         fid = cfh.get1d_fid(p_spec=p_spec)
 

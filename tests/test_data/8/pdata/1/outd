@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TopSpin 4.0.8
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmr-user
+$$ 2021-06-16 23:29:07.844 +0100  CHEM\nmr-user@ANCHOVY-CRL
+$$ C:\NMR\data\mfgrp\nmr/210616-4f-invrec-opt/1/pdata/1/outd
+$$ process C:\Bruker\TopSpin4.0.8\prog\mod\edparproc.exe
+##$CURPLOT= <A4>
+##$CURPRIN= <$1#1#0#1#1#1#1#1#0#-1#-1#1#-1>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_H.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

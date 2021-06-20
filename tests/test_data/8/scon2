@@ -1,0 +1,24 @@
+##TITLE= Parameter file, TopSpin 4.0.8
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmr-user
+$$ 2021-06-16 23:48:03.573 +0100  CHEM\nmr-user@ANCHOVY-CRL
+$$ C:/NMR/data/mfgrp/nmr/210616-4f-invrec-opt/1/scon2
+$$ process C:\Bruker\TopSpin4.0.8\prog\mod\acqdataserver.exe
+##$BLKTR= (0..32)
+3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+##$DE1= 4.5
+##$DEADC= 0.5
+##$DEPA= 4.5
+##$DERX= 1.5
+##$GRADPRE= (0..1)
+10 10
+##$HD_BLKTR= (0..32)
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+##$HD_DE1= 5
+##$HD_DEADC= 0
+##$HD_DEPA= 2.5
+##$HD_DERX= 0
+##END=

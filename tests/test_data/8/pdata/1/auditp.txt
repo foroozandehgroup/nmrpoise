@@ -1,0 +1,42 @@
+##TITLE= Audit trail, TopSpin 4.0.8
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmr-user
+$$ C:/NMR/data/mfgrp/nmr/210616-4f-invrec-opt/1/pdata/1/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2021-06-16 22:49:19.777 +0000>,<root>,<BladeEpu>,<go4>,<TopSpin 4.0.8>,
+      <created by zg on 'Avance' (ANCHOVY-CRL) by user 'CHEM\nmr-user'
+       on data set with UUID '014ec2dc-cef5-11eb-8669-00139526d3ed'
+       started at 2021-06-16 22:48:45.120 +0000, POWCHK enabled, PULCHK disabled,
+       completed at 2021-06-16 22:49:19.775 +0000
+       configuration hash MD5:
+       4D FF 16 F3 17 D3 F9 DF 88 64 83 B0 16 69 CA EE
+       double data hash MD5: 64K
+       A5 33 FB 77 91 CA 33 33 1A 21 9F 10 4B BB 7B 65>)
+(   2,<2021-06-17 00:02:47.382 +0100>,<CHEM\nmr-user>,<ANCHOVY-CRL>,<proc1d>,<TopSpin 4.0.8>,
+      <Start of raw data processing
+       efp LB = 0.3 FT_mod = 6 PKNL = 1 PHC0 = 145.8418 PHC1 = -17.56225 SI = 64K 
+       data hash MD5: 64K
+       D4 E5 B3 E1 F4 FD D2 65 F0 B8 15 4F 2E 49 77 D7>)
+(   3,<2021-06-17 00:02:48.366 +0100>,<CHEM\nmr-user>,<ANCHOVY-CRL>,<proc1d>,<TopSpin 4.0.8>,
+      <apk 
+       data hash MD5: 64K
+       B8 4D D1 31 83 36 BF 8E 05 B4 9B 39 A6 48 86 40>)
+(   4,<2021-06-17 00:02:48.475 +0100>,<CHEM\nmr-user>,<ANCHOVY-CRL>,<proc1d>,<TopSpin 4.0.8>,
+      <abs ABSG = 5 
+       data hash MD5: 64K
+       82 18 CA AB BB 0B 81 81 DD 27 82 27 98 C5 DF FF>)
+(   5,<2021-06-17 00:02:48.585 +0100>,<CHEM\nmr-user>,<ANCHOVY-CRL>,<proc1d>,<TopSpin 4.0.8>,
+      <ht 
+       data hash MD5: 64K
+       82 18 CA AB BB 0B 81 81 DD 27 82 27 98 C5 DF FF>)
+$$ /Users/yongrenjie/nmrpoise/tests/test_data/8/pdata/1/auditp.txt
+(   6,<2021-06-20 17:38:15.784 +0100>,<yongrenjie>,<Empoleon.local>,<audit>,<TopSpin 4.1.1>,
+      <user comment:
+       TITLE=1H but with TS4 double-type raw dataTITLE_END
+       data hash MD5: 64K
+       82 18 CA AB BB 0B 81 81 DD 27 82 27 98 C5 DF FF>)
+##END=
+
+$$ hash MD5
+$$ 00 11 7E CB AD 00 5D 30 DD 67 60 A2 6C 13 56 CB

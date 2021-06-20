@@ -1,0 +1,129 @@
+CONFIGURATION INFORMATION
+=========================
+
+Path         : /opt/topspin/conf/instr/spect/uxnmr.info
+Date         : Wed Apr 28 14:57:24 2021
+Release      : TopSpin 4.0.8
+Installed in : /opt/topspin
+Host         : BladeEpu
+OS           : CentOS Linux release 7.2.1511 (Core) 
+SPECTR-OS    : Version 4.0.142.20191209
+CPU          : Intel(R) Core(TM) i7-4700EQ CPU @ 2.40GHz (8 cores at 2290 MHz with Hyperthreading)
+User         : root (root)
+System       : Avance Neo 400 NMR spectrometer
+1H-frequency : 400.13 MHz
+Description  : Avance
+Bruker Order : Z165468_00009
+Configured in: BladeEpu:/opt/topspin/conf/instr/spect
+
+AQ-Rack:
+- EPU/2: AV4 EPU/2 Embedded Processing Unit H153448F1/00317 ECL 01.02
+- TRX 1200: AV4 TRANSCEIVER 1200 Z148391/01399 ECL 01.05
+  Location: slot 4 in rack 1
+  Connection: at IP 192.168.180.14 via PCIe #3
+  Firmware Version: 20190906082218
+  Devices: MTD at /dev/mtd1, DRX at /dev/bbu/drx3.5, RTD at /dev/bbu/rtd3.4
+  Sequencer: FCube
+  - FCube1
+- TRX 1200: AV4 TRANSCEIVER 1200 Z148391/01397 ECL 01.05
+  Location: slot 5 in rack 1
+  Connection: at IP 192.168.180.18 via PCIe #4
+  Firmware Version: 20190906082218
+  Devices: MTD at /dev/mtd4, DRX at /dev/bbu/drx4.5, RTD at /dev/bbu/rtd4.4
+  Sequencer: FCube
+  - FCube2
+- GTU: AV4 GT-CONTROLLER UNIT Z148393/00442 ECL 01.01
+  Location: slot 6 in rack 1
+  Connection: at IP 192.168.180.22 via PCIe #5
+  Firmware Version: 20190906085855
+  Devices: MTD at /dev/mtd7, RTD at /dev/bbu/rtd5.4, GPROC at /dev/bbu/gproc5.7
+  Sequencer: GCube, TCube
+  - GCube1
+  - TCube1
+- PSM-A: AV4 PSM-A Z149510/00477 ECL 02.00
+- RACK: AV4 CONSOLE NB WIRED Z163448/0006 ECL 00.00
+- PSM-D: AV4 PSM-D Z149520/00480 ECL 00.02
+- PSM-48V: AV4 PSM-48V Z149850/00942 ECL 01.01
+- PSM-48V: AV4 PSM-48V Z149850/00932 ECL 01.01
+- BLA2BB: BLA2BB 150/60 20-400 W1345049/5683 ECL 92
+- PSM-BLA: AQS INES PSM-BLA POWER SUPPLY Z128045/01351 ECL 02.01
+- REF 1200: AV4 REFERENCE 1200 Z148270/00505 ECL 02.01
+- 1H/2H 1H: AQS 1H/2H PREAMP 400 CRP Z128274/01146 ECL 01.05
+  HPPR2: - HPPR/2 preamplifier connected via AqRack
+      Type      : HPPR/2
+      Controller: no Cover
+                  no LED display for tuning and matching
+      Module  1 : 1H/2H 1H (virtual 50 Ohm reference: 143.9%/78.1deg)
+                  PN=Z128274, SN=01146 from 20171206
+      Module  2 : 1H/2H 2H (virtual 50 Ohm reference: 103.9%/-66.9deg)
+                  PN=Z128274, SN=01146 from 20171206
+      Module  3 : XBB19F 2HS
+                  PN=Z128143, SN=01139 from 20180131
+  
+- 1H/2H 2H: AQS 1H/2H PREAMP 400 CRP Z128274/01146 ECL 01.05
+- XBB19F 2HS: AQS XBB19F 2HS PREAMP CRP 400 Z128143/01139 ECL 07.01
+
+Amplifiers (AQS configuration):
+  RO  Amplifier  Module  Nucleus  Power/W  Switchbox Name PN/SN/FW
+   1      1         1        B      150    N         BLA2BB 150/60 20-400 W1345049/5683/-
+   2      1         2        B       60    N         BLA2BB 150/60 20-400 W1345049/5683/-
+
+
+Transmitters at the spectrometer subnet:
+----------------------------------------
+LTRX Z109888/02429 ECL 04.01:
+- TCP/IP address = 192.168.99.11
+- Amplifier      = BSMS/2 LOCK TRANSCEIVER 400: Z109888/02429 ECL 04.01
+
+BSMS: BSMS/2 connected to ethernet
+- TCP/IP address = 192.168.99.11
+- ELCB firmware version = 20180919
+- ELCB = BSMS/2 ELCB: Z100818/07436 ECL 07.02
+- GAB current limits = 0.0/X, 0.0/Y, 10.0/Z (in A)
+- SCB channels = 40
+- Shim System = BOSS3-SB
+- Shim matrix file: 292722aa.dat
+- Active shims: Z Z2 Z3 Z4 Z5 X XZ XZ2 (X2-Y2) XY Y YZ YZ2 (X2-Y2)Z2 XZ4 XZ3 Z6 (X2-Y2)Z YZ4 YZ3 XYZ2 XYZ X3Z X3 Y3Z Y3 Z7 Z8 XZ5 YZ5 (X2-Y2)Z3 (X2-Y2)Z4 (X2-Y2)Z5 XYZ3 XYZ4 XYZ5
+- Magnet polarity: SN (Bruker), uses standard H0 polarity
+- L-TRX = BSMS/2 LOCK TRANSCEIVER 400: Z109888/02429 ECL 04.01
+- Lock: on L-TRX board, supports 2H
+- VTU_SPB = BSMS/2 SPB SENSOR & PNEUMATIC BD: Z115191/04473 ECL 05.02
+- VTU_VPSB1 = AV4 VARIABLE POWER SUPPLY BD DC: Z139305/00435 ECL 01.02
+
+VTU: in BSMS/2 connected to ethernet
+- TCP/IP address = 192.168.99.11
+
+Sample Changers at the spectrometer subnet:
+-------------------------------------------------
+Sample Changer 1: BACS2_H15200-01_376
+- TCP/IP address   = 192.168.98.2
+- Protocol types   = SOAP
+
+
+Gradient Controller cable connections
+--------------------------------------------------------------------
+
+
+RF cable connections (detected)
+--------------------------------------------------------------------
+TRX1 NORM output -> input 1 of transmitter 1 (BLA2BB 150/60 20-400 W1345049/5683)
+TRX1 AUX  output -> open
+TRX2 NORM output -> input 2 of transmitter 1 (BLA2BB 150/60 20-400 W1345049/5683)
+TRX2 AUX  output -> input 1 of transmitter 2 (BSMS/2 LOCK TRANSCEIVER 400 Z109888/02429 at TCP/IP 192.168.99.11)
+
+Blanking cable connections (detected)
+--------------------------------------------------------------------
+transmitter 1 = BLA2BB 150/60 20-400 W1345049/5683:
+- amplifier B-150W uses blanking 1
+- amplifier B-60W uses blanking 2
+
+transmitter 2 = BSMS/2 LOCK TRANSCEIVER 400 Z109888/02429 at TCP/IP 192.168.99.11:
+- amplifier 2H-5W uses blanking 9
+
+
+Preamplifier connections (detected)
+--------------------------------------------------------------------
+Tune-TRX2 -> 1H/2H 1H   -> REC2
+(no tune) -> 1H/2H 2H   -> (no receiver)
+Tune-TRX1 -> XBB19F 2HS -> REC1
+

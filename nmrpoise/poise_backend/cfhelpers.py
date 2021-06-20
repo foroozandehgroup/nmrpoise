@@ -201,10 +201,23 @@ def get1d_fid(remove_grpdly=True, p_spec=None):
     p_spec = p_spec or _g.p_spectrum
     if getndim(p_spec=p_spec) != 1:
         raise ValueError("get1d_fid(): current spectrum is not 1D")
+    # Determine datatype (TopSpin DTYPA parameter). For int values, NC is used
+    # to scale the data; for double values, NC is not used.
+    bytorda = int(getpar("BYTORDA", p_spec=p_spec))
+    endianness = "<" if bytorda == 0 else ">"
+    dtypa = int(getpar("DTYPA", p_spec=p_spec))
+    if dtypa == 0:
+        datatype = endianness + "i4"
+        scaling_factor = 2 ** int(getpar("NC", p_spec))
+    elif dtypa == 2:
+        datatype = endianness + "d"
+        scaling_factor = 1
+    # Read in the FID
     p_fid = p_spec.parents[1] / "fid"
-    fid = np.fromfile(p_fid, dtype=np.int32)
+    fid = np.fromfile(p_fid, dtype=datatype)
     td = fid.size
     fid = fid.reshape(int(td/2), 2)
+    fid = fid * scaling_factor
     fid = np.transpose(fid)
     # so now fid[0] is the real part, fid[1] the imaginary
     complex_fid = fid[0] + (1j * fid[1])
@@ -595,6 +608,10 @@ def getpar(par, p_spec=None):
         returns an ndarray consisting of (f1_value, f2_value).  Otherwise (for
         1D spectra, or for 2D parameters which only apply to the direct
         dimension), getpar() returns a float.
+
+        Note that a float is returned even for parameters which can logically
+        only be integers (e.g. TD). If you want an integer you have to manually
+        convert it using `int()`.
     """
     p_spec = p_spec or _g.p_spectrum
 
