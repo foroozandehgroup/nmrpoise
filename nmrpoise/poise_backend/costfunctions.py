@@ -248,3 +248,49 @@ def specdiff():
     return np.linalg.norm(target/np.linalg.norm(target) -
                           spec/np.linalg.norm(spec))
 '''
+
+'''
+def dosy():
+    """
+    Tries to make a spectrum (1D diffusion experiment with variable gradient
+    strength) have 25% intensity of a target spectrum (1D diffusion experiment
+    with minimum gradient strength). This should be used in conjunction with
+    the dosy_opt Python programme (after POISE is installed via `pip`, this can
+    be installed from the TopSpin command-line via `poise --install dosy`.)
+    """
+    # The target spectrum is hardcoded to have EXPNO 99998. See psyche() for
+    # more discussion about this.
+    # As in psyche(), the F1P/F2P parameters are not taken from the reference
+    # spectrum but from the spectrum being optimised.
+    reference_path = make_p_spec(expno=99998, procno=1)
+    target = get1d_real(p_spec=reference_path)
+    # This is the spectrum being optimised.
+    spec = get1d_real()
+    # The intensity of the optimised spectrum is np.sum(spec), and likewise for
+    # the target spectrum. We take the ratio of the two and measure how "far
+    # away" this is from the ideal value of 0.25 (which corresponds to 75%
+    # attenuation).
+    return np.abs(np.sum(spec)/np.sum(target) - 0.25)
+'''
+
+'''
+def dosy_aux():
+    """
+    Non-absolute value of dosy(). To be used in the first stage of dosy_opt.
+    """
+    reference_path = make_p_spec(expno=99998, procno=1)
+    target = get1d_real(p_spec=reference_path)
+    spec = get1d_real()
+    return np.sum(spec)/np.sum(target) - 0.25
+'''
+
+'''
+def dosy_2p():
+    """
+    Two-parameter DOSY optimisation.
+    """
+    reference_path = make_p_spec(expno=99998, procno=1)
+    target = get1d_real(p_spec=reference_path)
+    spec = get1d_real()
+    return np.abs(np.sum(spec)/np.sum(target) - 0.25) + getpar("D20")
+'''

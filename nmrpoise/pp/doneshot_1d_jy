@@ -1,0 +1,108 @@
+; doneshot_1d_jy
+;
+; download from: https://git.io/JUHOP
+;
+; 1D version of Doneshot
+; Jonathan Yong - University of Oxford - 26 Aug 2020
+
+; modified from
+; Doneshot
+; DOSY pulse sequence
+; Ralph Adams, Juan Aguilar, Robert Evans, Mathias Nilsson and Gareth Morris
+; University of Manchester
+; Release 1.0c (27Mar2012)
+; 
+; Source citation:
+; M.D. Pelta, G.A. Morris, M.J. Stchedroff, S.J. Hammond, Magn. Reson. Chem. 40 (2002) S147-S152.
+;
+; Other relevant papers that could be of use include:
+; A. Botana, J.A. Aguilar, M. Nilsson, G.A. Morris, J. Magn. Reson. 208 (2011) 270-278.
+;
+;$CLASS=HighRes
+;$DIM=1D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+
+#include <Avance.incl>
+#include <Grad.incl>
+#include <Delay.incl>
+
+"cnst17=(2*p1+d16+p30)*0.000001"  ; Dtau
+
+;Assuming square gradient pulses
+;"cnst18=0.000001*p30*2*0.000001*p30*2*(d20+(0.000001*p30/3)*(cnst14*cnst14-2)+((cnst17)/2)*(cnst14*cnst14-1))" ; Dosytimecubed
+
+;JY - alpha is hardcoded as 0.2
+"cnst14=0.2"
+
+;Assuming half-sine gradient pulses [most common on Bruker systems]
+"cnst18=0.000001*p30*2*0.000001*p30*2*(d20 - (2*0.000001*p30*(5-3*cnst14*cnst14)/16) - (cnst17*(1-cnst14*cnst14)/2) )" ; Dosytimecubed
+"cnst15=1+cnst14"  ; 1 + alpha
+"cnst16=1-cnst14"  ; 1 - alpha
+"p2=p1*2"
+"DELTA1=d20-4.0*p1-4.0*p30-5.0*d16-p19"
+
+;The below line should be commented out for Topspin < 2.0
+"acqt0 = -p1*2/3.1416"
+
+1 ze
+2 d1
+3 50u UNBLKGRAD
+  p19:gp2*-1			;Spoiler gradient balancing pulse
+  d16
+  p1 ph1				;1st 90
+  p30:gp1*cnst16 		 	;1 - alpha
+  d16
+  p2 ph2				;First 180
+  p30:gp1*cnst15*-1		;1 + alpha
+  d16
+  p1 ph3				; 2nd 90
+  p30:gp1*cnst14*2		;Lock refocusing pulse pulse
+  d16
+  p19:gp2				;Spoiler gradient balancing pulse
+  d16
+  DELTA1
+  p30:gp1*cnst14*2 		;Lock refocusing pulse pulse
+  d16
+  p1 ph4				; 3rd 90
+  p30:gp1*cnst16   			; 1 - alpha
+  d16
+  p2 ph5
+  p30:gp1*cnst15*-1			;1 + alpha
+  d16
+  4u BLKGRAD
+  go=2 ph31
+  d1 mc #0 to 2 F0(zd)
+exit
+
+ph1 = 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3 0 2 0 2 1 3 1 3
+ph2 = 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+ph3 = 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+ph4 = 0 0 2 2 0 0 2 2 1 1 3 3 1 1 3 3 2 2 0 0 2 2 0 0 3 3 1 1 3 3 1 1 0 0 2 2 0 0 2 2 1 1 3 3 1 1 3 3 2 2 0 0 2 2 0 0 3 3 1 1 3 3 1 1 0 0 2 2 0 0 2 2 1 1 3 3 1 1 3 3 2 2 0 0 2 2 0 0 3 3 1 1 3 3 1 1 0 0 2 2 0 0 2 2 1 1 3 3 1 1 3 3 2 2 0 0 2 2 0 0 3 3 1 1 3 3 1 1 0 0 2 2 0 0 2 2 1 1 3 3 1 1 3 3 2 2 0 0 2 2 0 0 3 3 1 1 3 3 1 1 0 0 2 2 0 0 2 2 1 1 3 3 1 1 3 3 2 2 0 0 2 2 0 0 3 3 1 1 3 3 1 1 0 0 2 2 0 0 2 2 1 1 3 3 1 1 3 3 2 2 0 0 2 2 0 0 3 3 1 1 3 3 1 1 0 0 2 2 0 0 2 2 1 1 3 3 1 1 3 3 2 2 0 0 2 2 0 0 3 3 1 1 3 3 1 1
+ph5 =0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+
+ph31 = 0 2 2 0 1 3 3 1 3 1 1 3 0 2 2 0 2 0 0 2 3 1 1 3 1 3 3 1 2 0 0 2 2 0 0 2 3 1 1 3 1 3 3 1 2 0 0 2 0 2 2 0 1 3 3 1 3 1 1 3 0 2 2 0 2 0 0 2 3 1 1 3 1 3 3 1 2 0 0 2 0 2 2 0 1 3 3 1 3 1 1 3 0 2 2 0 0 2 2 0 1 3 3 1 3 1 1 3 0 2 2 0 2 0 0 2 3 1 1 3 1 3 3 1 2 0 0 2 0 2 2 0 1 3 3 1 3 1 1 3 0 2 2 0 2 0 0 2 3 1 1 3 1 3 3 1 2 0 0 2 2 0 0 2 3 1 1 3 1 3 3 1 2 0 0 2 0 2 2 0 1 3 3 1 3 1 1 3 0 2 2 0 2 0 0 2 3 1 1 3 1 3 3 1 2 0 0 2 0 2 2 0 1 3 3 1 3 1 1 3 0 2 2 0 0 2 2 0 1 3 3 1 3 1 1 3 0 2 2 0 2 0 0 2 3 1 1 3 1 3 3 1 2 0 0 2
+
+;pl1: f1 channel - power level for pulse (default)
+;p1 : f1 channel -  90 degree high power pulse
+;p19: gradient pulse 2 (spoil gradient)
+;p30: gradient pulse (little DELTA*0.5)
+;d1 : relaxation delay; 1-5 * T1
+;d16: delay for gradient recovery
+;d20: diffusion time (big DELTA)
+
+;cnst14: alpha, typically 0.2
+;cnst15: 1+alpha
+;cnst16: 1-alpha
+;cnst17: Dtau
+;cnst18: dosytimecubed
+
+;ns: 1*n
+;ds: 1*m
+;td1: number of experiments
+
+;gpnam1: SMSQ10.100
+;gpnam2: SMSQ10.100
+;gpz1: DOSY gradient strength. DO NOT EXCEED 80
+;gpz2: Oneshot CTP gradients
