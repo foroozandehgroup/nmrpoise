@@ -1,10 +1,12 @@
-; zg_epsi.2_jy
-; download from: https://git.io/JYGEa
-; 90 pulse followed by EPSI acquisition, with prephasing gradient
+;zg_epsi.2_jy
+;
+;download from: https://git.io/JYGEa
+;
+;90 pulse followed by EPSI acquisition, with prephasing gradient
 
-; modified from uftocsy, Giraudeau et al.
-; https://madoc.univ-nantes.fr/course/view.php?id=24710&section=1
-; IMPORTANT: set p15 + d6 = DW x TD(F2)/(2xL3)
+;modified from uftocsy, Giraudeau et al.
+;https://madoc.univ-nantes.fr/course/view.php?id=24710&section=1
+;IMPORTANT: set p15 + d6 = DW x TD(F2)/(2xL3)
 
 ;$CLASS=HighRes
 ;$DIM=1D
