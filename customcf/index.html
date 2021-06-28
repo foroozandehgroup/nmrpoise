@@ -59,7 +59,7 @@ Secondly, any cost functions defined in <code class="docutils literal notranslat
 <section id="accessing-spectra-and-parameters">
 <h2>Accessing spectra and parameters<a class="headerlink" href="#accessing-spectra-and-parameters" title="Permalink to this headline">¶</a></h2>
 <p>The most primitive way of accessing “outside” information is through the class <code class="docutils literal notranslate"><span class="pre">_g</span></code>, which is imported from <code class="docutils literal notranslate"><span class="pre">shared.py</span></code> and contains a series of global variables reflecting the current optimisation.
-For example, <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code> is the path to the procno folder: you can read and parse the <code class="docutils literal notranslate"><span class="pre">1r</span></code> file inside this to get the real spectrum as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref any docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> (for example).</p>
+For example, <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code> is the path to the procno folder: you can read and parse the <code class="docutils literal notranslate"><span class="pre">1r</span></code> file inside this to get the real spectrum as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)"><code class="xref any docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> (for example).</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nmrpoise.poise_backend.shared._g">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.shared.</span></span><span class="sig-name descname"><span class="pre">_g</span></span><a class="headerlink" href="#nmrpoise.poise_backend.shared._g" title="Permalink to this definition">¶</a></dt>
@@ -139,7 +139,7 @@ folders).</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.get1d_fid">
 <span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">get1d_fid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remove_grpdly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_fid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the FID as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>.</p>
+<dd><p>Returns the FID as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
@@ -154,7 +154,7 @@ folder two levels up.) Defaults to the currently active spectrum (i.e.
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>Complex-valued array containing the FID.</p>
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>Complex-valued array containing the FID.</p>
 </dd>
 </dl>
 </dd>
@@ -165,7 +165,7 @@ folder two levels up.) Defaults to the currently active spectrum (i.e.
 <dl class="py function">
 <dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.get1d_real">
 <span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">get1d_real</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get1d_real" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the real spectrum as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>. This function accounts for
+<dd><p>Return the real spectrum as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>. This function accounts for
 TopSpin’s <code class="docutils literal notranslate"><span class="pre">NC_PROC</span></code> variable, scaling the spectrum intensity accordingly.</p>
 <p>Note that this function only works for 1D spectra. It does <em>not</em> work for
 1D projections of 2D spectra. If you want to work with projections, you can
@@ -195,7 +195,7 @@ spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>Array containing the spectrum or the desired section of it (if bounds
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>Array containing the spectrum or the desired section of it (if bounds
 were specified).</p>
 </dd>
 </dl>
@@ -215,7 +215,7 @@ were specified).</p>
 <dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.get2d_rr">
 <span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">get2d_rr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f1_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f2_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.get2d_rr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the real part of the 2D spectrum (the “RR” quadrant) as a 2D
-<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>. This function takes into account the <code class="docutils literal notranslate"><span class="pre">NC_PROC</span></code> value in
+<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>. This function takes into account the <code class="docutils literal notranslate"><span class="pre">NC_PROC</span></code> value in
 TopSpin’s processing parameters.</p>
 <p>The <em>f1_bounds</em> and <em>f2_bounds</em> parameters may be specified in the
 following formats:</p>
@@ -246,7 +246,7 @@ spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>2D array containing the spectrum or the desired section of it (if
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>2D array containing the spectrum or the desired section of it (if
 <em>f1_bounds</em> or <em>f2_bounds</em> were specified).</p>
 </dd>
 </dl>
@@ -294,7 +294,7 @@ spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl>
-<dt>float or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>Value(s) of the requested parameter. None if the given parameter was
+<dt>float or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></dt><dd><p>Value(s) of the requested parameter. None if the given parameter was
 not found.</p>
 <p>For parameters that exist for both dimensions of 2D spectra, getpar()
 returns an ndarray consisting of (f1_value, f2_value).  Otherwise (for
