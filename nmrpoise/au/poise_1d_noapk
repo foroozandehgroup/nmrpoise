@@ -1,0 +1,4 @@
+ZG            // acquire
+EFP           // exponential apodisation, Fourier transform
+XCMD("abs n") // automatic baseline correction
+QUIT

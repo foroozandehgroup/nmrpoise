@@ -16,7 +16,7 @@ from glob import glob
 
 
 # AU scripts to be automatically installed with POISE.
-CORE_AU_SCRIPTS = ["poise_1d", "poise_2d", "poisecal"]
+CORE_AU_SCRIPTS = ["poise_1d", "poise_2d", "poise_1d_noapk", "poisecal"]
 
 
 def cp_r(src, dest):
