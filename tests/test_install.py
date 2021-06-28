@@ -42,10 +42,14 @@ def test_topspin_installation(tmpdir):
     remove_tree(str(py_user_path / "poise_backend"))
     delete_file_force(au_src_user_path / "poise_1d")
     delete_file_force(au_src_user_path / "poise_2d")
+    delete_file_force(au_src_user_path / "poise_1d_noapk")
+    delete_file_force(au_src_user_path / "poisecal")
     assert not (py_user_path / "poise.py").exists()
     assert not (py_user_path / "poise_backend").exists()
     assert not (au_src_user_path / "poise_1d").exists()
     assert not (au_src_user_path / "poise_2d").exists()
+    assert not (au_src_user_path / "poise_1d_noapk").exists()
+    assert not (au_src_user_path / "poisecal").exists()
 
     # Copy package to a temporary directory
     tmpdir = Path(tmpdir)
@@ -69,3 +73,5 @@ def test_topspin_installation(tmpdir):
     assert (py_user_path / "poise_backend" / "example_routines").exists()
     assert (au_src_user_path / "poise_1d").exists()
     assert (au_src_user_path / "poise_2d").exists()
+    assert (au_src_user_path / "poise_1d_noapk").exists()
+    assert (au_src_user_path / "poisecal").exists()
