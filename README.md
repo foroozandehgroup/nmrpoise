@@ -16,6 +16,10 @@
 <b>Jonathan Yong and Mohammadali Foroozandeh, University of Oxford</b>
 </p>
 
+<p align="center">
+<i>Anal. Chem.</i> <b>2021,</b> ASAP. <a href="https://doi.org/10.1021/acs.analchem.1c01767">DOI: 10.1021/acs.analchem.1c01767</a>
+</p>
+
 ---------
 
 ### Overview
