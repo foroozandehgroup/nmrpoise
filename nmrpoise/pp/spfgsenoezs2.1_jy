@@ -122,7 +122,7 @@ ph31=0 2 2 0 0 2 2 0
 ;                      ~10  :  17  :  40  :  25
 
 ;for z-only gradients:
-;gpz0: ca. 10 %
+;gpz0: 10% or so
 ;gpz1: 17%
 ;gpz3: 40%
 ;gpz4: 25%
