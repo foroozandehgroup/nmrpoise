@@ -5,7 +5,9 @@ POISE (*Parameter Optimisation by Iterative Spectral Evaluation*) is a Python pa
 
 The code is licensed under `the GNU General Public License v3 <https://www.gnu.org/licenses/gpl-3.0.en.html>`_ and can be found on `GitHub <https://github.com/foroozandehgroup/nmrpoise>`_.
 
-For more information, do check out the paper: *Anal. Chem.* **2021,** ASAP. `DOI: 10.1021/acs.analchem.1c01767 <https://doi.org/10.1021/acs.analchem.1c01767>`_.
+For more information, do check out the paper:
+
+ - Yong, J. R. J.; Foroozandeh, M. On-the-Fly, Sample-Tailored Optimization of NMR Experiments. *Anal. Chem.* **2021,** *93* (31), 10735–10739. DOI: `10.1021/acs.analchem.1c01767 <https://doi.org/10.1021/acs.analchem.1c01767>`_.
 
 .. note::
 
