@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-<i>Anal. Chem.</i> <b>2021,</b> ASAP. <a href="https://doi.org/10.1021/acs.analchem.1c01767">DOI: 10.1021/acs.analchem.1c01767</a>
+<i>Anal. Chem.</i> <b>2021,</b> <i>93</i> (31), 10735–10739. <a href="https://doi.org/10.1021/acs.analchem.1c01767">DOI: 10.1021/acs.analchem.1c01767</a>
 </p>
 
 ---------
