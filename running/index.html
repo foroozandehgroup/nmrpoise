@@ -78,7 +78,7 @@ Some of the key information inside the <code class="docutils literal notranslate
 <span class="go">0   p1cal     48.0  [p1]  40.0  56.0  0.2        nm  minabsint  poise_1d   48.125  6.849146e+06    10    77</span>
 </pre></div>
 </div>
-<p><a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.1)"><code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> object which contains most of the information in the log file.
+<p><a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> returns a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.2)"><code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> object which contains most of the information in the log file.
 However, this object does not include details of individual cost function evaluations (even though these are fully logged).
 If you want to analyse that data, you will have to write your own function!</p>
 <p>The full documentation for <a class="reference internal" href="#nmrpoise.parse_log" title="nmrpoise.parse_log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">parse_log</span></code></a> (which really doesn’t say much more than the previous example) is as follows:</p>
@@ -98,7 +98,7 @@ not specified, defaults to the current working directory.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl>
-<dt><strong>log_df</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></span></dt><dd><p>DataFrame with rows corresponding to optimisations which successfully
+<dt><strong>log_df</strong><span class="classifier"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></span></dt><dd><p>DataFrame with rows corresponding to optimisations which successfully
 terminated. The time taken is given in seconds.</p>
 </dd>
 </dl>
@@ -132,9 +132,16 @@ We welcome bug reports — please <a class="reference external" href="https://gi
 
 
 
-<p>
-<a href="https://github.com/foroozandehgroup/nmrpoise">View on GitHub</a>
-</p><h3>Navigation</h3>
+<p></p>
+<h3>Useful links</h3>
+<ul>
+    <li><a href="https://doi.org/10.1021/acs.analchem.1c01767">Paper (<i>Anal. Chem.</i> 2021)</a></li>
+    <li><a href="https://arxiv.org/abs/2108.07121">arXiv preprint</a></li>
+    <li><a href="https://github.com/foroozandehgroup/nmrpoise">GitHub repository</a></li>
+    <li><a href="https://www.youtube.com/watch?v=QTCeSCRZs4I">YouTube video guide</a></li>
+    <li><a href="https://foroozandehgroup.github.io/nmrpoise">HTML documentation</a></li>
+    <li><a href="https://foroozandehgroup.github.io/nmrpoise/poise.pdf">PDF documentation</a></li>
+</ul><h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../routines/">Setting up a Routine</a></li>

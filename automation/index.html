@@ -64,39 +64,39 @@ In practice, we’ve already used it many times to calibrate <code class="docuti
 <p class="admonition-title">Note</p>
 <p>This AU programme comes installed with POISE. However, you must create the <code class="docutils literal notranslate"><span class="pre">p1cal</span></code> routine before you can use this. Please see <a class="reference internal" href="../routines/"><span class="doc">Setting up a Routine</span></a> for a full walkthrough.</p>
 </div>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">GETCURDATA</span>
-<span class="kt">int</span> <span class="n">old_expno</span> <span class="o">=</span> <span class="n">expno</span><span class="p">;</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">GETCURDATA</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="n">old_expno</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">expno</span><span class="p">;</span><span class="w"></span>
 <span class="c1">// Use EXPNO 99999 in the current folder for optimisation.</span>
-<span class="n">DATASET</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="mi">99999</span><span class="p">,</span> <span class="n">procno</span><span class="p">,</span> <span class="n">disk</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
+<span class="n">DATASET</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="mi">99999</span><span class="p">,</span><span class="w"> </span><span class="n">procno</span><span class="p">,</span><span class="w"> </span><span class="n">disk</span><span class="p">,</span><span class="w"> </span><span class="n">user</span><span class="p">)</span><span class="w"></span>
 <span class="c1">// Set some key parameters. Notice that these lines can be substantially cut</span>
 <span class="c1">// if an appropriate parameter set is set up beforehand.</span>
-<span class="n">RPAR</span><span class="p">(</span><span class="s">&quot;PROTON&quot;</span><span class="p">,</span> <span class="s">&quot;all&quot;</span><span class="p">)</span>
-<span class="n">GETPROSOL</span>
-<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;PULPROG&quot;</span><span class="p">,</span> <span class="s">&quot;zg&quot;</span><span class="p">)</span>
-<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;NS&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;DS&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;D 1&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;RG&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;F1P&quot;</span><span class="p">,</span> <span class="n">f1p</span><span class="p">)</span>
-<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;F2P&quot;</span><span class="p">,</span> <span class="n">f2p</span><span class="p">)</span>
-<span class="n">STOREPARS</span><span class="p">(</span><span class="s">&quot;F1P&quot;</span><span class="p">,</span> <span class="n">f1p</span><span class="p">)</span>
-<span class="n">STOREPARS</span><span class="p">(</span><span class="s">&quot;F2P&quot;</span><span class="p">,</span> <span class="n">f2p</span><span class="p">)</span>
+<span class="n">RPAR</span><span class="p">(</span><span class="s">&quot;PROTON&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;all&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="n">GETPROSOL</span><span class="w"></span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;PULPROG&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;zg&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;NS&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;DS&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;D 1&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"></span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;RG&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;F1P&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">f1p</span><span class="p">)</span><span class="w"></span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;F2P&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">f2p</span><span class="p">)</span><span class="w"></span>
+<span class="n">STOREPARS</span><span class="p">(</span><span class="s">&quot;F1P&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">f1p</span><span class="p">)</span><span class="w"></span>
+<span class="n">STOREPARS</span><span class="p">(</span><span class="s">&quot;F2P&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">f2p</span><span class="p">)</span><span class="w"></span>
 <span class="c1">// Run optimisation (uses BOBYQA by default).</span>
-<span class="n">XCMD</span><span class="p">(</span><span class="s">&quot;sendgui xpy poise p1cal -q&quot;</span><span class="p">)</span>
+<span class="n">XCMD</span><span class="p">(</span><span class="s">&quot;sendgui xpy poise p1cal -q&quot;</span><span class="p">)</span><span class="w"></span>
 <span class="c1">// POISE stores the optimised value in p1 after it&#39;s done. We can retrieve it</span>
 <span class="c1">// here. Don&#39;t try to get the *status* parameter, since that is not the</span>
 <span class="c1">// optimised value (it is the value used for the last function evaluation!)</span>
-<span class="kt">float</span> <span class="n">p1opt</span><span class="p">;</span>
-<span class="n">FETCHPAR</span><span class="p">(</span><span class="s">&quot;P 1&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">p1opt</span><span class="p">)</span>
-<span class="n">p1opt</span> <span class="o">=</span> <span class="n">p1opt</span><span class="o">/</span><span class="mi">4</span><span class="p">;</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">p1opt</span><span class="p">;</span><span class="w"></span>
+<span class="n">FETCHPAR</span><span class="p">(</span><span class="s">&quot;P 1&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p1opt</span><span class="p">)</span><span class="w"></span>
+<span class="n">p1opt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p1opt</span><span class="o">/</span><span class="mi">4</span><span class="p">;</span><span class="w"></span>
 <span class="c1">// Move back to old dataset and set p1 to optimised value.</span>
-<span class="n">DATASET</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">old_expno</span><span class="p">,</span> <span class="n">procno</span><span class="p">,</span> <span class="n">disk</span><span class="p">,</span> <span class="n">user</span><span class="p">)</span>
-<span class="n">VIEWDATA_SAMEWIN</span>  <span class="c1">// not strictly necessary, just re-focuses the original spectrum</span>
-<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;P 1&quot;</span><span class="p">,</span> <span class="n">p1opt</span><span class="p">)</span>
-<span class="n">Proc_err</span><span class="p">(</span><span class="n">INFO_OPT</span><span class="p">,</span> <span class="s">&quot;Optimised value of p1: %.3f&quot;</span><span class="p">,</span> <span class="n">p1opt</span><span class="p">);</span>
+<span class="n">DATASET</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">old_expno</span><span class="p">,</span><span class="w"> </span><span class="n">procno</span><span class="p">,</span><span class="w"> </span><span class="n">disk</span><span class="p">,</span><span class="w"> </span><span class="n">user</span><span class="p">)</span><span class="w"></span>
+<span class="n">VIEWDATA_SAMEWIN</span><span class="w">  </span><span class="c1">// not strictly necessary, just re-focuses the original spectrum</span>
+<span class="n">STOREPAR</span><span class="p">(</span><span class="s">&quot;P 1&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">p1opt</span><span class="p">)</span><span class="w"></span>
+<span class="n">Proc_err</span><span class="p">(</span><span class="n">INFO_OPT</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Optimised value of p1: %.3f&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">p1opt</span><span class="p">);</span><span class="w"></span>
 <span class="c1">// (Optional) Run acquisition.</span>
 <span class="c1">// ZG</span>
-<span class="n">QUIT</span>
+<span class="n">QUIT</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Note that the six lines underneath “set some key params” can be collapsed to one line if an appropriate parameter set is set up beforehand.</p>
@@ -198,9 +198,16 @@ We show a Python script here, but the AU script is essentially the same, just wi
 
 
 
-<p>
-<a href="https://github.com/foroozandehgroup/nmrpoise">View on GitHub</a>
-</p><h3>Navigation</h3>
+<p></p>
+<h3>Useful links</h3>
+<ul>
+    <li><a href="https://doi.org/10.1021/acs.analchem.1c01767">Paper (<i>Anal. Chem.</i> 2021)</a></li>
+    <li><a href="https://arxiv.org/abs/2108.07121">arXiv preprint</a></li>
+    <li><a href="https://github.com/foroozandehgroup/nmrpoise">GitHub repository</a></li>
+    <li><a href="https://www.youtube.com/watch?v=QTCeSCRZs4I">YouTube video guide</a></li>
+    <li><a href="https://foroozandehgroup.github.io/nmrpoise">HTML documentation</a></li>
+    <li><a href="https://foroozandehgroup.github.io/nmrpoise/poise.pdf">PDF documentation</a></li>
+</ul><h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../install/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../routines/">Setting up a Routine</a></li>

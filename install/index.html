@@ -52,14 +52,17 @@ If that is the case, congratulations — you can move on to the next chapter, <a
 <section id="updating-poise">
 <h2>Updating POISE<a class="headerlink" href="#updating-poise" title="Permalink to this headline">¶</a></h2>
 <p>Simply use:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">nmrpoise</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">nmrpoise</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">cache</span><span class="o">-</span><span class="nb">dir</span>
 </pre></div>
 </div>
 <p>All other steps (including troubleshooting, if necessary) are the same.</p>
 </section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
-<p>The installation can occasionally fail if TopSpin is installed to a non-standard location.
+<p>If you are reinstalling POISE (either using the <code class="docutils literal notranslate"><span class="pre">--upgrade</span></code> flag, or after uninstalling it), make sure to add the <code class="docutils literal notranslate"><span class="pre">--no-cache-dir</span></code> flag to <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>.
+In other words, run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">nmrpoise</span> <span class="pre">--no-cache-dir</span></code>.
+(The reason for this is because if <code class="docutils literal notranslate"><span class="pre">pip</span></code> uses a pre-built wheel to install POISE, the TopSpin files will not be installed. There is a <a class="reference external" href="https://stackoverflow.com/q/58289062/7115316">possible workaround</a> for this, but even though this allows installation to complete successfully, it shows the user some scary red text in the process, which I’d rather not.)</p>
+<p>Apart from this, the installation can occasionally fail if TopSpin is installed to a non-standard location.
 To solve this issue, you can specify the TopSpin installation directory as an environment variable <code class="docutils literal notranslate"><span class="pre">TSDIR</span></code> before installing POISE.
 The way to do this depends on what operating system (and shell) you use.</p>
 <p>On Windows PowerShell, run the following command:</p>
@@ -136,9 +139,16 @@ On a computer that <em>does</em> have an Internet connection:</p>
 
 
 
-<p>
-<a href="https://github.com/foroozandehgroup/nmrpoise">View on GitHub</a>
-</p><h3>Navigation</h3>
+<p></p>
+<h3>Useful links</h3>
+<ul>
+    <li><a href="https://doi.org/10.1021/acs.analchem.1c01767">Paper (<i>Anal. Chem.</i> 2021)</a></li>
+    <li><a href="https://arxiv.org/abs/2108.07121">arXiv preprint</a></li>
+    <li><a href="https://github.com/foroozandehgroup/nmrpoise">GitHub repository</a></li>
+    <li><a href="https://www.youtube.com/watch?v=QTCeSCRZs4I">YouTube video guide</a></li>
+    <li><a href="https://foroozandehgroup.github.io/nmrpoise">HTML documentation</a></li>
+    <li><a href="https://foroozandehgroup.github.io/nmrpoise/poise.pdf">PDF documentation</a></li>
+</ul><h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#updating-poise">Updating POISE</a></li>
