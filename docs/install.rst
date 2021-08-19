@@ -25,7 +25,7 @@ Updating POISE
 
 Simply use::
 
-    pip install --upgrade nmrpoise
+    pip install --upgrade nmrpoise --no-cache-dir
 
 All other steps (including troubleshooting, if necessary) are the same.
 
@@ -33,7 +33,11 @@ All other steps (including troubleshooting, if necessary) are the same.
 Troubleshooting
 ---------------
 
-The installation can occasionally fail if TopSpin is installed to a non-standard location.
+If you are reinstalling POISE (either using the ``--upgrade`` flag, or after uninstalling it), make sure to add the ``--no-cache-dir`` flag to ``pip install``.
+In other words, run ``pip install nmrpoise --no-cache-dir``.
+(The reason for this is because if ``pip`` uses a pre-built wheel to install POISE, the TopSpin files will not be installed. There is a `possible workaround <https://stackoverflow.com/q/58289062/7115316>`_ for this, but even though this allows installation to complete successfully, it shows the user some scary red text in the process, which I'd rather not.)
+
+Apart from this, the installation can occasionally fail if TopSpin is installed to a non-standard location.
 To solve this issue, you can specify the TopSpin installation directory as an environment variable ``TSDIR`` before installing POISE.
 The way to do this depends on what operating system (and shell) you use.
 

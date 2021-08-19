@@ -86,13 +86,15 @@ html_theme_options = {
 html_sidebars = {
     '**': [
         'about.html',
-        'github_link.html',
+        'sidebar_links.html',
         'navigation.html',
         'relations.html',
         'searchbox.html',
         'donate.html',
     ]
 }
+
+html_scaled_image_link = False
 
 # -- Options for LaTeX output ------------------------------------------------
 
