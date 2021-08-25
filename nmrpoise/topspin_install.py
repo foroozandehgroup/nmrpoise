@@ -168,7 +168,7 @@ def get_topspin_path(ostype):
         "\t$env:TSDIR = \"C:\\Bruker\\TopSpinX.Y.Z\\exp\\stan\\nmr\"\n"
     )
     if "TSDIR" in os.environ:
-        ts = os.environ["TSDIR"]    # KeyError if not provided
+        ts = Path(os.environ["TSDIR"])   # KeyError if not provided
         py_user = ts / "py" / "user"
         if not ts.is_dir() and py_user.is_dir():
             raise RuntimeError(INVALID_ENVVAR_ERROR)

@@ -1,3 +1,5 @@
+import sys
+import time
 import platform
 import subprocess
 from pathlib import Path
@@ -6,13 +8,13 @@ from distutils.file_util import copy_file
 
 import pytest
 
-hostname = platform.node()
+identifier = f"{platform.node()}_{sys.platform}"
 pkg_toplevel_dir = Path(__file__).parents[1].resolve()
 
-# Have to hardcode these. I don't see a way around it.
-hostname_to_tspath = {
-    "Empoleon": Path("/opt/topspin4.1.3/exp/stan/nmr"),
-    "CARP-CRL": Path(r"C:\Bruker\TopSpin4.0.7\exp\stan\nmr"),
+identifier_to_tspath = {
+    "Empoleon_darwin": Path("/opt/topspin4.1.3/exp/stan/nmr"),
+    # "CARP-CRL_linux": Path("/mnt/c/Bruker/TopSpin4.0.7/exp/stan/nmr"),
+    "CARP-CRL_win32": Path(r"C:\Bruker\TopSpin4.0.7\exp\stan\nmr"),
 }
 
 
@@ -25,15 +27,12 @@ def delete_file_force(path):
         pass
 
 
-@pytest.mark.skipif(all(host not in platform.node()
-                        for host in hostname_to_tspath.keys()),
-                    reason=f"Testing on {hostname} is not supported.")
+@pytest.mark.skipif(identifier not in identifier_to_tspath,
+                    reason=f"Testing on {identifier} is not supported.")
 def test_topspin_installation(tmpdir):
     # Path to TopSpin py/user, and /au/src/user.
-    for host in hostname_to_tspath.keys():
-        if host in platform.node():
-            py_user_path = hostname_to_tspath[host] / "py" / "user"
-            au_src_user_path = hostname_to_tspath[host] / "au" / "src" / "user"
+    py_user_path = identifier_to_tspath[identifier] / "py" / "user"
+    au_src_user_path = identifier_to_tspath[identifier] / "au" / "src" / "user"
     # Make sure it's right
     assert py_user_path.is_dir()
 
@@ -61,7 +60,7 @@ def test_topspin_installation(tmpdir):
 
     # Run the installation script in the temporary directory
     new_ts_install_script = tmpdir_poise / "topspin_install.py"
-    subprocess.run(["python3", str(new_ts_install_script)])
+    subprocess.run([sys.executable, str(new_ts_install_script)])
 
     # Check whether the files were installed to TopSpin correctly
     assert (py_user_path / "poise.py").exists()
