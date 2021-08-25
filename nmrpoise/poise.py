@@ -31,7 +31,7 @@ p_backend = os.path.join(p_poise, "backend.py")
 p_routines = os.path.join(p_poise, "routines")
 p_python3 = r"/usr/local/bin/python"
 Routine = namedtuple("Routine", "name pars lb ub init tol cf au")
-version = "1.2.0"
+version = "1.2.1"
 
 
 def main(args):
