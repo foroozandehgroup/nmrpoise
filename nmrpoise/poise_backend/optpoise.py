@@ -282,6 +282,16 @@ def deco_cf(maxfev):
     returns a decorator, which can then be used to decorate a cost function:
 
     >>> cf = deco_cf(maxfev=maxfev)(cf)
+
+    Notes
+    =====
+
+    Note that we need to re-apply the counter on the counted_cf() function.  If
+    we don't do this, then the *inner* function (i.e. "fn") will have a 'calls'
+    attribute, but the *outer* function will not. So if we decorate a cost
+    function with cf = deco_maxfev(MAXFEVS)(cf), cf.calls will stop to work. By
+    re-applying the counter on the outside function, we make sure that the
+    decorated function always has a valid 'calls' attribute.
     """
     def decorator(fn):
         @wraps(fn)
@@ -293,7 +303,10 @@ def deco_cf(maxfev):
             # parameters returned are the cost function value, a flag
             # indicating whether to break, and a message.
             else:
-                return fn(*args, **kwargs)
+                result = fn(*args, **kwargs)
+                decorated_cf.calls = fn.calls
+                return result
+        decorated_cf.calls = 0
         return decorated_cf
     return decorator
 

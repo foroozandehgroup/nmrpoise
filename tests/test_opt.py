@@ -189,12 +189,19 @@ def test_bobyqa_accuracy():
 
 
 def test_maxfevals_reached():
+    MAXFEV = 10
+
+    quadratic.calls = 0
     optResult = nelder_mead(cf=quadratic, x0=x0, xtol=([1e-6] * len(x0)),
-                            scaled_lb=lb, scaled_ub=ub, maxfev=10)
+                            scaled_lb=lb, scaled_ub=ub, maxfev=MAXFEV)
     assert optResult.message == MESSAGE_OPT_MAXFEV_REACHED
+    assert optResult.nfev == MAXFEV
+
+    quadratic.calls = 0
     optResult = multid_search(cf=quadratic, x0=x0, xtol=([1e-6] * len(x0)),
-                              scaled_lb=lb, scaled_ub=ub, maxfev=10)
+                              scaled_lb=lb, scaled_ub=ub, maxfev=MAXFEV)
     assert optResult.message == MESSAGE_OPT_MAXFEV_REACHED
+    assert optResult.nfev == MAXFEV
 
 
 def test_CostFunctionError():
