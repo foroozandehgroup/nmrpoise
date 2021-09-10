@@ -45,15 +45,18 @@ def makep(expno, procno):
 
 def test_ppm_to_point():
     p_spec = makep(1, 1)
-    assert cfh._ppm_to_point(9, p_spec=p_spec) is None  # out of range
+    with pytest.raises(ValueError):  # Out of bounds
+        cfh._ppm_to_point(9, p_spec=p_spec)
     assert cfh._ppm_to_point(6, p_spec=p_spec) == 19658
     assert cfh._ppm_to_point(3, p_spec=p_spec) == 39324
     # This one is mildly off. 58990 is the "index" in TopSpin, but ppm_to_point
     # calculates an index of 58989. See docstring of ppm_to_point.
     assert cfh._ppm_to_point(0, p_spec=p_spec) == 58990 - 1
-    assert cfh._ppm_to_point(-3, p_spec=p_spec) is None
+    with pytest.raises(ValueError):  # Out of bounds
+        cfh._ppm_to_point(-3, p_spec=p_spec)
     p_spec = makep(101, 1)
-    assert cfh._ppm_to_point(170, axis=0, p_spec=p_spec) is None
+    with pytest.raises(ValueError):  # Out of bounds
+        cfh._ppm_to_point(170, axis=0, p_spec=p_spec)
     assert cfh._ppm_to_point(123.1, axis=0, p_spec=p_spec) == 545  # 13C
     assert cfh._ppm_to_point(7.083, axis=1, p_spec=p_spec) == 402  # 1H
     with pytest.raises(ValueError):   # Nonexistent axis

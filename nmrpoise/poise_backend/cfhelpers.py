@@ -167,10 +167,12 @@ def _ppm_to_point(shift, axis=None, p_spec=None):
             raise ValueError(f"Invalid value '{axis}' for axis.")
 
     # Make sure it's within range
-    highest_shift = o1p + 0.5*sw
-    lowest_shift = o1p - 0.5*sw
+    highest_shift = o1p + (0.5 * sw)
+    lowest_shift = o1p - (0.5 * sw)
     if shift > highest_shift or shift < lowest_shift:
-        return None
+        raise ValueError(f"Requested chemical shift {shift} is out of bounds."
+                         " Please check status F1P/F2P parameters or the cost"
+                         " function.")
 
     # Calculate the value
     spacing = (highest_shift - lowest_shift)/(si - 1)
