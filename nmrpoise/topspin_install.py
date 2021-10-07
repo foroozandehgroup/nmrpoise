@@ -99,8 +99,6 @@ def main():
             # Use rstrip() to remove extra newlines since print() already
             # includes one for us.
             print(line.rstrip(), file=outfile)
-    # Copy the new file over the old file.
-    cp(poise_py_out, poise_py)
 
     # Copy the files to TopSpin's directories.
     for ts_path in ts_paths:
@@ -108,7 +106,11 @@ def main():
         ts_backend_path = ts_path / "py" / "user" / "poise_backend"
         # Copy poise.py and poise_backend/ to TopSpin path, except for
         # costfunctions_user.py (which is hardcoded as an exception in cp_r()).
-        cp(poise_py, ts_user_path)
+        cp(poise_py_out, ts_user_path / "poise.py")
+        try:
+            poise_py_out.unlink()   # missing_ok parameter is 3.8+
+        except FileNotFoundError:
+            pass
         cp_r(poise_backend, ts_backend_path)
         # Copy costfunctions_user.py but only if it's not found.
         cf_user_path = poise_backend / "costfunctions_user.py"
@@ -178,6 +180,10 @@ def get_topspin_path(ostype):
             glob_query = "/opt/topspin*/exp/stan/nmr"
         elif ostype == "win":
             glob_query = r"C:\Bruker\TopSpin*\exp\stan\nmr"
+        else:
+            raise ValueError(f"Unrecognised operating system {ostype}."
+                             " Please report this error at"
+                             " https://github.com/foroozandehgroup/nmrpoise.")
         dirs = glob(glob_query)
 
         if len(dirs) == 0:              # No TopSpin folders found
