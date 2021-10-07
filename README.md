@@ -37,17 +37,33 @@ The software comprises two parts:
 
 ### Installation
 
-Python 3.6 or later is required. Please download and install that first before proceeding.
+To install POISE, you will need:
 
-POISE can be installed using ``pip``, which will install both components of POISE (if any errors occur, please see [the documentation](https://foroozandehgroup.github.io/nmrpoise/install/), or contact us):
+ - **TopSpin**. The minimum tested version is 3.6 but we expect that this should work with versions going back to 3.2. If there are bugs, please do inform us.
 
-    pip install nmrpoise
+   Note that other instrument manufacturers are not currently supported.
+
+ - **Python 3.6 or later.** This refers to a system installation, which is entirely separate from that in TopSpin. Please download and install that (many instructions are available online).
+
+POISE can then be installed using ``pip`` (which uses the system installation of Python): 
+
+    python -m pip install nmrpoise   # or 'python3'
+
+If any errors occur, please see [the documentation](https://foroozandehgroup.github.io/nmrpoise/install/), or contact us.
+
+To upgrade or reinstall POISE use:
+
+    python -m pip install --upgrade nmrpoise --no-cache-dir
+
+Note that the `--no-cache-dir` flag is necessary (its purpose is explained in the [documentation](https://foroozandehgroup.github.io/nmrpoise/install/#troubleshooting)).
 
 -----------
 
 ### Documentation
 
 The documentation is hosted at https://foroozandehgroup.github.io/nmrpoise; it contains complete instructions on how to set POISE up and use it.
+
+There is also a video guide available at https://www.youtube.com/watch?v=QTCeSCRZs4I.
 
 -----------
 
