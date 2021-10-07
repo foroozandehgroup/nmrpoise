@@ -40,8 +40,8 @@
 In particular, POISE requires a minimum version of <strong>Python 3.6.</strong>
 For Windows, your best bet is to download an installer from <a class="reference external" href="https://www.python.org/downloads/">the Python website</a>.
 For Unix machines, we suggest using a package manager to do so (such as Homebrew for macOS or <code class="docutils literal notranslate"><span class="pre">apt</span></code>/<code class="docutils literal notranslate"><span class="pre">yum</span></code> &amp; their equivalents on Linux), although the installers are also fine.</p>
-<p>Once that’s done, you can install POISE using <code class="docutils literal notranslate"><span class="pre">pip</span></code> (or <code class="docutils literal notranslate"><span class="pre">pip3</span></code>):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">nmrpoise</span>
+<p>Once that’s done, you can install POISE using <code class="docutils literal notranslate"><span class="pre">pip</span></code> (replace <code class="docutils literal notranslate"><span class="pre">python</span></code> with <code class="docutils literal notranslate"><span class="pre">python3</span></code> if necessary):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">nmrpoise</span>
 </pre></div>
 </div>
 <p>The package requirements are <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, and <code class="docutils literal notranslate"><span class="pre">Py-BOBYQA</span></code>; these will be automatically downloaded if necessary.</p>
@@ -52,16 +52,18 @@ If that is the case, congratulations — you can move on to the next chapter, <a
 <section id="updating-poise">
 <h2>Updating POISE<a class="headerlink" href="#updating-poise" title="Permalink to this headline">¶</a></h2>
 <p>Simply use:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">nmrpoise</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">cache</span><span class="o">-</span><span class="nb">dir</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">nmrpoise</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">cache</span><span class="o">-</span><span class="nb">dir</span>
 </pre></div>
 </div>
-<p>All other steps (including troubleshooting, if necessary) are the same.</p>
+<p>(again replacing <code class="docutils literal notranslate"><span class="pre">python</span></code> with <code class="docutils literal notranslate"><span class="pre">python3</span></code> if necessary). All other steps (including troubleshooting, if necessary) are the same.</p>
 </section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
 <p>If you are reinstalling POISE (either using the <code class="docutils literal notranslate"><span class="pre">--upgrade</span></code> flag, or after uninstalling it), make sure to add the <code class="docutils literal notranslate"><span class="pre">--no-cache-dir</span></code> flag to <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>.
-In other words, run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">nmrpoise</span> <span class="pre">--no-cache-dir</span></code>.
-(The reason for this is because if <code class="docutils literal notranslate"><span class="pre">pip</span></code> uses a pre-built wheel to install POISE, the TopSpin files will not be installed. There is a <a class="reference external" href="https://stackoverflow.com/q/58289062/7115316">possible workaround</a> for this, but even though this allows installation to complete successfully, it shows the user some scary red text in the process, which I’d rather not.)</p>
+In other words, run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">nmrpoise</span> <span class="pre">--no-cache-dir</span></code>.
+(The reason for this is because if <code class="docutils literal notranslate"><span class="pre">pip</span></code> uses a pre-built wheel to install POISE, the TopSpin files will not be installed.
+When POISE is installed for the first time, <code class="docutils literal notranslate"><span class="pre">pip</span></code> will create a wheel, and subsequent installations will use the wheel and fail to install the TopSpin files, <em>unless</em> the <code class="docutils literal notranslate"><span class="pre">-no-cache-dir</span></code> flag is passed.
+There is a <a class="reference external" href="https://stackoverflow.com/q/58289062/7115316">possible workaround</a> for this to prevent wheels from ever being built, but even though this allows installation to complete successfully, it shows the user some scary red text in the process, which I’d rather not.)</p>
 <p>Apart from this, the installation can occasionally fail if TopSpin is installed to a non-standard location.
 To solve this issue, you can specify the TopSpin installation directory as an environment variable <code class="docutils literal notranslate"><span class="pre">TSDIR</span></code> before installing POISE.
 The way to do this depends on what operating system (and shell) you use.</p>
@@ -202,7 +204,7 @@ On a computer that <em>does</em> have an Internet connection:</p>
       &copy;2021, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

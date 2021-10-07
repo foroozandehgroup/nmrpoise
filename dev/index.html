@@ -63,7 +63,7 @@ The entire <code class="docutils literal notranslate"><span class="pre">$TS/py/u
 </div>
 <p>The second thing is that you should never, ever, do anything with the backend’s <code class="docutils literal notranslate"><span class="pre">stdin</span></code> and <code class="docutils literal notranslate"><span class="pre">stdout</span></code>, because these are exclusively reserved for communication with the frontend.
 So you should never print anything from the backend, since the frontend will just interpret that as an error.
-This applies to all files inside the <code class="docutils literal notranslate"><span class="pre">$TS/py/user/poise_backend</span></code> directory, including cost functions, which is why custom cost functions should always use POISE’s <a class="reference internal" href="../customcf/#nmrpoise.poise_backend.cfhelpers.log" title="nmrpoise.poise_backend.cfhelpers.log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">log</span></code></a> function instead of plain old <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">print</span></code></a>.</p>
+This applies to all files inside the <code class="docutils literal notranslate"><span class="pre">$TS/py/user/poise_backend</span></code> directory, including cost functions, which is why custom cost functions should always use POISE’s <a class="reference internal" href="../customcf/#nmrpoise.poise_backend.cfhelpers.log" title="nmrpoise.poise_backend.cfhelpers.log"><code class="xref any py py-func docutils literal notranslate"><span class="pre">log</span></code></a> function instead of plain old <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.10)"><code class="xref any docutils literal notranslate"><span class="pre">print</span></code></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If you really just want to do some quick-and-dirty debugging, you <em>can</em> actually use this behaviour to your advantage. The frontend will echo any “invalid” message it receives from the backend, so if you print some unexpected text from the backend (on purpose), you should see it pop up as a TopSpin message when you run an optimisation. This is slightly less hassle than printing to a file and opening the file.</p>
@@ -165,7 +165,7 @@ If you only have one of these versions, use:</p>
       &copy;2021, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

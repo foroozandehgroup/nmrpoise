@@ -71,18 +71,18 @@ For example, <code class="docutils literal notranslate"><span class="pre">_g.p_s
 </dd>
 <dt><strong>routine_id</strong><span class="classifier">str</span></dt><dd><p>The name of the routine being used.</p>
 </dd>
-<dt><strong>p_spectrum</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the procno folder of the spectrum just acquired. (e.g.
+<dt><strong>p_spectrum</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the procno folder of the spectrum just acquired. (e.g.
 <code class="docutils literal notranslate"><span class="pre">/path/to/data/1/pdata/1</span></code>)</p>
 </dd>
-<dt><strong>p_optlog</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the currently active <code class="docutils literal notranslate"><span class="pre">poise.log</span></code> file.</p>
+<dt><strong>p_optlog</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the currently active <code class="docutils literal notranslate"><span class="pre">poise.log</span></code> file.</p>
 </dd>
-<dt><strong>p_errlog</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the currently active <code class="docutils literal notranslate"><span class="pre">poise_err_backend.log</span></code> file.</p>
+<dt><strong>p_errlog</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the currently active <code class="docutils literal notranslate"><span class="pre">poise_err_backend.log</span></code> file.</p>
 </dd>
 <dt><strong>maxfev</strong><span class="classifier">int</span></dt><dd><p>The maximum number of function evaluations specified by the user. Can
 be zero, indicating no limit (beyond the hard limit of 500 times the
 number of parameters).</p>
 </dd>
-<dt><strong>p_poise</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the <code class="docutils literal notranslate"><span class="pre">$TS/exp/stan/nmr/py/user/poise_backend</span></code> folder.</p>
+<dt><strong>p_poise</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>The path to the <code class="docutils literal notranslate"><span class="pre">$TS/exp/stan/nmr/py/user/poise_backend</span></code> folder.</p>
 </dd>
 <dt><strong>spec_f1p</strong><span class="classifier">float or tuple of float</span></dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">F1P</span></code> parameter. For a 1D spectrum this is a float. For a 2D
 spectrum this is a tuple of floats (<code class="docutils literal notranslate"><span class="pre">indirect,</span> <span class="pre">direct</span></code>) corresponding
@@ -110,7 +110,7 @@ All of these methods are stored inside <code class="docutils literal notranslate
 <dl class="py function">
 <dt class="sig sig-object py" id="nmrpoise.poise_backend.cfhelpers.make_p_spec">
 <span class="sig-prename descclassname"><span class="pre">nmrpoise.poise_backend.cfhelpers.</span></span><span class="sig-name descname"><span class="pre">make_p_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nmrpoise.poise_backend.cfhelpers.make_p_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs a <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a> object corresponding to the procno folder
+<dd><p>Constructs a <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a> object corresponding to the procno folder
 <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;/&lt;expno&gt;/pdata/&lt;procno&gt;</span></code>. If parameters are not passed, they are
 inherited from the currently active spectrum (<code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 <p>Thus, for example, <code class="docutils literal notranslate"><span class="pre">make_p_spec(expno=1,</span> <span class="pre">procno=1)</span></code> returns a path to the
@@ -119,7 +119,7 @@ active spectrum.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>path</strong><span class="classifier">str or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the main folder of the spectrum (one level above the expno
+<dt><strong>path</strong><span class="classifier">str or <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the main folder of the spectrum (one level above the expno
 folders).</p>
 </dd>
 <dt><strong>expno</strong><span class="classifier">int, optional</span></dt><dd></dd>
@@ -128,7 +128,7 @@ folders).</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl>
-<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>Path pointing to the requested spectrum.</p>
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></dt><dd><p>Path pointing to the requested spectrum.</p>
 </dd>
 </dl>
 </dd>
@@ -146,7 +146,7 @@ folders).</p>
 <dt><strong>remove_grpdly</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to remove the group delay (to be precise, it is shifted to the
 end of the FID). Defaults to True.</p>
 </dd>
-<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. (The FID is taken from the expno
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. (The FID is taken from the expno
 folder two levels up.) Defaults to the currently active spectrum (i.e.
 <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 </dd>
@@ -188,7 +188,7 @@ examples. If no bounds are provided, uses the <code class="docutils literal notr
 processing parameters, which can be specified via <code class="docutils literal notranslate"><span class="pre">dpl</span></code>. If these are
 not specified, defaults to the whole spectrum.</p>
 </dd>
-<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
 spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 </dd>
 </dl>
@@ -239,7 +239,7 @@ above for examples. If no bounds are provided, uses the <code class="docutils li
 <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">F2P</span></code> processing parameters, which can be specified via <code class="docutils literal notranslate"><span class="pre">dpl</span></code>. If
 these are not specified, defaults to the whole spectrum.</p>
 </dd>
-<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
 spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 </dd>
 </dl>
@@ -287,7 +287,7 @@ for both 1D and 2D spectra (see return type below), but nothing higher.</p>
 <dd class="field-odd"><dl>
 <dt><strong>par</strong><span class="classifier">str</span></dt><dd><p>Name of the parameter.</p>
 </dd>
-<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
 spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 </dd>
 </dl>
@@ -318,7 +318,7 @@ PARMODE, plus one (becaus PARMODE is 0 for 1D spectra, etc.)</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl>
-<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
+<dt><strong>p_spec</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, optional</span></dt><dd><p>Path to the procno folder of interest. Defaults to the currently active
 spectrum (i.e. <code class="docutils literal notranslate"><span class="pre">_g.p_spectrum</span></code>).</p>
 </dd>
 </dl>
@@ -500,7 +500,7 @@ This file also contains a number of more specialised cost functions, which were 
       &copy;2021, Jonathan Yong & Mohammadali Foroozandeh.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

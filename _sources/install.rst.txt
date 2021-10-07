@@ -8,9 +8,9 @@ In particular, POISE requires a minimum version of **Python 3.6.**
 For Windows, your best bet is to download an installer from `the Python website <https://www.python.org/downloads/>`_.
 For Unix machines, we suggest using a package manager to do so (such as Homebrew for macOS or ``apt``/``yum`` & their equivalents on Linux), although the installers are also fine.
 
-Once that's done, you can install POISE using ``pip`` (or ``pip3``)::
+Once that's done, you can install POISE using ``pip`` (replace ``python`` with ``python3`` if necessary)::
 
-    pip install nmrpoise
+    python -m pip install nmrpoise
 
 The package requirements are ``numpy``, ``scipy``, ``pandas``, and ``Py-BOBYQA``; these will be automatically downloaded if necessary.
 
@@ -25,17 +25,19 @@ Updating POISE
 
 Simply use::
 
-    pip install --upgrade nmrpoise --no-cache-dir
+    python -m pip install --upgrade nmrpoise --no-cache-dir
 
-All other steps (including troubleshooting, if necessary) are the same.
+(again replacing ``python`` with ``python3`` if necessary). All other steps (including troubleshooting, if necessary) are the same.
 
 
 Troubleshooting
 ---------------
 
 If you are reinstalling POISE (either using the ``--upgrade`` flag, or after uninstalling it), make sure to add the ``--no-cache-dir`` flag to ``pip install``.
-In other words, run ``pip install nmrpoise --no-cache-dir``.
-(The reason for this is because if ``pip`` uses a pre-built wheel to install POISE, the TopSpin files will not be installed. There is a `possible workaround <https://stackoverflow.com/q/58289062/7115316>`_ for this, but even though this allows installation to complete successfully, it shows the user some scary red text in the process, which I'd rather not.)
+In other words, run ``python -m pip install nmrpoise --no-cache-dir``.
+(The reason for this is because if ``pip`` uses a pre-built wheel to install POISE, the TopSpin files will not be installed.
+When POISE is installed for the first time, ``pip`` will create a wheel, and subsequent installations will use the wheel and fail to install the TopSpin files, *unless* the ``-no-cache-dir`` flag is passed.
+There is a `possible workaround <https://stackoverflow.com/q/58289062/7115316>`_ for this to prevent wheels from ever being built, but even though this allows installation to complete successfully, it shows the user some scary red text in the process, which I'd rather not.)
 
 Apart from this, the installation can occasionally fail if TopSpin is installed to a non-standard location.
 To solve this issue, you can specify the TopSpin installation directory as an environment variable ``TSDIR`` before installing POISE.
