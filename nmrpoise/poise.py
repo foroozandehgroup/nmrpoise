@@ -959,6 +959,8 @@ def pulprog_contains_wvm():
         if ppname in os.listdir(ppdir):
             fname = os.path.join(ppdir, ppname)
             break
+    else:
+        err_exit("The pulse programme {} was not found.".format(ppname))
 
     # Search for lines containing WaveMaker directives
     wvm_rgx = re.compile(r"^\s*;[A-Za-z0-9]+:wvm:")
