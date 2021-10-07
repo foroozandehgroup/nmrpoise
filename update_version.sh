@@ -72,7 +72,7 @@ fi
 
 # git add and commit
 git add -A
-git commit -m "version: Bump to ${new_vno}"
+git commit -m "Bump version to ${new_vno}"
 git tag "v${new_vno}"
 
 echo ""
