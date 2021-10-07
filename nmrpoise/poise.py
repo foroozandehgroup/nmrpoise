@@ -11,7 +11,7 @@ for a more thorough introduction.
 SPDX-License-Identifier: GPL-3.0-or-later
 """
 
-from __future__ import division, with_statement, print_function
+from __future__ import division, with_statement
 
 import os
 import re
@@ -171,10 +171,8 @@ def main(args):
                                    stdin=subprocess.PIPE,
                                    stdout=subprocess.PIPE)
         # Pass key information to the backend script
-        print(args.algorithm, file=backend.stdin)
-        print(routine_id, file=backend.stdin)
-        print(p_spectrum, file=backend.stdin)
-        print(args.maxfev, file=backend.stdin)
+        for item in [args.algorithm, routine_id, p_spectrum, args.maxfev]:
+            print >>backend.stdin, item
         backend.stdin.flush()
 
         # Main loop, controlled by the lines printed by the backend.
@@ -248,8 +246,8 @@ def main(args):
                     raise RuntimeError("Acquisition stopped prematurely. "
                                        "poise has been terminated.")
                 # Tell backend script it's done
-                print("done", file=backend.stdin)
-                print(make_p_spectrum(), file=backend.stdin)
+                print >>backend.stdin, "done"
+                print >>backend.stdin, make_p_spectrum()
                 backend.stdin.flush()
 
             # CASE 5 - Traceback for backend error
