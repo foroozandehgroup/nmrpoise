@@ -13,6 +13,7 @@ pkg_toplevel_dir = Path(__file__).parents[1].resolve()
 
 identifier_to_tspath = {
     "Empoleon_darwin": Path("/opt/topspin4.1.3/exp/stan/nmr"),
+    "Empoleon.local_darwin": Path("/opt/topspin4.1.3/exp/stan/nmr"),
     # "CARP-CRL_linux": Path("/mnt/c/Bruker/TopSpin4.0.7/exp/stan/nmr"),
     "CARP-CRL_win32": Path(r"C:\Bruker\TopSpin4.0.7\exp\stan\nmr"),
 }
