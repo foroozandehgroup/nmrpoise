@@ -39,7 +39,7 @@ The software comprises two parts:
 
 To install POISE, you will need:
 
- - **TopSpin**. The minimum tested version is 3.6 but we expect that this should work with versions going back to 3.2. If there are bugs, please do inform us.
+ - **TopSpin**. The minimum tested version is 3.6; however, this should work on any version of TopSpin that has Python 2.7 internally bundled (older versions of Python 2 are not currently supported). To check which version of Python comes with TopSpin, follow [these instructions](https://foroozandehgroup.github.io/nmrpoise/install/).
 
    Note that other instrument manufacturers are not currently supported.
 
@@ -55,7 +55,7 @@ To upgrade or reinstall POISE use:
 
     python -m pip install --upgrade nmrpoise --no-cache-dir
 
-Note that the `--no-cache-dir` flag is necessary (its purpose is explained in the [documentation](https://foroozandehgroup.github.io/nmrpoise/install/#troubleshooting)).
+Note that the `--no-cache-dir` flag is necessary if you are reinstalling (its purpose is explained in the [documentation](https://foroozandehgroup.github.io/nmrpoise/install/#troubleshooting)).
 
 -----------
 

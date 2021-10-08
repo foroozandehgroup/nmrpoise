@@ -3,16 +3,24 @@ Installation
 
 POISE comprises a *frontend* script, which is accessible from within TopSpin itself, as well as a *backend* script, which has to be run using Python 3 (i.e. not TopSpin's native Python interpreter).
 
-This means that Python 3 must be installed separately first.
-In particular, POISE requires a minimum version of **Python 3.6.**
-For Windows, your best bet is to download an installer from `the Python website <https://www.python.org/downloads/>`_.
-For Unix machines, we suggest using a package manager to do so (such as Homebrew for macOS or ``apt``/``yum`` & their equivalents on Linux), although the installers are also fine.
+The requirements are:
+
+ - **TopSpin**. We have tested TopSpin versions 3.6 and 4.0 thoroughly. Older versions of TopSpin are not guaranteed to work: they *should*, however, work as long as the Python version *inside* TopSpin is 2.7.
+   
+   To check the TopSpin Python version, you can create a new Python script in TopSPin (``edpy``), enter the following, and execute it::
+
+       import sys; MSG(sys.version)
+
+   If the resulting version number starts with 2.7, you should be good to go.
+
+ - **Python 3**. This refers to a separate, system installation of Python 3; in particular, POISE requires a minimum version of **Python 3.6.** (We have tested up to Python 3.9.)
+
+   For Windows, your best bet is to download an installer from `the Python website <https://www.python.org/downloads/>`_.
+   For macOS and Linux, we suggest using a package manager to do so (such as Homebrew for macOS or ``apt``/``yum`` & their equivalents on Linux), although the installers are also fine.
 
 Once that's done, you can install POISE using ``pip`` (replace ``python`` with ``python3`` if necessary)::
 
     python -m pip install nmrpoise
-
-The package requirements are ``numpy``, ``scipy``, ``pandas``, and ``Py-BOBYQA``; these will be automatically downloaded if necessary.
 
 ``pip`` tries to take care of installing the scripts to your TopSpin directory.
 To do so, it checks for TopSpin installations in standard directories (``/opt`` on Unix and ``C:\Bruker`` on Windows).
