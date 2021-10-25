@@ -2,9 +2,12 @@
 ;
 ;download from: https://git.io/JUHOo
 ;
+;Shaped pulses can be downloaded from the website of Burkhard Luy's group:
+;https://www.ioc.kit.edu/luy/110.php (click on ASAP-HSQC > pulse shapes)
+;
 ;modified from version by Luy et al. to include internal power calculations for
 ;DIPSI-2 mixing, as well as URPs
-;order of gradients also switched round to correct frequencies
+;order of gradients also switched round to correct F1 frequencies
 ;added extra delay d30 before experiment starts
 ;Jonathan Yong - University of Oxford - 26 August 2020
 ;
