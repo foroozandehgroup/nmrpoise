@@ -956,7 +956,7 @@ def pulprog_contains_wvm():
     # Get path to the pulse programme text
     ppdirs = getParfileDirs(0)
     for ppdir in ppdirs:
-        if ppname in os.listdir(ppdir):
+        if os.path.isdir(ppdir) and ppname in os.listdir(ppdir):
             fname = os.path.join(ppdir, ppname)
             break
     else:
