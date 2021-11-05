@@ -107,10 +107,6 @@ def main():
         # Copy poise.py and poise_backend/ to TopSpin path, except for
         # costfunctions_user.py (which is hardcoded as an exception in cp_r()).
         cp(poise_py_out, ts_user_path / "poise.py")
-        try:
-            poise_py_out.unlink()   # missing_ok parameter is 3.8+
-        except FileNotFoundError:
-            pass
         cp_r(poise_backend, ts_backend_path)
         # Copy costfunctions_user.py but only if it's not found.
         cf_user_path = poise_backend / "costfunctions_user.py"
@@ -124,6 +120,12 @@ def main():
             src = dirname / "au" / auscript
             dest = ts_au_user_path / auscript
             cp(str(src), str(dest))
+    # Delete the poise.py.out file
+    # missing_ok parameter is 3.8+, hence try/except is needed
+    try:
+        poise_py_out.unlink()
+    except FileNotFoundError:
+        pass
     print("topspin_install.py: completed")
 
 
