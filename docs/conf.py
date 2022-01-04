@@ -20,7 +20,7 @@ exec(open('../nmrpoise/_version.py').read())
 # -- Project information -----------------------------------------------------
 
 project = 'poise'
-copyright = '2021, Jonathan Yong & Mohammadali Foroozandeh'
+copyright = '2021–2022, Jonathan Yong & Mohammadali Foroozandeh'
 author = 'Jonathan Yong & Mohammadali Foroozandeh'
 
 
