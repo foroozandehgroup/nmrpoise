@@ -15,8 +15,24 @@ from pathlib import Path
 from glob import glob
 
 
-# AU scripts to be automatically installed with POISE.
 CORE_AU_SCRIPTS = ["poise_1d", "poise_2d", "poise_1d_noapk", "poisecal"]
+GH_URL = "https://github.com/foroozandehgroup/nmrpoise"
+INVALID_ENVVAR_ERROR = (
+    "The TopSpin installation directory was specified as the environment"
+    " variable TSDIR, but it was not a valid path.\n\n"
+    "Please make sure that TSDIR points to the ../exp/stan/nmr folder in"
+    " TopSpin."
+)
+NO_TSDIR_UNIX_ERROR = (
+    "A valid TopSpin installation directory was not found.\n"
+    "Please set it using the TSDIR environment variable:\n\n"
+    "\texport TSDIR=/opt/topspinX.Y.Z/exp/stan/nmr\n"
+)
+NO_TSDIR_WIN_ERROR = (
+    "A valid TopSpin installation directory was not found.\n"
+    "Please set it using the TSDIR environment variable:\n\n"
+    "\t$env:TSDIR = \"C:\\Bruker\\TopSpinX.Y.Z\\exp\\stan\\nmr\"\n"
+)
 
 
 def cp_r(src, dest):
@@ -24,8 +40,9 @@ def cp_r(src, dest):
     Recursively copies src to dest.
 
     This is a reimplementation of shutil.copytree(dirs_exist_ok=True), because
-    the dirs_exist_ok keyword argument is not available in Python <=3.7. The
-    ignore pattern is hardcoded.
+    the dirs_exist_ok keyword argument is not available in Python <=3.7. We
+    also make sure to ignore costfunctions_user.py so that user-defined
+    costfunctions aren't overwritten upon reinstall.
 
     Modified from https://stackoverflow.com/a/15824216/7115316.
     """
@@ -61,13 +78,14 @@ def get_ostype():
     elif osname in ["Windows"]:
         return "win"
     else:
-        raise OSError("Unsupported operating system. "
-                      "Please perform a manual installation.")
+        raise OSError(f"Unsupported operating system '{osname}'."
+                      f" Please perform a manual installation and/or raise an"
+                      f" issue on GitHub: {GH_URL}.")
 
 
 def main():
     """
-    Attempts to install poise's core scripts (frontend and beckend) to TopSpin
+    Attempts to install poise's core scripts (frontend and backend) to TopSpin
     directory. This function also makes sure to replace p_python3 (the path to
     the Python 3 executable) in the frontend script.
 
@@ -155,22 +173,6 @@ def get_topspin_path(ostype):
         If no paths were found. We need to throw an error so that the pip
         installation fails.
     """
-    INVALID_ENVVAR_ERROR = (
-        "The TopSpin installation directory was specified as the environment "
-        "variable TSDIR, but it was not a valid path.\n\n"
-        "Please make sure that TSDIR points to the ../exp/stan/nmr folder in "
-        "TopSpin."
-    )
-    NO_TSDIR_UNIX_ERROR = (
-        "A valid TopSpin installation directory was not found.\n"
-        "Please set it using the TSDIR environment variable:\n\n"
-        "\texport TSDIR=/opt/topspinX.Y.Z/exp/stan/nmr\n"
-    )
-    NO_TSDIR_WIN_ERROR = (
-        "A valid TopSpin installation directory was not found.\n"
-        "Please set it using the TSDIR environment variable:\n\n"
-        "\t$env:TSDIR = \"C:\\Bruker\\TopSpinX.Y.Z\\exp\\stan\\nmr\"\n"
-    )
     if "TSDIR" in os.environ:
         ts = Path(os.environ["TSDIR"])   # KeyError if not provided
         py_user = ts / "py" / "user"
@@ -184,8 +186,8 @@ def get_topspin_path(ostype):
             glob_query = r"C:\Bruker\TopSpin*\exp\stan\nmr"
         else:
             raise ValueError(f"Unrecognised operating system {ostype}."
-                             " Please report this error at"
-                             " https://github.com/foroozandehgroup/nmrpoise.")
+                             f" This error message should never be seen!"
+                             f" Please report this error at {GH_URL}.")
         dirs = glob(glob_query)
 
         if len(dirs) == 0:              # No TopSpin folders found
